@@ -1,0 +1,64 @@
+import { BuildPlugin } from '../@types';
+import { PACKAGE_NAME } from './global';
+
+export const load: BuildPlugin.load = function () {
+    console.debug(`${PACKAGE_NAME} load`);
+};
+export const unload: BuildPlugin.load = function () {
+    console.debug(`${PACKAGE_NAME} unload`);
+};
+
+export const configs: BuildPlugin.Configs = {
+    '*': {
+        hooks: './hooks',
+        doc: 'editor/publish/custom-build-plugin.html',
+        options: {
+            injectCode: {
+                label: `注入代码`,
+                description: `需要在构建出的文件中注入的代码`,
+                default: '',
+                render: {
+                    ui: 'ui-input',
+                    attributes: {
+                        placeholder: `请填入需要注入的代码`,
+                    },
+                },
+            },
+            injectFileName: {
+                label: `需要注入代码的文件名`,
+                description: `需要注入代码的文件名（构建出的）`,
+                default: '',
+                render: {
+                    ui: 'ui-input',
+                    attributes: {
+                        placeholder: `请填入需要注入的文件名`,
+                    },
+                },
+            },
+            searchPattern: {
+                label: `注入代码位置`,
+                description: `需要注入代码位置（正则）`,
+                default: '',
+                render: {
+                    ui: 'ui-input',
+                    attributes: {
+                        placeholder: `请填入注入代码位置`,
+                    },
+                },
+            }
+        },
+        verifyRuleMap: {
+            ruleTest: {
+                message: `i18n:${PACKAGE_NAME}.options.ruleTest_msg`,
+                func(val, buildOptions) {
+                    if (val === 'cocos') {
+                        return true;
+                    }
+                    return false;
+                },
+            },
+        },
+    },
+};
+
+export const assetHandlers: BuildPlugin.AssetHandlers = './asset-handlers';
