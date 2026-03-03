@@ -37,7 +37,7 @@ export const configs: BuildPlugin.Configs = {
             },
             searchPattern: {
                 label: `注入代码位置`,
-                description: `需要注入代码位置（正则）`,
+                description: `需要注入代码位置（正则）/(globalThis\s*=\s*\$global\s*;)/`,
                 default: '',
                 render: {
                     ui: 'ui-input',
