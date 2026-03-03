@@ -26,8 +26,8 @@ export const onAfterBuild: BuildHook.onAfterBuild = async function (options: ITa
     console.log('onAfterBuild options ', options);
     if (options.platform === 'taobao-mini-game') {
         console.log('build options : == ', options.packages['build-plugin']);
-        let { injectCode, injectFileName, searchPattern } = options.packages['build-plugin'];
-        if (injectCode === '' || injectFileName === '' || searchPattern === '') {
+        let { injectCode, injectFilePath, searchPattern } = options.packages['build-plugin'];
+        if (injectCode === '' || injectFilePath === '' || searchPattern === '') {
             return;
         }
         console.log(`${options.platform} : start code inject------`, Editor.Project.path);
@@ -36,7 +36,7 @@ export const onAfterBuild: BuildHook.onAfterBuild = async function (options: ITa
             searchPattern = searchPattern.slice(1, -1);
         }
         const SEARCH_PATTERN = new RegExp(searchPattern);
-        let gameJsPath = Editor.Utils.Path.normalize(`${Editor.Project.path}/build/${options.outputName}/${injectFileName}`);
+        let gameJsPath = Editor.Utils.Path.normalize(`${Editor.Project.path}/build/${options.outputName}/${injectFilePath}`);
         if (!fs.existsSync(gameJsPath)) {
             console.log('gameJsPath is not exist', gameJsPath);
         }

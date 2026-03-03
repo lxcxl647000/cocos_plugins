@@ -24,14 +24,14 @@ export const configs: BuildPlugin.Configs = {
                     },
                 },
             },
-            injectFileName: {
-                label: `需要注入代码的文件名`,
-                description: `需要注入代码的文件名（构建出的）`,
+            injectFilePath: {
+                label: `需要注入代码的文件路径`,
+                description: `需要注入代码的文件路径（构建出的）`,
                 default: '',
                 render: {
                     ui: 'ui-input',
                     attributes: {
-                        placeholder: `请填入需要注入的文件名`,
+                        placeholder: `请填入需要注入的文件路径`,
                     },
                 },
             },

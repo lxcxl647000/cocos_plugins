@@ -28,6 +28,6 @@ export interface ICustomPanelThis extends IPanelThis {
 
 export interface IOptions {
     injectCode: string;
-    injectFileName: string;
+    injectFilePath: string;
     searchPattern: string;
 }
