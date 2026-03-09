@@ -45,6 +45,14 @@ export const configs: BuildPlugin.Configs = {
                         placeholder: `请填入注入代码位置`,
                     },
                 },
+            },
+            injectAtTop: {
+                label: `是否在顶部注入`,
+                description: `是否在顶部注入`,
+                default: false,
+                render: {
+                    ui: 'ui-checkbox',
+                },
             }
         },
         verifyRuleMap: {

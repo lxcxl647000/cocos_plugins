@@ -30,4 +30,5 @@ export interface IOptions {
     injectCode: string;
     injectFilePath: string;
     searchPattern: string;
+    injectAtTop: boolean;
 }

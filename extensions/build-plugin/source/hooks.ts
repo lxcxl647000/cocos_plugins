@@ -26,16 +26,14 @@ export const onAfterBuild: BuildHook.onAfterBuild = async function (options: ITa
     console.log('onAfterBuild options ', options);
     if (options.platform === 'taobao-mini-game') {
         console.log('build options : == ', options.packages['build-plugin']);
-        let { injectCode, injectFilePath, searchPattern } = options.packages['build-plugin'];
-        if (injectCode === '' || injectFilePath === '' || searchPattern === '') {
+        let { injectCode, injectFilePath, searchPattern, injectAtTop } = options.packages['build-plugin'];
+        if (injectCode === '' || injectFilePath === '') {
+            return;
+        }
+        if (!injectAtTop && searchPattern === '') {
             return;
         }
         console.log(`${options.platform} : start code inject------`, Editor.Project.path);
-        if (searchPattern.startsWith('/') && searchPattern.endsWith('/')) {
-            // 截取中间部分：(globalThis\s*=\s*\$global\s*;)
-            searchPattern = searchPattern.slice(1, -1);
-        }
-        const SEARCH_PATTERN = new RegExp(searchPattern);
         let gameJsPath = Editor.Utils.Path.normalize(`${Editor.Project.path}/build/${options.outputName}/${injectFilePath}`);
         if (!fs.existsSync(gameJsPath)) {
             console.log('gameJsPath is not exist', gameJsPath);
@@ -45,16 +43,26 @@ export const onAfterBuild: BuildHook.onAfterBuild = async function (options: ITa
             let content = fs.readFileSync(gameJsPath, 'utf-8');
             if (content) {
                 console.log('get gameJs content ');
-                let newContent = content;
                 let isInjected = false;
-                if (SEARCH_PATTERN.test(content)) {
-                    newContent = content.replace(SEARCH_PATTERN, `$1${injectCode}`);
-                    isInjected = newContent !== content;
+                let newContent = content;
+                if (injectAtTop) {
+                    newContent = injectCode + content;
+                    isInjected = true;
                 }
                 else {
-                    console.log(`cant find ${SEARCH_PATTERN}`);
+                    if (searchPattern.startsWith('/') && searchPattern.endsWith('/')) {
+                        // 截取中间部分：(globalThis\s*=\s*\$global\s*;)
+                        searchPattern = searchPattern.slice(1, -1);
+                    }
+                    const SEARCH_PATTERN = new RegExp(searchPattern);
+                    if (SEARCH_PATTERN.test(content)) {
+                        newContent = content.replace(SEARCH_PATTERN, `$1${injectCode}`);
+                        isInjected = newContent !== content;
+                    }
+                    else {
+                        console.log(`cant find ${SEARCH_PATTERN}`);
+                    }
                 }
-
                 if (isInjected) {
                     fs.writeFileSync(gameJsPath, newContent, 'utf-8');
                     console.log('code inject success-------------');
