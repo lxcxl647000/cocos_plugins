@@ -53,6 +53,24 @@ export const configs: BuildPlugin.Configs = {
                 render: {
                     ui: 'ui-checkbox',
                 },
+            },
+            navigationBarTextStyle: {
+                label: `导航栏文字样式`,
+                description: `导航栏文字颜色`,
+                default: 'black',
+                render: {
+                    ui: 'ui-select',
+                    "items": [
+                        {
+                            "value": 'black',
+                            "label": "black"
+                        },
+                        {
+                            "value": 'white',
+                            "label": "white"
+                        }
+                    ]
+                },
             }
         },
         verifyRuleMap: {

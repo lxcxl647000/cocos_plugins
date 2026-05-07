@@ -31,4 +31,5 @@ export interface IOptions {
     injectFilePath: string;
     searchPattern: string;
     injectAtTop: boolean;
+    navigationBarTextStyle: string;
 }
