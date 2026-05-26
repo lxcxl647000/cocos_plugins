@@ -1,0 +1,157 @@
+# 项目名称，构建后的目录名
+title: ProDragon
+
+# 游戏对应名称
+gameName: "战火防线"
+
+# 项目组名
+teamName: "苹果组"
+
+# 引擎目录
+enginePath: "/Applications/Cocos/Creator/2.4.13/CocosCreator.app/Contents/MacOS/CocosCreator"
+# enginePath: "G:/developKit/CocosDashboard/resources/.editors/Creator/2.4.3/CocosCreator.exe"
+
+# 引擎版本
+engineVer: 2.4.13
+
+# 渠道输出目录 拼接 渠道buildPath为最终输出目录
+outputDir: "/Users/ywkj/Documents/output/ProDragon"
+#自定义js引擎路径，如果有则需要填上
+customJsEnginePath: "/Users/ywkj/Documents/projects/cocos2.4.13ex/engine"
+# customJsEnginePath: "G:/project/GambloxEngine/engine"
+
+#自定义cpp引擎路径，如果有则需要填上
+customCppEnginePath: "/Users/ywkj/Documents/projects/cocos2.4.13ex/cocos2d-x"
+# customCppEnginePath: "G:/project/GambloxEngine/cocos2d-x"
+
+
+# apksoutput 不要跟工程一个目录
+appOutput: "/Users/ywkj/Documents/apks/ProDragon"
+#构建完成后钉钉通知
+notifyDingTalk: false
+dingTalkWebHook: "https://oapi.dingtalk.com/robot/send?access_token=8c733f80f00eedcf3327ad2e94587ebc206b9f9a970fa68a9b6aa5144062523c"
+
+#构建完成后飞书通知
+notifyFeiShuTalk: true
+feiShuWebHook: "https://open.feishu.cn/open-apis/bot/v2/hook/7885b7ee-d67d-405d-9b8e-4ccc09a8ac6c"
+
+#打包日志上传地址 testurl https://uat.addata-api.zuiqiangyingyu.net/Api/Buildpkglog/save
+logReportUrl: "https://addata-api.zuiqiangyingyu.net/Api/Buildpkglog/save"
+
+# 屏幕方向
+orientation: portrait
+
+# android密钥信息
+keyStoreInfo: &keyStoreInfo
+    keystorePath: "E:/developKit/PrivateMoney.jks"
+    keystorePassword: "123321"
+    keystoreAlias: "key0"
+    keystoreAliasPassword: "123321"
+
+#  平台相关，可根据自己需求修改
+#  各大渠道配置
+# 渠道名:几个比较重要的参数
+#   buildPath 构建目录配合输出目录
+#   packageName 包名不需要不填
+#   remoteDir cdn资源绝对路径用于上传资源服务器
+#   apiLevel  打包的android版本号
+#   gameName 游戏名称，不填默认用总的
+
+# 注：因为有些相关信息参数命令行构建是没有提供修改的，需要额外修改，最好本地自行先用编辑器打包一次
+basePlatforms: &basePlatforms
+    version: "1.0.0"
+    isNative: false
+    md5Cache: true
+    buildPath: "build"
+    remoteDir: ""
+    gameName: ""
+
+platforms:
+    # 字节跳动渠道
+    bytedance: &bytedance
+        <<: *basePlatforms
+        # buildPath: "bytedance"
+        platform: "bytedance"
+        version: "1.0.0"
+        remoteDir: "/Users/ywkj/Documents/cdnres/prodragon/tt"
+        # 字节跳动上传后台登录需要的账号密码
+        account: "wujianfen@126.com"
+        password: "8288988fen"
+
+    # oppo小游戏
+    oppo: &oppo
+        <<: *basePlatforms
+        # buildPath: "oppo"
+        platform: "quickgame"
+        packageName: "com.wonder.fmshoppo.nearme.gamecenter"
+        privatePath: "E:/project/FenmoGameRes/private.pem"
+        certificatePath: "E:/project/FenmoGameRes/certificate.pem"
+        version: "1.0.8"
+        icon: "E:/project/FenmoGameRes/logooppo.png"
+        remoteDir: "E:/cdnres/SaveTheGirl/fenmogameoppo"
+
+    # vivo小游戏 vivo跟oppo是一家
+    vivo: &vivo
+        <<: *oppo
+        platform: "qgame"
+        version: "1.0.0"
+        remoteDir: "E:/cdnres/SaveTheGirl/fenmogamevivo"
+    
+    bilibili:
+        <<: *basePlatforms
+        # privatePath 需要私钥以及白名单，详细可以访问官方文档查看https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
+        privatePath: "/Users/ywkj/Documents/packconfig/private.wxe3efd52849ed2c64.key"
+        platform: "wechatgame"
+        remoteDir: "/Users/ywkj/Documents/cdnres/prodragon/wx"
+        version: "1.0.0"
+        appid: "biligame4c78136ce8ae073d"
+        gameName: "御龙防线"
+        REMOTE_SERVER_ROOT: "https://static.zuiqiangyingyu.net/wb_webview/prodragon/wx"
+
+    # 快手小游戏
+    kwai:
+        <<: *basePlatforms
+        platform: "wechatgame"
+        toolsDir: "E:/project/kwaigame"
+        remoteDir: "/Users/ywkj/Documents/cdnres/SaveTheGirl/fenmogameks"
+        appid: "ks696650571558531114"
+        buildPath: "kwaigame"
+        REMOTE_SERVER_ROOT: "https://static.zuiqiangyingyu.net/wb_webview/SaveTheGirl/fenmogameks"
+
+    #百度小游戏
+    baidu:
+        <<: *basePlatforms
+        platform: "baidugame"
+        privateKey: "WQxaVVuYmY5Y3F1MGgtbHJudzJFVy03fkxtcG5kNHAtLUdXNHpFSVUxTVJiODllSVFBQUFBJCQAAAAAAAAAAAEAAACnaPQiR2lmYW4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABHip14R4qdeS"
+        remoteDir: "E:/cdnres/SaveTheGirl/fenmogamebd"
+        # remoteDir: "G:/project/SaveTheGirl/cdnres/SaveTheGirl/fenmogamebd"
+        version: "1.0.1"
+
+    wechatgame:
+        <<: *basePlatforms
+        # privatePath 需要私钥以及白名单，详细可以访问官方文档查看https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
+        privatePath: "/Users/ywkj/Documents/packconfig/private.wxe3efd52849ed2c64.key"
+        platform: "wechatgame"
+        remoteDir: "/Users/ywkj/Documents/cdnres/prodragon/wx"
+        version: "1.0.0"
+        appid: "wxe3efd52849ed2c64"
+        gameName: "御龙防线"
+        REMOTE_SERVER_ROOT: "https://static.zuiqiangyingyu.net/wb_webview/prodragon/wx"
+
+    web_mobile:
+        <<: *basePlatforms
+        platform: "web-mobile"
+        remoteDir: '/Users/ywkj/Documents/cdnres/prodragon/h502'
+        serverPath: "https://static.zuiqiangyingyu.net/wb_webview/prodragon/h502/web-mobile/index.html"
+    
+    web_desktop:
+        <<: *basePlatforms
+        platform: "web-desktop"
+        previewWidth: 450
+        previewHeight: 800
+        sourceMaps: true
+        localPath: "http://192.168.20.185:5500/"
+        remoteDir: '/Users/ywkj/Documents/cdnres/prodragon/h5test02'
+        serverPath: "https://static.zuiqiangyingyu.net/wb_webview/prodragon/h5test02/web-desktop/index.html"
+
+

@@ -1,0 +1,165 @@
+# 项目名称，构建后的目录名
+title: TemplateProject
+
+# 游戏对应名称
+gameName: "TemplateProject"
+
+# 项目组名
+teamName: ""
+
+# 引擎目录
+enginePath: "D:/cocos_editor/Creator/3.8.6/CocosCreator.exe"
+
+# 引擎版本
+engineVer: 3.8.6
+
+# 渠道输出目录 拼接 渠道buildPath为最终输出目录
+outputDir: "D:/cocos_project/TemplateProject"
+
+#自定义js引擎路径，如果有则需要填上
+customJsEnginePath: ""
+
+#自定义cpp引擎路径，如果有则需要填上
+customCppEnginePath: ""
+
+# git-bash.exe路径 用于windows上执行sh脚本
+gitBashPath: "D:/Git/git-bash.exe"
+
+# apk输出目录,不要构建在安卓工程目录下
+apksOutput: ""
+
+# 构建完成后钉钉通知
+notifyDingTalk: false
+# 填写钉钉机器人的webhook地址，钉钉
+dingTalkWebHook: ""
+# 构建完成后飞书通知
+notifyFeiShuTalk: false
+# 填写飞书机器人的webhook地址，飞书
+feiShuWebHook: ""
+
+#打包日志上传地址
+logReportUrl: ""
+
+# 屏幕方向
+orientation: portrait
+
+# android密钥信息
+keyStoreInfo: &keyStoreInfo
+    keystorePath: "G:/developKit/PrivateMoney.jks"
+    keystorePassword: "123321"
+    keystoreAlias: "key0"
+    keystoreAliasPassword: "123321"
+
+#  平台相关，可根据自己需求修改
+#  各大渠道配置
+# 渠道名:
+#   buildPath 构建目录配合输出目录
+#   packageName 包名不需要不填
+#   isNative 是否是原生平台
+#   remoteDir cdn资源绝对路径用于上传资源服务器
+#   platform 构建平台，详情可参考http://docs.cocos.com/creator/manual/zh/publish/publish-in-command-line.html
+#   gameName 渠道游戏名称，不填默认用总的gameName
+
+# 注：因为有些相关信息参数命令行构建是没有提供修改的，需要额外修改，最好本地自行先用编辑器打包一次
+basePlatforms: &basePlatforms
+    version: "0.0.1"
+    isNative: false
+    md5Cache: true
+    buildPath: "build"
+    remoteDir: ""
+    gameName: ""
+
+platforms:
+    # 淘宝小游戏渠道
+    taobao-mini-game: &taobao-mini-game
+        <<: *basePlatforms
+        platform: "taobao-mini-game"
+        remoteDir: ""
+        md5Cache: false
+        appid: "3000000132351722"
+        mainBundleCompressionType: "subpackage"
+
+    # 字节跳动渠道
+    bytedance: &bytedance
+        <<: *basePlatforms
+        platform: "bytedance"
+        remoteDir: ""
+        # 字节跳动上传后台登录需要的账号密码
+        account: ""
+        password: ""
+        #2.4以下版本需要兼容添加appid REMOTE_VSERVER_ROOT
+        #appid: "" appid有则填写
+        # REMOTE_SERVER_ROOT: "" #资源服务器地址，有则填写，没有就删掉该字段
+
+    # oppo小游戏
+    oppo: &oppo
+        <<: *basePlatforms
+        platform: "quickgame"
+        privatePath: "G:/project/FenmoGame/private.pem"
+        certificatePath: "G:/project/FenmoGame/certificate.pem"
+        version: "1.0.7"
+        icon: "G:/project/FenmoGame/settings/icon.png"
+
+    # vivo小游戏 vivo跟oppo是一家
+    vivo: &vivo
+        <<: *oppo
+        platform: "qgame"
+        version: "0.0.1"
+
+    xiaomi:
+        <<: *oppo
+        version: "1.0.2"
+        platform: "xiaomi"
+        remoteDir: "E:/cdnres/SaveTheGirl/fenmogamexm"
+        
+    # 快手小游戏
+    kwai:
+        <<: *basePlatforms
+        platform: "cocos-runtime"
+        toolsDir: "E:/kwaigame"
+        version: "0.0.1"
+
+    #百度小游戏
+    baidu:
+        <<: *basePlatforms
+        platform: "baidugame"
+        #登录token 百度开发者工具-关于-复制秘钥可获得
+        privatePath: ""
+        remoteDir: ""
+        version: "0.0.1"
+
+    wechatgame:
+        <<: *basePlatforms
+        # privatePath 需要私钥以及白名单，详细可以访问官方文档查看https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
+        privatePath: "testkey"
+        platform: "wechatgame"
+        remoteDir: ""
+        #需要兼容qq添加appid REMOTE_VSERVER_ROOT
+        #appid: "" appid有则填写
+        # REMOTE_SERVER_ROOT: "" #资源服务器地址，有则填写，没有就删掉该字段
+
+    qq: #需要安装docker镜像来运行https://q.qq.com/wiki/tools/ci/#方式三：运行-docker-镜像
+        <<: *basePlatforms
+        # privatePath 需要私钥以及白名单，详细可以访问官方文档查看https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
+        privatePath: "testkey"
+        platform: "wechatgame"
+        remoteDir: ""
+        #2.4以下版本需要兼容添加appid REMOTE_VSERVER_ROOT
+        #appid: "" appid有则填写
+        # REMOTE_SERVER_ROOT: "" #资源服务器地址，有则填写，没有就删掉该字段
+
+    web_mobile:
+        <<: *basePlatforms
+        platform: "web-mobile"
+        remoteDir: ""
+
+    zijiaandroid:
+        <<: *basePlatforms
+        <<: *keyStoreInfo
+        platform: "android"
+        buildPath: "zijiaandroid"
+        packageName: "com.wonder.fmsh"
+        isNative: true
+        template: 'default'
+        version: "1.0.1"
+        apiLevel: 29

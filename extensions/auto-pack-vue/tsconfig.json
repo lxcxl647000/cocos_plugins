@@ -8,5 +8,7 @@
             "@cocos/creator-types/editor",
         ],
         "strict": false,
-    }
+        "ignoreDeprecations": "6.0"
+    },
+    "include": ["source/**/*"]
 }
