@@ -1,0 +1,47 @@
+<div>
+    <div style="max-height: 80vh;overflow-y: auto;">
+        <div v-for="(item, index) in taskList" :key="item.id"
+            style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+
+            <h2>{{ item.name }}</h2>
+
+            <ui-prop>
+                <ui-label slot="label">工程路径</ui-label>
+                <!-- 双向绑定到当前循环项的 path -->
+                <ui-file style="width: 70%;" type="directory" :value="item.path"
+                    @confirm="item.path = $event.target.value"></ui-file>
+            </ui-prop>
+
+            <ui-prop>
+                <ui-label slot="label">是否上传</ui-label>
+                <!-- 双向绑定到当前循环项的 upload -->
+                <ui-checkbox slot="content" :checked="item.upload"
+                    @confirm="item.upload = $event.target.value"></ui-checkbox>
+            </ui-prop>
+
+            <ui-prop>
+                <ui-label slot="label">是否跳过构建</ui-label>
+                <ui-checkbox slot="content" :checked="item.skip"
+                    @confirm="item.skip = $event.target.value"></ui-checkbox>
+            </ui-prop>
+
+            <ui-prop>
+                <ui-label slot="label">是否自动化</ui-label>
+                <ui-checkbox slot="content" :checked="item.needAutoPack"
+                    @confirm="item.needAutoPack = $event.target.value"></ui-checkbox>
+            </ui-prop>
+
+            <ui-prop>
+                <ui-label slot="label">构建平台</ui-label>
+                <!-- 双向绑定到当前循环项的 channel -->
+                <ui-select slot="content" :value="item.channel" @confirm="item.channel = $event.target.value">
+                    <option value="taobao-mini-game">taobao-mini-game</option>
+                </ui-select>
+            </ui-prop>
+        </div>
+    </div>
+    <div style="margin-top: 20px;">
+        <ui-button @confirm="startAutoPack">开始</ui-button>
+        <ui-loading v-show="isAutoPack"></ui-loading>
+    </div>
+</div>
