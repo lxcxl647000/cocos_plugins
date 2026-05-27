@@ -278,6 +278,48 @@ module.exports = Editor.Panel.define({
                             console.error('导出失败:', error);
                             openDilog('error', '错误', '导出配置文件失败，请检查权限！');
                         }
+                    },
+                    onekeyOperateAutoPack(flag: boolean) {
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            this.taskList[i].needAutoPack = flag;
+                        }
+                    },
+                    onekeyOperateUpload(flag: boolean) {
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            this.taskList[i].upload = flag;
+                        }
+                    },
+                    onekeyOperateSkipPack(flag: boolean) {
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            this.taskList[i].skip = flag;
+                        }
+                    },
+                    getAutoCount() {
+                        let count = 0;
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            if (this.taskList[i].needAutoPack) {
+                                count++;
+                            }
+                        }
+                        return count;
+                    },
+                    getUploadCount() {
+                        let count = 0;
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            if (this.taskList[i].upload) {
+                                count++;
+                            }
+                        }
+                        return count;
+                    },
+                    getPackCount() {
+                        let count = 0;
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            if (!this.taskList[i].skip) {
+                                count++;
+                            }
+                        }
+                        return count;
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

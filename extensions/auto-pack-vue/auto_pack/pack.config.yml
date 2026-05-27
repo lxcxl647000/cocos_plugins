@@ -32,6 +32,12 @@ apksOutput: ""
 notifyDingTalk: false
 # 填写钉钉机器人的webhook地址，钉钉
 dingTalkWebHook: ""
+# 填写钉钉机器人的自定义内容，钉钉
+dingTalkCustomContent_pack: "打包通知"
+# 填写钉钉机器人的自定义内容，钉钉
+dingTalkCustomContent_upload: "上传通知"
+# 填写钉钉机器人的webhook地址，钉钉
+dingTalkWebHook: ""
 # 构建完成后飞书通知
 notifyFeiShuTalk: false
 # 填写飞书机器人的webhook地址，飞书

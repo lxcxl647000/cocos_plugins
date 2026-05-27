@@ -7,6 +7,12 @@
         <ui-button style=" margin-left: 10px;" @confirm=" exportPacksConfig">
             <ui-icon value="export"></ui-icon>
         </ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(true)">一键勾选自动化</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(false)">一键取消自动化</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(true)">一键勾选上传</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(false)">一键取消上传</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(true)">一键勾选跳过打包</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(false)">一键取消跳过打包</ui-button>
     </div>
     <div style="max-height: 80vh;overflow-y: auto;">
         <div v-for="(item, index) in taskList" :key="item.id"
@@ -58,6 +64,10 @@
     </div>
     <div style="margin-top: 20px;">
         <ui-button @confirm="startAutoPack">开始</ui-button>
+        <ui-label style="margin-left: 10px;">{{`总共 : ${taskList.length}`}}</ui-label>
+        <ui-label style="margin-left: 10px;">{{`自动化 : ${getAutoCount()}`}}</ui-label>
+        <ui-label style="margin-left: 10px;">{{`打包 : ${getPackCount()}`}}</ui-label>
+        <ui-label style="margin-left: 10px;">{{`上传 : ${getUploadCount()}`}}</ui-label>
     </div>
     <div v-if="isAutoPack" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
                 background-color: rgba(0, 0, 0, 0.3); z-index: 9999;">

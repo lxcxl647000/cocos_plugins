@@ -6,7 +6,7 @@
 			"path": "D:/cocos_project/HappyPullCat",
 			"channel": "taobao-mini-game",
 			"upload": false,
-			"skip": true,
+			"skip": false,
 			"needAutoPack": false
 		},
 		{
@@ -15,7 +15,7 @@
 			"path": "D:/cocos_project/Cat",
 			"channel": "taobao-mini-game",
 			"upload": false,
-			"skip": true,
+			"skip": false,
 			"needAutoPack": false
 		},
 		{
@@ -23,8 +23,8 @@
 			"name": "萌宠连连看",
 			"path": "D:/cocos_project/Pet_Line",
 			"channel": "taobao-mini-game",
-			"upload": true,
-			"skip": true,
+			"upload": false,
+			"skip": false,
 			"needAutoPack": false
 		},
 		{
@@ -32,8 +32,8 @@
 			"name": "猫咪萌宠消除",
 			"path": "D:\\cocos_project\\Cat_Eliminate",
 			"channel": "taobao-mini-game",
-			"upload": true,
-			"skip": true,
+			"upload": false,
+			"skip": false,
 			"needAutoPack": false
 		},
 		{
@@ -50,8 +50,8 @@
 			"name": "合数专家",
 			"path": "D:\\cocos_project\\SuperRelieveStressPipe",
 			"channel": "taobao-mini-game",
-			"upload": true,
-			"skip": true,
+			"upload": false,
+			"skip": false,
 			"needAutoPack": false
 		},
 		{
@@ -59,8 +59,8 @@
 			"name": "兄弟来闯关",
 			"path": "D:\\cocos_project\\BuddyGo",
 			"channel": "taobao-mini-game",
-			"upload": true,
-			"skip": true,
+			"upload": false,
+			"skip": false,
 			"needAutoPack": false
 		},
 		{
@@ -68,9 +68,45 @@
 			"name": "箭头转转消",
 			"path": "D:\\cocos_project\\ArrowEliminate",
 			"channel": "taobao-mini-game",
-			"upload": true,
-			"skip": true,
-			"needAutoPack": true
+			"upload": false,
+			"skip": false,
+			"needAutoPack": false
+		},
+		{
+			"id": 9,
+			"name": "倒水大师",
+			"path": "D:\\cocos_project\\PourTheWater",
+			"channel": "taobao-mini-game",
+			"upload": false,
+			"skip": false,
+			"needAutoPack": false
+		},
+		{
+			"id": 10,
+			"name": "糖豆消消乐",
+			"path": "D:\\cocos_project\\HappyEliminate\\Eliminate",
+			"channel": "taobao-mini-game",
+			"upload": false,
+			"skip": false,
+			"needAutoPack": false
+		},
+		{
+			"id": 11,
+			"name": "小鱼碰碰消",
+			"path": "D:\\cocos_project\\Ocean_Eliminate",
+			"channel": "taobao-mini-game",
+			"upload": false,
+			"skip": false,
+			"needAutoPack": false
+		},
+		{
+			"id": 12,
+			"name": "全员打螺丝",
+			"path": "D:\\cocos_project\\ScrewInScrews",
+			"channel": "taobao-mini-game",
+			"upload": false,
+			"skip": false,
+			"needAutoPack": false
 		}
 	]
 }

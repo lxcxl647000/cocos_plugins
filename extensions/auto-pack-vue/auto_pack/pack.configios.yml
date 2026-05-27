@@ -29,7 +29,12 @@ customCppEnginePath: "/Users/ywkj/Documents/projects/cocos2.4.13ex/cocos2d-x"
 appOutput: "/Users/ywkj/Documents/apks/ProDragon"
 #构建完成后钉钉通知
 notifyDingTalk: false
-dingTalkWebHook: "https://oapi.dingtalk.com/robot/send?access_token=8c733f80f00eedcf3327ad2e94587ebc206b9f9a970fa68a9b6aa5144062523c"
+# 填写钉钉机器人的webhook地址，钉钉
+dingTalkWebHook: ""
+# 填写钉钉机器人的自定义内容，钉钉
+dingTalkCustomContent_pack: "打包通知"
+# 填写钉钉机器人的自定义内容，钉钉
+dingTalkCustomContent_upload: "上传通知"
 
 #构建完成后飞书通知
 notifyFeiShuTalk: true
