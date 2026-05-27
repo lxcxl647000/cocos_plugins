@@ -1,9 +1,25 @@
 <div>
+    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+        <ui-button @confirm="addProject">+</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm=" importPacksConfig">
+            <ui-icon value="import"></ui-icon>
+        </ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm=" exportPacksConfig">
+            <ui-icon value="export"></ui-icon>
+        </ui-button>
+    </div>
     <div style="max-height: 80vh;overflow-y: auto;">
         <div v-for="(item, index) in taskList" :key="item.id"
             style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
 
-            <h2>{{ item.name }}</h2>
+            <div style="display: flex; align-items: center;">
+                <ui-input style="font-size: 14px; max-width: 50%;" :value="item.name"
+                    @confirm="item.name = $event.target.value">
+                </ui-input>
+                <ui-button style=" margin-left: 10px;" @confirm=" delProject(item)">
+                    <ui-icon color="red" value="del"></ui-icon>
+                </ui-button>
+            </div>
 
             <ui-prop>
                 <ui-label slot="label">工程路径</ui-label>

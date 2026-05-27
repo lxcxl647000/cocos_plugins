@@ -1,9 +1,10 @@
 /* eslint-disable vue/one-component-per-file */
 
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs-extra';
+import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import { join } from 'path';
 import { createApp, App, defineComponent } from 'vue';
+import os from 'os';
 const panelDataMap = new WeakMap<any, App>();
 /**
  * @zh 如果希望兼容 3.3 之前的版本可以使用下方的代码
@@ -11,7 +12,18 @@ const panelDataMap = new WeakMap<any, App>();
  */
 // Editor.Panel.define = Editor.Panel.define || function(options: any) { return options }
 
-let taskList: any[] = JSON.parse(readFileSync(join(__dirname, '../../../static/packconfigs/Packs.json'), 'utf-8')).packs;
+interface PackProject {
+    id: number,
+    name: string,
+    path: string,// Cocos项目根目录
+    channel: string,// 指定打包对应渠道名称
+    skip?: boolean,// 是否跳过cocos构建工程，直接使用导出工程
+    upload?: boolean// 是否需要上传
+    needAutoPack?: boolean// 是否需要进行自动构建上传
+}
+
+const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
+let taskList: PackProject[] = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
 
 const modifyPackageJson = () => {
     let data = { packs: taskList };
@@ -71,6 +83,15 @@ module.exports = Editor.Panel.define({
                 },
                 methods: {
                     startAutoPack() {
+                        if (!this.taskList || this.taskList.length === 0) {
+                            let btnMap = new Map<string, Function>();
+                            btnMap.set('add', () => {
+                                this.addProject();
+                            });
+                            btnMap.set('cancel', null);
+                            openDilog('warn', 'warn', '请先添加自动化项目配置！', btnMap);
+                            return;
+                        }
                         if (this.isAutoPack) {
                             openDilog('warn', 'warn', '正在自动化，请稍后再试!');
                             return;
@@ -122,9 +143,128 @@ module.exports = Editor.Panel.define({
                         else {
                             autoPack();
                         }
+                    },
+                    addProject() {
+                        let id = 0;
+                        for (let task of this.taskList) {
+                            if (task.id > id) {
+                                id = task.id;
+                            }
+                        }
+                        id++;
+                        this.taskList.push({
+                            id,
+                            name: '',
+                            path: '',
+                            channel: '',
+                            upload: false,
+                            skip: false,
+                            needAutoPack: false,
+                        });
+                    },
+                    delProject(item: PackProject) {
+                        let btnMap = new Map<string, Function>();
+                        btnMap.set('delete', () => {
+                            this.taskList = this.taskList.filter((task: PackProject) => task.id !== item.id);
+                            taskList = this.taskList;
+                        });
+                        openDilog('warn', 'delete', '是否删除配置?', btnMap, 1);
+                    },
+                    importPacksConfig() {
+                        const importFunc = () => {
+                            // 1. 动态创建一个隐藏的 input 标签
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            // 限制只能选择 json 文件，如果导入 Excel 可以改为 '.xlsx, .xls'
+                            input.accept = '.json';
+                            input.style.display = 'none';
+
+                            // 2. 监听文件选择的变化
+                            input.onchange = (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (!file) return;
+
+                                // 3. 使用 FileReader 读取文件内容
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                    try {
+                                        // 获取文件里的文本内容并解析为 JSON
+                                        const result = event.target?.result as string;
+                                        const importedData = JSON.parse(result);
+
+                                        // 假设导入的 JSON 格式也是 { packs: [...] }
+                                        if (importedData.packs && Array.isArray(importedData.packs)) {
+                                            // 将导入的数据替换到当前的 taskList 中
+                                            this.taskList = importedData.packs;
+                                            taskList = this.taskList;
+
+                                            // 4. 触发保存，将新数据写入本地 Packs.json
+                                            modifyPackageJson();
+
+                                            // 如果有 Editor.Dialog，可以弹个成功提示
+                                            openDilog('info', '提示', '导入成功！');
+                                        } else {
+                                            openDilog('warn', '警告', '导入的文件格式不正确！');
+                                        }
+                                    } catch (error) {
+                                        console.error(error);
+                                        openDilog('error', '错误', '文件解析失败，请检查文件格式！');
+                                    }
+
+                                    // 5. 清理：将临时创建的 input 标签从页面中移除
+                                    document.body.removeChild(input);
+                                };
+                                reader.readAsText(file); // 以文本形式读取文件
+                            };
+
+                            // 6. 将 input 挂载到页面并触发点击，弹出文件选择框
+                            document.body.appendChild(input);
+                            input.click();
+                        };
+                        // 说明静态文件中有 Packs.json了，询问是否替换
+                        if (this.taskList && this.taskList.length > 0) {
+                            let btnMap = new Map<string, Function>();
+                            btnMap.set('replace', () => {
+                                importFunc();
+                            });
+                            btnMap.set('cancel', null);
+                            openDilog('warn', 'replace', 'Packs.json 已存在，是否替换?', btnMap);
+                        }
+                        else {
+                            importFunc();
+                        }
+                    },
+                    exportPacksConfig() {
+                        // 说明没有配置
+                        if (!this.taskList || this.taskList.length === 0) {
+                            openDilog('warn', '警告', '没有配置，无法导出');
+                            return;
+                        }
+                        try {
+                            // 1. 组装需要导出的数据
+                            const exportData = {
+                                packs: this.taskList
+                            };
+                            const dataStr = JSON.stringify(exportData, null, "\t");
+
+                            // 2. 获取当前系统的桌面路径
+                            const desktopPath = os.homedir() + '/Desktop';
+
+                            // 3. 拼接完整的保存路径
+                            const savePath = join(desktopPath, `Packs.json`);
+
+                            // 4. 使用 Node.js 原生 fs 模块同步写入文件到桌面
+                            writeFileSync(savePath, dataStr, 'utf-8');
+
+                            // 5. 弹出成功提示
+                            openDilog('info', '提示', `配置已成功导出到桌面！\n文件名：${`Packs.json`}`);
+
+                        } catch (error) {
+                            console.error('导出失败:', error);
+                            openDilog('error', '错误', '导出配置文件失败，请检查权限！');
+                        }
                     }
                 },
-                expose: ['taskList'],
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),
             }));
             app.mount(this.$.app);
