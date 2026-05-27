@@ -1,4 +1,4 @@
-<div>
+<div style="position: relative; height: 100%;">
     <div style="display: flex; align-items: center; margin-bottom: 10px;">
         <ui-button @confirm="addProject">+</ui-button>
         <ui-button style=" margin-left: 10px;" @confirm=" importPacksConfig">
@@ -50,7 +50,8 @@
             <ui-prop>
                 <ui-label slot="label">构建平台</ui-label>
                 <!-- 双向绑定到当前循环项的 channel -->
-                <ui-select slot="content" :value="item.channel" @confirm="item.channel = $event.target.value">
+                <ui-select slot="content" :value="item.channel || 'taobao-mini-game'"
+                    @confirm="item.channel = $event.target.value">
                     <option value="taobao-mini-game">taobao-mini-game</option>
                 </ui-select>
             </ui-prop>
@@ -58,6 +59,9 @@
     </div>
     <div style="margin-top: 20px;">
         <ui-button @confirm="startAutoPack">开始</ui-button>
-        <ui-loading v-show="isAutoPack"></ui-loading>
+    </div>
+    <div v-if="isAutoPack" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                background-color: rgba(0, 0, 0, 0.3); z-index: 9999;">
+        <ui-loading style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></ui-loading>
     </div>
 </div>

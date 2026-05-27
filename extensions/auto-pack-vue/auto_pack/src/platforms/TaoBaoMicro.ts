@@ -7,10 +7,6 @@ import { AutoUploadPlatform, channelToName } from "./PlatformConfig";
 export class TaoBaoMicro extends BasePlatform {
     public QRCodeURL: string = "";
     public async afterBuildFinish() {
-        let doAfterBuildFinish = async () => {
-            this.saveBackUpConfig();
-            await super.afterBuildFinish();
-        }
         if (this.upload) {
             let version = '';
             let outPath = path.join(this.outputPath, this.curPackChannel);

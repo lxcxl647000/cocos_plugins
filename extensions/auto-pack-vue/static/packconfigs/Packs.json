@@ -7,7 +7,7 @@
 			"channel": "taobao-mini-game",
 			"upload": false,
 			"skip": true,
-			"needAutoPack": true
+			"needAutoPack": false
 		},
 		{
 			"id": 2,
@@ -16,16 +16,16 @@
 			"channel": "taobao-mini-game",
 			"upload": false,
 			"skip": true,
-			"needAutoPack": true
+			"needAutoPack": false
 		},
 		{
 			"id": 3,
 			"name": "萌宠连连看",
 			"path": "D:/cocos_project/Pet_Line",
 			"channel": "taobao-mini-game",
-			"upload": false,
+			"upload": true,
 			"skip": true,
-			"needAutoPack": true
+			"needAutoPack": false
 		},
 		{
 			"id": 4,
@@ -33,8 +33,17 @@
 			"path": "D:\\cocos_project\\Cat_Eliminate",
 			"channel": "taobao-mini-game",
 			"upload": true,
-			"skip": false,
-			"needAutoPack": true
+			"skip": true,
+			"needAutoPack": false
+		},
+		{
+			"id": 5,
+			"name": "挪车大师",
+			"path": "D:/cocos_project/Parking_Master",
+			"channel": "taobao-mini-game",
+			"upload": false,
+			"skip": true,
+			"needAutoPack": false
 		}
 	]
 }
