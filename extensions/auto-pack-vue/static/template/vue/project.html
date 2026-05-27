@@ -50,8 +50,7 @@
             <ui-prop>
                 <ui-label slot="label">构建平台</ui-label>
                 <!-- 双向绑定到当前循环项的 channel -->
-                <ui-select slot="content" :value="item.channel || 'taobao-mini-game'"
-                    @confirm="item.channel = $event.target.value">
+                <ui-select slot="content" :value="item.channel" @confirm="item.channel = $event.target.value">
                     <option value="taobao-mini-game">taobao-mini-game</option>
                 </ui-select>
             </ui-prop>

@@ -92,6 +92,19 @@ module.exports = Editor.Panel.define({
                             openDilog('warn', 'warn', '请先添加自动化项目配置！', btnMap);
                             return;
                         }
+                        for (let task of this.taskList) {
+                            if (!task.path || !task.channel) {
+                                let str = '';
+                                if (!task.path) {
+                                    str += '未配置项目路径 ';
+                                }
+                                if (!task.channel) {
+                                    str += '未配置渠道 ';
+                                }
+                                openDilog('warn', 'warn', `id:${task.id}${task.name}${str}请检查配置！`);
+                                return;
+                            }
+                        }
                         if (this.isAutoPack) {
                             openDilog('warn', 'warn', '正在自动化，请稍后再试!');
                             return;
@@ -118,9 +131,11 @@ module.exports = Editor.Panel.define({
                             })
                             sp.on('exit', (code, data) => {
                                 if (code === 0) {
-                                    openDilog('info', 'suscess', '自动化成功!');
+                                    console.log(`exit suscess ${data}`);
+                                    openDilog('info', 'suscess', '自动化完成!');
                                 }
                                 else {
+                                    console.log(`exit fail ${data}`);
                                     openDilog('error', 'fail', '自动化失败!');
                                 }
                                 this.isAutoPack = false;
@@ -156,7 +171,7 @@ module.exports = Editor.Panel.define({
                             id,
                             name: '',
                             path: '',
-                            channel: '',
+                            channel: 'taobao-mini-game',
                             upload: false,
                             skip: false,
                             needAutoPack: false,

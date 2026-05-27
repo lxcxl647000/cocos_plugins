@@ -233,6 +233,9 @@ export default class PackManager {
             if (project.path && project.channel) {
                 new _Pack().init(project);
             }
+            else {
+                this._failedByPathOrChannel(project);
+            }
         }
         else {
             console.log(`--------------total build projects ${PackManager.ins.packs.length}  success : ${this._successPackProjects.length}  fail : ${this._failPackProjects.length}--------------------`);
@@ -279,5 +282,23 @@ export default class PackManager {
         if (project.path && project.channel) {
             new _Pack().init(project);
         }
+        else {
+            this._failedByPathOrChannel(project);
+        }
+    }
+
+    private _failedByPathOrChannel(project: PackProject) {
+        let reason = '';
+        if (!project.path) {
+            reason += 'path is empty ';
+        }
+        if (!project.channel) {
+            reason += 'channel is empty ';
+        }
+        this.addFailProject(project.name);
+        this.packIndex++;
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        console.log(`${project.name}打包失败，原因:${reason}${timeStr}`);
     }
 }

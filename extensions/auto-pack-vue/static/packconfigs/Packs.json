@@ -42,8 +42,35 @@
 			"path": "D:/cocos_project/Parking_Master",
 			"channel": "taobao-mini-game",
 			"upload": false,
+			"skip": false,
+			"needAutoPack": false
+		},
+		{
+			"id": 6,
+			"name": "合数专家",
+			"path": "D:\\cocos_project\\SuperRelieveStressPipe",
+			"channel": "taobao-mini-game",
+			"upload": true,
 			"skip": true,
 			"needAutoPack": false
+		},
+		{
+			"id": 7,
+			"name": "兄弟来闯关",
+			"path": "D:\\cocos_project\\BuddyGo",
+			"channel": "taobao-mini-game",
+			"upload": true,
+			"skip": true,
+			"needAutoPack": false
+		},
+		{
+			"id": 8,
+			"name": "箭头转转消",
+			"path": "D:\\cocos_project\\ArrowEliminate",
+			"channel": "taobao-mini-game",
+			"upload": true,
+			"skip": true,
+			"needAutoPack": true
 		}
 	]
 }
