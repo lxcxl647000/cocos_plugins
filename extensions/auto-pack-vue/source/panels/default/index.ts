@@ -176,6 +176,7 @@ module.exports = Editor.Panel.define({
                             skip: false,
                             needAutoPack: false,
                         });
+                        openDilog('info', 'add', '添加成功');
                     },
                     delProject(item: PackProject) {
                         let btnMap = new Map<string, Function>();

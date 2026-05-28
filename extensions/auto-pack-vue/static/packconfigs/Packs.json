@@ -106,7 +106,7 @@
 			"channel": "taobao-mini-game",
 			"upload": false,
 			"skip": false,
-			"needAutoPack": false
+			"needAutoPack": true
 		}
 	]
 }

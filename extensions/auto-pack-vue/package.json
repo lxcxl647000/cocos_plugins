@@ -59,12 +59,22 @@
                 "path": "auto-pack-vue",
                 "label": "open_panel",
                 "message": "open-panel"
+            },
+            {
+                "path": "auto-pack-vue",
+                "label": "update_tool",
+                "message": "update-tool"
             }
         ],
         "messages": {
             "open-panel": {
                 "methods": [
                     "openPanel"
+                ]
+            },
+            "update-tool": {
+                "methods": [
+                    "updateTool"
                 ]
             }
         }
