@@ -4,6 +4,7 @@ import yaml from 'yamljs';
 import { BasePlatform } from '../platforms/BasePlatform';
 import { IPackConfig, supportPlatform } from '../platforms/PlatformConfig';
 import PackUtil from '../utils/PackUtil';
+import LogHelper from './LogHelper';
 
 export interface PackProject {
     name: string,
@@ -57,21 +58,20 @@ class _Pack {
         this.isDebug = isdebug;
         let configyml = PackUtil.isIOS ? "pack.configios.yml" : "pack.config.yml";
         let configPath = path.join(projectDir, "settings", configyml);
-        console.log(`projectDir=${projectDir}`, `pack channel=${packChannel}`);
         if (!fs.existsSync(configPath)) {
-            console.error(`config file does't exits：${configPath}`);
+            PackManager.ins.logHelper.error(`${project.name} config file does't exits：${configPath}`);
             return;
         }
         this.projectDir = projectDir;
         this.configData = yaml.parse(fs.readFileSync(configPath).toString());
         const channelInfo = this.configData.platforms[packChannel];
         if (!channelInfo) {
-            console.error(`current channel ${packChannel} does't extis, please check ${configyml}`);
+            PackManager.ins.logHelper.error(`${this.configData.gameName} current channel ${packChannel} does't extis, please check ${configyml}`);
             return;
         }
         const scripts = supportPlatform[packChannel] || (channelInfo.channel ? supportPlatform[channelInfo.channel] : null);
         if (!scripts) {
-            console.error(`current channel ${packChannel} pack script does't extis, please confirm`);
+            PackManager.ins.logHelper.error(`${this.configData.gameName} current channel ${packChannel} pack script does't extis, please confirm`);
             return;
         }
         this.checkCustomEngine();
@@ -79,7 +79,7 @@ class _Pack {
         (<any>this.curPlatform).bmsName = bmsname;
         this.curPlatform.init({ configData: this.configData, project: project });
         if (this.curPlatform.channelInfo.isNative) {
-            console.log("isBundle = ", androidBundle, "bmsname = ", bmsname, "bmsversion = ", bmsversion);
+            this.curPlatform.logHelper.log("isBundle = ", androidBundle, "bmsname = ", bmsname, "bmsversion = ", bmsversion);
             (<any>this.curPlatform).isBundle = androidBundle;
 
             (<any>this.curPlatform).bmsVersion = bmsversion;
@@ -130,9 +130,15 @@ export default class PackManager {
     public static get ins(): PackManager {
         if (!this._mgr) {
             this._mgr = new PackManager();
-            // this._mgr.getPackProjectDatas();
+            let logOutputPath = path.resolve(__dirname, '../../../../toolLog');
+            this._mgr._logHelper = new LogHelper(logOutputPath, 'PackManager');
         }
         return this._mgr;
+    }
+
+    private _logHelper: LogHelper = null!;
+    public get logHelper() {
+        return this._logHelper;
     }
 
     private _oneByOne = false;
@@ -181,7 +187,15 @@ export default class PackManager {
             this._packOneByOne();
         }
         else {
-            this._checkFinishPack();
+            if (index === 0) {
+                let packs = PackManager.ins.packs;
+                for (let i = 0; i < packs.length; i++) {
+                    PackManager.ins.doPack(i);
+                }
+            }
+            else {
+                this._checkFinishPack();
+            }
         }
     }
 
@@ -207,27 +221,27 @@ export default class PackManager {
     }
     private _checkFinishUpload() {
         if (this._successUploads.length + this._failUploads.length === this._totalUploads) {
-            console.log(`--------------total upload ${this._totalUploads}  success : ${this._successUploads.length}  fail : ${this._failUploads.length}--------------------`);
+            PackManager.ins.logHelper.log(`total upload ${this._totalUploads}  success : ${this._successUploads.length}  fail : ${this._failUploads.length}`);
             let successStr = 'success upload:' + '\n';
             let failStr = 'fail upload:' + '\n';
             for (let i = 0; i < this._successUploads.length; i++) {
                 successStr += this._successUploads[i] + '\n';
             }
-            console.log(successStr);
+            PackManager.ins.logHelper.log(successStr);
 
             for (let i = 0; i < this._failUploads.length; i++) {
                 failStr += this._failUploads[i] + '\n';
             }
-            console.log(failStr);
+            PackManager.ins.logHelper.log(failStr);
+
+            if (this._packIndex >= PackManager.ins.packs.length) {
+                PackManager.ins.logHelper.saveLog();
+            }
         }
     }
 
     // 一个打完打下一个
     private _packOneByOne() {
-        if (!this._oneByOne) {
-            console.log("oneByOne is false,不能使用这个方法--------------------");
-            return;
-        }
         if (this._packIndex < PackManager.ins.packs.length) {
             let project = PackManager.ins.packs[this._packIndex];
             if (project.path && project.channel) {
@@ -238,46 +252,36 @@ export default class PackManager {
             }
         }
         else {
-            console.log(`--------------total build projects ${PackManager.ins.packs.length}  success : ${this._successPackProjects.length}  fail : ${this._failPackProjects.length}--------------------`);
-            console.log("--------------build finish all projects--------------------");
-            let successStr = 'success pack projects:' + '\n';
-            let failStr = 'fail pack projects:' + '\n';
-            for (let i = 0; i < this._successPackProjects.length; i++) {
-                successStr += this._successPackProjects[i] + '\n';
-            }
-            console.log(successStr);
-            for (let i = 0; i < this._failPackProjects.length; i++) {
-                failStr += this._failPackProjects[i] + '\n';
-            }
-            console.log(failStr);
-            console.log("--------------build finish all projects--------------------");
+            this._finishPack();
         }
     }
 
     private _checkFinishPack() {
         if (this._packIndex >= PackManager.ins.packs.length) {
-            console.log(`--------------total build projects ${PackManager.ins.packs.length}  success : ${this._successPackProjects.length}  fail : ${this._failPackProjects.length}--------------------`);
-            console.log("--------------build finish all projects--------------------");
-            let successStr = 'success pack projects:' + '\n';
-            let failStr = 'fail pack projects:' + '\n';
-            for (let i = 0; i < this._successPackProjects.length; i++) {
-                successStr += this._successPackProjects[i] + '\n';
-            }
-            console.log(successStr);
-            for (let i = 0; i < this._failPackProjects.length; i++) {
-                failStr += this._failPackProjects[i] + '\n';
-            }
-            console.log(failStr);
-            console.log("--------------build finish all projects--------------------");
+            this._finishPack();
+        }
+    }
+
+    private _finishPack() {
+        PackManager.ins.logHelper.log(`total build projects ${PackManager.ins.packs.length}  success : ${this._successPackProjects.length}  fail : ${this._failPackProjects.length}`);
+        let successStr = 'success pack projects:';
+        let failStr = 'fail pack projects:';
+        for (let i = 0; i < this._successPackProjects.length; i++) {
+            successStr += this._successPackProjects[i] + (i === this._successPackProjects.length - 1 ? '' : ',');
+        }
+        PackManager.ins.logHelper.log(successStr);
+        for (let i = 0; i < this._failPackProjects.length; i++) {
+            failStr += this._failPackProjects[i] + (i === this._failPackProjects.length - 1 ? '' : ',');
+        }
+        PackManager.ins.logHelper.log(failStr);
+
+        if (this._successUploads.length + this._failUploads.length === this._totalUploads) {
+            PackManager.ins.logHelper.saveLog();
         }
     }
 
     // 直接打，不用等上一个打完
     public doPack(index: number) {
-        if (this._oneByOne) {
-            console.log("oneByOne is true,不能使用这个方法--------------------");
-            return;
-        }
         let project = PackManager.ins.packs[index];
         if (project.path && project.channel) {
             new _Pack().init(project);
@@ -295,10 +299,10 @@ export default class PackManager {
         if (!project.channel) {
             reason += 'channel is empty ';
         }
-        this.addFailProject(project.name);
-        this.packIndex++;
         const now = new Date();
         const timeStr = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-        console.log(`${project.name}打包失败，原因:${reason}${timeStr}`);
+        PackManager.ins.logHelper.log(`${project.name}打包失败，原因:${reason}${timeStr}`);
+        this.addFailProject(project.name);
+        this.packIndex++;
     }
 }

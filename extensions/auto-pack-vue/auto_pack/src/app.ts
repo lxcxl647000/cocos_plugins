@@ -8,26 +8,17 @@ program
     .option("-p, --packs <value>", "要打包的工程")
 
 program.parse(process.argv);
-const options = program.opts();
-console.log(options);
-PackManager.ins.oneByOne = options.onebyone;
+let options = program.opts();
 
+PackManager.ins.oneByOne = options.onebyone;
 if (options.packs && options.packs !== '') {
     // 避免双引号在命令行中被吃掉，在发送端时进行了base64编码，所以这里要解码一下
     let jsonStr = Buffer.from(options.packs, 'base64').toString('utf-8');
-    PackManager.ins.packs = JSON.parse(jsonStr).packs;
+    options.packs = JSON.parse(jsonStr);
+    PackManager.ins.packs = options.packs.packs;
 }
-
-// 从第一个工程开始打包
-if (PackManager.ins.oneByOne) {
-    PackManager.ins.packIndex = 0;
-}
-else {
-    let packs = PackManager.ins.packs;
-    for (let i = 0; i < packs.length; i++) {
-        PackManager.ins.doPack(i);
-    }
-}
+PackManager.ins.logHelper.log(options);
+PackManager.ins.packIndex = 0;
 
 /*e:
 set batcommond=-d

@@ -1,10 +1,11 @@
 /* eslint-disable vue/one-component-per-file */
 
-import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import { ChildProcessWithoutNullStreams, spawn, exec } from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import { join } from 'path';
 import { createApp, App, defineComponent } from 'vue';
 import os from 'os';
+import { checkTaobaoLogin, loginForTaobao } from '../../main';
 const panelDataMap = new WeakMap<any, App>();
 /**
  * @zh 如果希望兼容 3.3 之前的版本可以使用下方的代码
@@ -13,7 +14,7 @@ const panelDataMap = new WeakMap<any, App>();
 // Editor.Panel.define = Editor.Panel.define || function(options: any) { return options }
 
 interface PackProject {
-    id: number,
+    appId: string,
     name: string,
     path: string,// Cocos项目根目录
     channel: string,// 指定打包对应渠道名称
@@ -31,7 +32,7 @@ const modifyPackageJson = () => {
     writeFileSync(join(__dirname, '../../../static/packconfigs/Packs.json'), dataStr, 'utf-8');
 };
 
-const openDilog = async (type: string, title: string, message: string, btnMap?: Map<string, Function>, cancel?: number) => {
+export const openDilog = async (type: string, title: string, message: string, btnMap?: Map<string, Function>, cancel?: number) => {
     let option: Editor.Dialog.MessageDialogOptions = {
         title
     };
@@ -95,13 +96,16 @@ module.exports = Editor.Panel.define({
                         for (let task of this.taskList) {
                             if (!task.path || !task.channel) {
                                 let str = '';
+                                if (!task.appId) {
+                                    str += '未配置appId ';
+                                }
                                 if (!task.path) {
                                     str += '未配置项目路径 ';
                                 }
                                 if (!task.channel) {
                                     str += '未配置渠道 ';
                                 }
-                                openDilog('warn', 'warn', `id:${task.id}${task.name}${str}请检查配置！`);
+                                openDilog('warn', 'warn', `appId:${task.appId}${task.name}${str}请检查配置！`);
                                 return;
                             }
                         }
@@ -109,6 +113,30 @@ module.exports = Editor.Panel.define({
                             openDilog('warn', 'warn', '正在自动化，请稍后再试!');
                             return;
                         }
+
+                        const checkTaobao = (func: Function) => {
+                            let check = false;
+                            for (let task of this.taskList) {
+                                if (task.channel === 'taobao-mini-game') {
+                                    check = true;
+                                    break;
+                                }
+                            }
+                            if (check) {
+                                checkTaobaoLogin(
+                                    () => {
+                                        func && func();
+                                    },
+                                    () => {
+                                        openDilog('warn', 'warn', '淘宝登录态过期，请重新登录!');
+                                    }
+                                );
+                            }
+                            else {
+                                func && func();
+                            }
+                        }
+
                         const autoPack = () => {
                             openDilog('info', 'start', '开始自动化');
                             this.isAutoPack = true;
@@ -124,51 +152,50 @@ module.exports = Editor.Panel.define({
                             let sp: ChildProcessWithoutNullStreams = spawn("node", args, { shell: true });
                             sp.stdout.setEncoding('utf8');
                             sp.stdout.on('data', (data) => {
-                                console.log(`stdout ${data.toString()}`);
+                                console.log(`autoPack stdout ${data.toString()}`);
                             });
                             sp.stderr.on('data', (data) => {
-                                console.log(`stderr ${data.toString()}`);
+                                console.log(`autoPack stderr ${data.toString()}`);
                             })
                             sp.on('exit', (code, data) => {
                                 if (code === 0) {
-                                    console.log(`exit suscess ${data}`);
-                                    openDilog('info', 'suscess', '自动化完成!');
+                                    console.log(`autoPack exit suscess ${data}`);
+                                    openDilog('info', '完成', '自动化完成!');
                                 }
                                 else {
-                                    console.log(`exit fail ${data}`);
-                                    openDilog('error', 'fail', '自动化失败!');
+                                    console.log(`autoPack exit fail ${data}`);
+                                    openDilog('error', '失败', '自动化失败!');
                                 }
                                 this.isAutoPack = false;
                             });
                         }
-                        let hasUpload = false;
+                        let msg = '';
+                        let uploadCount = 0;
+                        let packCount = 0;
+                        let autoCount = 0;
                         for (let task of this.taskList) {
-                            if (task.needAutoPack && task.upload) {
-                                hasUpload = true;
-                                break;
+                            if (task.needAutoPack) {
+                                autoCount++;
+                                if (task.upload) {
+                                    uploadCount++;
+                                }
+                                if (!task.skip) {
+                                    packCount++;
+                                }
+                                msg += `${task.appId}：${task.name}，构建：${(task.skip ? '✕' : '✓')}，上传：${(task.upload ? '✓' : '✕')}\n`;
                             }
                         }
-                        if (hasUpload) {
-                            let btnMap = new Map<string, Function>();
-                            btnMap.set('ok', () => {
-                                autoPack();
-                            });
-                            openDilog('warn', 'warn', '有游戏需要上传，是否继续', btnMap, 1);
-                        }
-                        else {
-                            autoPack();
-                        }
+                        msg += `自动化：${autoCount}个，构建：${packCount}个，上传：${uploadCount}个\n`;
+                        let btnMap = new Map<string, Function>();
+                        btnMap.set('ok', () => {
+                            checkTaobao(() => { autoPack(); });
+                            // autoPack();
+                        });
+                        openDilog('warn', 'warn', `${msg}开始自动化?`, btnMap, 1);
                     },
                     addProject() {
-                        let id = 0;
-                        for (let task of this.taskList) {
-                            if (task.id > id) {
-                                id = task.id;
-                            }
-                        }
-                        id++;
                         this.taskList.push({
-                            id,
+                            appId: '',
                             name: '',
                             path: '',
                             channel: 'taobao-mini-game',
@@ -181,7 +208,7 @@ module.exports = Editor.Panel.define({
                     delProject(item: PackProject) {
                         let btnMap = new Map<string, Function>();
                         btnMap.set('delete', () => {
-                            this.taskList = this.taskList.filter((task: PackProject) => task.id !== item.id);
+                            this.taskList = this.taskList.filter((task: PackProject) => task.appId !== item.appId);
                             taskList = this.taskList;
                         });
                         openDilog('warn', 'delete', '是否删除配置?', btnMap, 1);
@@ -316,11 +343,34 @@ module.exports = Editor.Panel.define({
                     getPackCount() {
                         let count = 0;
                         for (let i = 0; i < this.taskList.length; i++) {
-                            if (!this.taskList[i].skip) {
+                            if (!this.taskList[i].skip && this.taskList[i].needAutoPack) {
                                 count++;
                             }
                         }
                         return count;
+                    },
+                    openLogDir(path: string) {
+                        if (!existsSync(path)) {
+                            openDilog('warn', 'warn', '日志文件夹不存在！');
+                            return;
+                        }
+                        try {
+                            exec(`start "" "${path}"`, (error) => {
+                                if (error) {
+                                    console.error('执行命令出错:', error);
+                                    openDilog('error', '错误', '无法打开目录，请检查路径或权限！');
+                                }
+                            });
+                        } catch (error) {
+                            console.error('打开目录异常:', error);
+                            openDilog('error', '错误', '发生未知错误，无法打开目录！');
+                        }
+                    },
+                    openToolLog() {
+                        this.openLogDir(join(__dirname, '../../../toolLog'));
+                    },
+                    taobaoLogin() {
+                        loginForTaobao();
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

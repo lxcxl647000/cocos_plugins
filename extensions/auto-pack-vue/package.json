@@ -57,13 +57,18 @@
         "menu": [
             {
                 "path": "auto-pack-vue",
-                "label": "open_panel",
+                "label": "打开自动化面板",
                 "message": "open-panel"
             },
             {
                 "path": "auto-pack-vue",
-                "label": "update_tool",
+                "label": "更新自动化工具",
                 "message": "update-tool"
+            },
+            {
+                "path": "auto-pack-vue",
+                "label": "登录淘宝",
+                "message": "taobao-login"
             }
         ],
         "messages": {
@@ -75,6 +80,11 @@
             "update-tool": {
                 "methods": [
                     "updateTool"
+                ]
+            },
+            "taobao-login": {
+                "methods": [
+                    "taobaoLogin"
                 ]
             }
         }

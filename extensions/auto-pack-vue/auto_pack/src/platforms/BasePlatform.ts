@@ -5,6 +5,7 @@ import { afterBuildFinish, beforeStartBuild } from '../build-custom/BuildCustom'
 import PackUtil from '../utils/PackUtil';
 import { ChannelInfo, IPackConfig } from './PlatformConfig';
 import PackManager, { PackProject } from '../pack/PackManager';
+import LogHelper from '../pack/LogHelper';
 export class BasePlatform {
     public configData: IPackConfig = null!;
     public channelInfo: ChannelInfo = null!;
@@ -31,6 +32,8 @@ export class BasePlatform {
     public isHotUpdate: boolean = false;
     public isHotUpLoad: boolean = false;
     public gameConfigPath: string = "";
+
+    public logHelper: LogHelper = null;
 
     public constructor() {
     }
@@ -59,6 +62,7 @@ export class BasePlatform {
         this.desc = options.project.tdesc || "";
         this.isDebug = options.project.debug || false;
         this.outputPath = path.join(outputpath, this.channelInfo.buildPath);
+        this.logHelper = new LogHelper(path.join(this.outputPath, 'log'), options.configData.gameName);
         if (PackUtil.compareVersion(this.configData.engineVer, "3.0.0") >= 0) {
             this.isEngine3 = true;
         }
@@ -68,12 +72,12 @@ export class BasePlatform {
         } else {
             this.checkNewVersion();
         }
-        console.log("current is debug? ", this.isDebug);
+        this.logHelper.log(`current is debug? ${this.isDebug}`);
     }
     public async startBuild() {
         let channelInfo = this.configData.platforms[this.curPackChannel] as ChannelInfo;
         if (!channelInfo) {
-            console.error(`current channel ${this.curPackChannel} config info does't exits, please confirm`);
+            this.logHelper.error(`current channel ${this.curPackChannel} config info does't exits, please confirm`);
             return;
         }
         //开始构建前
@@ -84,12 +88,12 @@ export class BasePlatform {
         }
         if (channelInfo.customTemplate) {
             let customTemplatePath = path.join(this.projectDir, channelInfo.customTemplate);
-            console.log('start customTemplate copy success');
+            this.logHelper.log('start customTemplate copy success');
             if (fs.existsSync(customTemplatePath)) {
                 PackUtil.copyFiles(customTemplatePath, this.outputPath);
-                console.log('customTemplate copy success');
+                this.logHelper.log('customTemplate copy success');
             } else {
-                console.error(`customTemplate path ${customTemplatePath} does't exits, please confirm`);
+                this.logHelper.error(`customTemplate path ${customTemplatePath} does't exits, please confirm`);
             }
         }
         if (boo) {
@@ -123,21 +127,17 @@ export class BasePlatform {
                 buildInfo = `${buildInfo}mainBundleCompressionType=${channelInfo.mainBundleCompressionType};`
             }
             try {
-
-                // console.log(`${this.enginePath} --path ${this.projectDir} --build ${buildInfo}`);
-                //@ts-ignore
                 let sp: ChildProcessWithoutNullStreams = null;
-
-                console.log("building...", buildInfo);
+                this.logHelper.log("building...", buildInfo);
                 if (this.isEngine3) {
-                    buildInfo += `;name=${configData.title};`;
+                    buildInfo += `name=${configData.title};`;
                     if (channelInfo.configName) {
                         buildInfo += `configPath=${this.projectDir}/settings/${channelInfo.configName}`;
                     } else {
-                        console.warn("缺少configName字段，将使用引擎默认构建配置");
+                        this.logHelper.warn("缺少configName字段，将使用引擎默认构建配置");
                     }
                     buildInfo = `${buildInfo}"`;
-                    console.log(`构建参数: ${this.enginePath} --project ${this.projectDir} --build ${buildInfo}`);
+                    this.logHelper.log(`构建参数: ${this.enginePath} --project ${this.projectDir} --build ${buildInfo}`);
                     //win  ...\CocosCreator.exe --project projectPath --build "platform=web-desktop;debug=true"
                     sp = spawn(`${this.enginePath}`, ["--project", `${this.projectDir}`, "--build", `${buildInfo}`]);
                 } else {
@@ -147,17 +147,27 @@ export class BasePlatform {
 
                 sp.stdout.setEncoding('utf8');
                 sp.stdout.on('data', (data) => {
-                    console.log(data.toString());
+                    if (data.indexOf('[Build]') >= 0 || data.indexOf('[Package]') >= 0 || data.indexOf('[Build-plugin]') >= 0) {
+                        console.log(`stdout cocos build ${data}`);
+                    }
+                    else {
+                        this.logHelper.log(`stdout cocos build ${data}`);
+                    }
                 });
                 sp.stderr.on('data', (data) => {
-                    console.log(data.toString());
-                })
+                    if (data.indexOf('[Build]') >= 0 || data.indexOf('[Package]') >= 0 || data.indexOf('[Build-plugin]') >= 0) {
+                        console.log(`stderr cocos build ${data}`);
+                    }
+                    else {
+                        this.logHelper.log(`stderr cocos build ${data}`);
+                    }
+                });
                 sp.on('exit', (code, sign) => {
                     if (code == 0 || (this.isEngine3 && code == 36)) {
-                        console.log(`build finish ${this.curPackChannel}`);
+                        this.logHelper.log(`cocos build finish ${this.curPackChannel}`);
                         resolve(true);
                     } else {
-                        console.error(`
+                        this.logHelper.error(`
                             构建失败,错误代码:${code}
                             32 构建失败 —— 构建参数不合法
                             34 构建失败 —— 构建过程出错失败，详情请参考构建日志
@@ -166,9 +176,9 @@ export class BasePlatform {
                         resolve(false);
                     }
                 });
-                console.log("output path=", buildPath);
+                this.logHelper.log("output path=", buildPath);
             } catch (error) {
-                console.log(`build failed ${this.curPackChannel}:${error}`);
+                this.logHelper.log(`cocos build failed ${this.curPackChannel}:${error}`);
                 reject(false);
             }
         });
@@ -187,7 +197,6 @@ export class BasePlatform {
         return new Promise<void>((resolve, reject) => {
             afterBuildFinish({ platform: this }, () => {
                 resolve();
-                // 打包下一个工程
                 PackManager.ins.addSuccessProject(this.configData.gameName);
                 PackManager.ins.packIndex++;
             })
