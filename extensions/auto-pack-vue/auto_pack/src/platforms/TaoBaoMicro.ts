@@ -2,8 +2,6 @@ import { BasePlatform } from "./BasePlatform";
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import path from "path";
 import PackManager from "../pack/PackManager";
-import { DingdingBot } from "../utils/DingdingBot";
-import { AutoUploadPlatform, channelToName } from "./PlatformConfig";
 export class TaoBaoMicro extends BasePlatform {
     public QRCodeURL: string = "";
     public async afterBuildFinish() {
