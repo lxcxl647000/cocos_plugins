@@ -109,6 +109,10 @@ module.exports = Editor.Panel.define({
                                 return;
                             }
                         }
+                        if (this.getAutoCount() === 0) {
+                            openDilog('warn', 'warn', '无自动化项目!');
+                            return;
+                        }
                         if (this.isAutoPack) {
                             openDilog('warn', 'warn', '正在自动化，请稍后再试!');
                             return;
@@ -312,6 +316,10 @@ module.exports = Editor.Panel.define({
                     onekeyOperateAutoPack(flag: boolean) {
                         for (let i = 0; i < this.taskList.length; i++) {
                             this.taskList[i].needAutoPack = flag;
+                            if (!flag) {
+                                this.taskList[i].upload = false;
+                                this.taskList[i].skip = false;
+                            }
                         }
                     },
                     onekeyOperateUpload(flag: boolean) {
@@ -336,7 +344,7 @@ module.exports = Editor.Panel.define({
                     getUploadCount() {
                         let count = 0;
                         for (let i = 0; i < this.taskList.length; i++) {
-                            if (this.taskList[i].upload) {
+                            if (this.taskList[i].upload && this.taskList[i].needAutoPack) {
                                 count++;
                             }
                         }
@@ -373,6 +381,13 @@ module.exports = Editor.Panel.define({
                     },
                     taobaoLogin() {
                         loginForTaobao();
+                    },
+                    clickAutoPackToggle(item: PackProject, flag: boolean) {
+                        item.needAutoPack = flag;
+                        if (!flag) {
+                            item.upload = false;
+                            item.skip = false;
+                        }
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

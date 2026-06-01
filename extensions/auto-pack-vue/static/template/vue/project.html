@@ -64,7 +64,8 @@
             <ui-prop>
                 <ui-label slot="label">是否自动化</ui-label>
                 <ui-checkbox slot="content" :checked="item.needAutoPack"
-                    @confirm="item.needAutoPack = $event.target.value"></ui-checkbox>
+                    @confirm="clickAutoPackToggle(item, $event.target.value)"></ui-checkbox>
+                <!-- @confirm="item.needAutoPack = $event.target.value"></ui-checkbox> -->
             </ui-prop>
 
             <ui-prop>

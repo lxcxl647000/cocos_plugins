@@ -6,7 +6,7 @@
 			"channel": "taobao-mini-game",
 			"upload": false,
 			"skip": false,
-			"needAutoPack": true,
+			"needAutoPack": false,
 			"appId": "3000000136119813"
 		},
 		{
@@ -31,9 +31,9 @@
 			"name": "猫咪萌宠消除",
 			"path": "D:\\cocos_project\\Cat_Eliminate",
 			"channel": "taobao-mini-game",
-			"upload": false,
+			"upload": true,
 			"skip": false,
-			"needAutoPack": false,
+			"needAutoPack": true,
 			"appId": "3000000136636894"
 		},
 		{
