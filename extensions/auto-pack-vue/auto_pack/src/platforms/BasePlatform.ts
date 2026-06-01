@@ -3,9 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import { afterBuildFinish, beforeStartBuild } from '../build-custom/BuildCustom';
 import PackUtil from '../utils/PackUtil';
-import { ChannelInfo, IPackConfig } from './PlatformConfig';
+import { ChannelInfo, channelToName, IPackConfig } from './PlatformConfig';
 import PackManager, { PackProject } from '../pack/PackManager';
 import LogHelper from '../pack/LogHelper';
+import { DingdingBot } from '../utils/DingdingBot';
 export class BasePlatform {
     public configData: IPackConfig = null!;
     public channelInfo: ChannelInfo = null!;
@@ -232,5 +233,30 @@ export class BasePlatform {
             backData[this.curPackChannel] = this.version;
         }
         fs.writeFileSync(backPath, JSON.stringify(backData, null, "\t"), { encoding: 'utf8' });
+    }
+
+    public postToDingTalk(result: string, isUpload: boolean, version?: string) {
+        if (this.configData.notifyDingTalk && this.configData.dingTalkWebHook && !this.isSkipNotify) {
+            let oprateType = '';
+            let versionStr = '';
+            let oprateStr = '';
+            let channelName = channelToName[this.curPackChannel] || this.channelInfo.platform;
+            let outputPath = '';
+            if (isUpload) {
+                oprateStr = this.configData.dingTalkCustomContent_upload;
+                oprateType = '上传';
+                versionStr = `##### ${oprateType}版本：**${version}** \n`;
+                outputPath = channelName + "后台";
+            }
+            else {
+                oprateStr = this.configData.dingTalkCustomContent_pack;
+                oprateType = '打包';
+                outputPath = path.join(this.outputPath, this.curPackChannel);
+            }
+            let bot = new DingdingBot(this.configData.dingTalkWebHook);
+            let msg = `#### **<font color='#e61a1a'>${oprateStr}</font>** \n #### 游戏名字：**<font color='#1E90FF'>${this.configData.gameName}</font>** \n ##### 游戏渠道：**${channelName}**\n ${versionStr} ##### 状态：**<font color='#00dd00'>${oprateType + result}</font>** \n ##### 资源包路径：${outputPath} \n ##### ${oprateType}时间：**${new Date().toLocaleString()}** \n`;
+            let title = `${this.configData.gameName}`;
+            bot.pushMsgMarkdown(msg, title);
+        }
     }
 }

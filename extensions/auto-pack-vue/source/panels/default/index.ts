@@ -123,11 +123,14 @@ module.exports = Editor.Panel.define({
                                 }
                             }
                             if (check) {
+                                this.isAutoPack = true;
                                 checkTaobaoLogin(
                                     () => {
+                                        this.isAutoPack = false;
                                         func && func();
                                     },
                                     () => {
+                                        this.isAutoPack = false;
                                         openDilog('warn', 'warn', '淘宝登录态过期，请重新登录!');
                                     }
                                 );
@@ -189,7 +192,6 @@ module.exports = Editor.Panel.define({
                         let btnMap = new Map<string, Function>();
                         btnMap.set('ok', () => {
                             checkTaobao(() => { autoPack(); });
-                            // autoPack();
                         });
                         openDilog('warn', 'warn', `${msg}开始自动化?`, btnMap, 1);
                     },

@@ -239,11 +239,8 @@ export function afterBuildFinish(options: {
         }
     }
 
-    if (!pl.skipBuild && pl.configData.notifyDingTalk && pl.configData.dingTalkWebHook && !options.platform.isSkipNotify) {
-        let bot = new DingdingBot(pl.configData.dingTalkWebHook);
-        let msg = `#### **<font color='#e61a1a'>${pl.configData.dingTalkCustomContent_pack}</font>** \n #### 游戏名字：**<font color='#1E90FF'>${gameName}</font>** \n ##### 游戏渠道：**${channelName}**\n ##### 状态：**<font color='#00dd00'>打包完成</font>** \n ##### 资源包路径：${outputPath} \n ##### 打包时间：**${new Date().toLocaleString()}** \n`;
-        let title = `${gameName}`;
-        bot.pushMsgMarkdown(msg, title);
+    if (!pl.skipBuild) {
+        options.platform.postToDingTalk("完成", false);
     }
 
 
