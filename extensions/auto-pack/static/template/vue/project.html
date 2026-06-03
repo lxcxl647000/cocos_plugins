@@ -1,0 +1,94 @@
+<div style="position: relative; height: 100%;">
+    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+        <ui-button @confirm="addProject">+</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm=" importPacksConfig">
+            <ui-icon value="import"></ui-icon>
+        </ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm=" exportPacksConfig">
+            <ui-icon value="export"></ui-icon>
+        </ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(true)">一键勾选自动化</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(false)">一键取消自动化</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(true)">一键勾选上传</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(false)">一键取消上传</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(true)">一键勾选跳过打包</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(false)">一键取消跳过打包</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm=" openToolLog">
+            <ui-icon value="log"></ui-icon>
+        </ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm=" taobaoLogin">登录淘宝</ui-button>
+    </div>
+    <div style="max-height: 80vh;overflow-y: auto;">
+        <div v-for="(item, index) in taskList" :key="item.appId"
+            style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+
+            <div style="display: flex; align-items: center;">
+                <ui-input style="font-size: 14px; max-width: 50%;" :value="item.name"
+                    @confirm="item.name = $event.target.value">
+                </ui-input>
+                <ui-button style=" margin-left: 10px;" @confirm=" delProject(item)">
+                    <ui-icon color="red" value="del"></ui-icon>
+                </ui-button>
+                <ui-button style=" margin-left: 10px;" @confirm=" openLogDir(`${item.path}/build/log`)">
+                    <ui-icon value="log"></ui-icon>
+                </ui-button>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-top: 10px;">
+                <ui-label slot="label">工程路径</ui-label>
+                <!-- 双向绑定到当前循环项的 path -->
+                <ui-file style="width: 70%; margin-left: 10px;" type="directory" :value="item.path"
+                    @confirm="item.path = $event.target.value"></ui-file>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-top: 10px;">
+                <ui-label slot="label">appId</ui-label>
+                <ui-input style="font-size: 14px; max-width: 50%; margin-left: 10px;" :value="item.appId"
+                    @confirm="item.appId = $event.target.value">
+                </ui-input>
+            </div>
+
+            <ui-prop>
+                <ui-label slot="label">是否上传</ui-label>
+                <!-- 双向绑定到当前循环项的 upload -->
+                <ui-checkbox slot="content" :checked="item.upload"
+                    @confirm="item.upload = $event.target.value"></ui-checkbox>
+            </ui-prop>
+
+            <ui-prop>
+                <ui-label slot="label">是否跳过构建</ui-label>
+                <ui-checkbox slot="content" :checked="item.skip"
+                    @confirm="item.skip = $event.target.value"></ui-checkbox>
+            </ui-prop>
+
+            <ui-prop>
+                <ui-label slot="label">是否自动化</ui-label>
+                <ui-checkbox slot="content" :checked="item.needAutoPack"
+                    @confirm="clickAutoPackToggle(item, $event.target.value)"></ui-checkbox>
+                <!-- @confirm="item.needAutoPack = $event.target.value"></ui-checkbox> -->
+            </ui-prop>
+
+            <ui-prop>
+                <ui-label slot="label">构建平台</ui-label>
+                <!-- 双向绑定到当前循环项的 channel -->
+                <ui-select slot="content" :value="item.channel" @confirm="item.channel = $event.target.value">
+                    <option value="taobao-mini-game">taobao-mini-game</option>
+                </ui-select>
+            </ui-prop>
+        </div>
+    </div>
+    <div style="margin-top: 20px;">
+        <ui-button @confirm="startAutoPack">开始</ui-button>
+        <ui-label style="margin-left: 10px;">{{`总共 : ${taskList.length}`}}</ui-label>
+        <ui-label style="margin-left: 10px;">{{`自动化 : ${getAutoCount()}`}}</ui-label>
+        <ui-label style="margin-left: 10px;">{{`构建 : ${getPackCount()}`}}</ui-label>
+        <ui-label style="margin-left: 10px;">{{`上传 : ${getUploadCount()}`}}</ui-label>
+    </div>
+    <div v-if="isAutoPack || isCheckLogin" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                background-color: rgba(0, 0, 0, 0.3); z-index: 9999;">
+        <ui-loading v-if="isAutoPack"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></ui-loading>
+        <ui-label v-if="isCheckLogin"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">检测淘宝登录态...</ui-label>
+    </div>
+</div>

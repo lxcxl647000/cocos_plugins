@@ -1,0 +1,50 @@
+{
+  "name": "creatorpacker",
+  "version": "1.1.7",
+  "description": "auto pack creator project",
+  "main": "./build/app.js",
+  "bin": {
+    "creatorpacker": "./build/app.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bc": "tsc --build && node scripts/copyFiles.js"
+  },
+  "keywords": [
+    "cocos creator",
+    "auto",
+    "cocos packer",
+    "auto pack"
+  ],
+  "files": [
+    "/build",
+    "*.bat",
+    "*.yml",
+    "*.sh"
+  ],
+  "author": "wujianfen",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^18.11.18",
+    "bili-sgame-cli": "^2.1.4",
+    "commander": "^10.0.0",
+    "jd-minigame-ci": "^0.3.0",
+    "ks-miniprogram-ci": "^1.3.9",
+    "minidev": "^2.2.5",
+    "minigame-code-fortify-cli": "^0.1.2",
+    "miniprogram-ci": "^2.1.26",
+    "request": "^2.88.2",
+    "tt-minigame-ide-cli": "^2.0.7",
+    "xlsx-populate": "^1.21.0",
+    "xml2js": "^0.4.23",
+    "yamljs": "^0.3.0",
+    "tb-open-cli": "^0.0.6"
+  },
+  "devDependencies": {
+    "@types/qrcode-terminal": "^0.12.0",
+    "@types/request": "^2.48.8",
+    "@types/xml2js": "^0.4.11",
+    "@types/yamljs": "^0.2.31",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
