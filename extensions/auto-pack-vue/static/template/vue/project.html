@@ -84,8 +84,11 @@
         <ui-label style="margin-left: 10px;">{{`构建 : ${getPackCount()}`}}</ui-label>
         <ui-label style="margin-left: 10px;">{{`上传 : ${getUploadCount()}`}}</ui-label>
     </div>
-    <div v-if="isAutoPack" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    <div v-if="isAutoPack || isCheckLogin" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
                 background-color: rgba(0, 0, 0, 0.3); z-index: 9999;">
-        <ui-loading style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></ui-loading>
+        <ui-loading v-if="isAutoPack"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></ui-loading>
+        <ui-label v-if="isCheckLogin"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">检测淘宝登录态...</ui-label>
     </div>
 </div>

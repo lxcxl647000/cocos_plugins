@@ -79,7 +79,8 @@ module.exports = Editor.Panel.define({
                 data() {
                     return {
                         taskList: taskList,
-                        isAutoPack: false
+                        isAutoPack: false,
+                        isCheckLogin: false
                     };
                 },
                 methods: {
@@ -127,14 +128,14 @@ module.exports = Editor.Panel.define({
                                 }
                             }
                             if (check) {
-                                this.isAutoPack = true;
+                                this.isCheckLogin = true;
                                 checkTaobaoLogin(
                                     () => {
-                                        this.isAutoPack = false;
+                                        this.isCheckLogin = false;
                                         func && func();
                                     },
                                     () => {
-                                        this.isAutoPack = false;
+                                        this.isCheckLogin = false;
                                         openDilog('warn', 'warn', '淘宝登录态过期，请重新登录!');
                                     }
                                 );
@@ -214,8 +215,13 @@ module.exports = Editor.Panel.define({
                     delProject(item: PackProject) {
                         let btnMap = new Map<string, Function>();
                         btnMap.set('delete', () => {
-                            this.taskList = this.taskList.filter((task: PackProject) => task.appId !== item.appId);
-                            taskList = this.taskList;
+                            for (let i = 0; i < this.taskList.length; i++) {
+                                let task = this.taskList[i];
+                                if (task.appId === item.appId && task.name === item.name) {
+                                    this.taskList.splice(i, 1);
+                                    break;
+                                }
+                            }
                         });
                         openDilog('warn', 'delete', '是否删除配置?', btnMap, 1);
                     },

@@ -2,6 +2,7 @@ import { BasePlatform } from "./BasePlatform";
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import path from "path";
 import PackManager from "../pack/PackManager";
+import fs from 'fs';
 export class TaoBaoMicro extends BasePlatform {
     public QRCodeURL: string = "";
     public async afterBuildFinish() {
@@ -33,6 +34,10 @@ export class TaoBaoMicro extends BasePlatform {
                         if (version) {
                             let versionArr = version.split('.');
                             version = versionArr[0] + '.' + versionArr[1] + '.' + (+versionArr[2] + 1);
+
+                            // 上传游戏之前设置game.json文件高新能模式
+                            this._setHighPerformanceMode();
+
                             // 上传小游戏
                             this.logHelper.log(`start upload version:${version}`);
                             this._spawn(["upload", "--input", outPath, "--appId", this.channelInfo.appid, "--type", "minigame", "--version", version], null,
@@ -72,6 +77,7 @@ export class TaoBaoMicro extends BasePlatform {
             return;
         }
         let needLogin = false;
+        let uploadFailed = false;
         let sp: ChildProcessWithoutNullStreams = spawn("tbopen", args, { shell: true });
         sp.stdout.setEncoding('utf8');
         let commondStr = sp.spawnargs[4].replace(/"/g, '');
@@ -84,11 +90,14 @@ export class TaoBaoMicro extends BasePlatform {
             if (data.indexOf('登录态过期，可使用指令 tbopen login 刷新登录态') > -1 || data.indexOf('need login') > -1) {
                 needLogin = true;
             }
+            if (data.indexOf('上传失败') > -1) {
+                uploadFailed = true;
+            }
         })
         sp.on('exit', (code) => {
             if (code === 0) {
-                if (needLogin) {
-                    this.logHelper.log(`${this.configData.gameName} ${commondStr} failed : 登录过期`);
+                if (needLogin || uploadFailed) {
+                    this.logHelper.log(`${this.configData.gameName} ${commondStr} failed : ${needLogin ? '登录过期' : '上传失败'}`);
                     fail && fail();
                 }
                 else {
@@ -101,6 +110,30 @@ export class TaoBaoMicro extends BasePlatform {
                 fail && fail();
             }
         });
+    }
+
+    private _setHighPerformanceMode() {
+        this.logHelper.log('set game.json high performance mode');
+        let gameJsonPath = path.join(this.outputPath, `${this.curPackChannel}/game.json`);
+        if (!fs.existsSync(gameJsonPath)) {
+            this.logHelper.log('game.json is not exist', gameJsonPath);
+        }
+        else {
+            this.logHelper.log('game.json  exist', gameJsonPath);
+            let content = fs.readFileSync(gameJsonPath, 'utf-8');
+            if (content) {
+                this.logHelper.log(`get game.json content ${content}`);
+                let newContent = content;
+                let data = JSON.parse(content);
+                let newData = { ...data, highPerformanceMode: true };
+                newContent = JSON.stringify(newData);
+                this.logHelper.log(`get game.json newContent ${newContent}`);
+                fs.writeFileSync(gameJsonPath, newContent, 'utf-8');
+            }
+            else {
+                this.logHelper.log('cant get game.json content ');
+            }
+        }
     }
 
     public async beforeStartBuild() {
