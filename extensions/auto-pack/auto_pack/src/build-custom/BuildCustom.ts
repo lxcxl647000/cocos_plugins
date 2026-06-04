@@ -9,7 +9,7 @@ export function beforeStartBuild(options: {
     //构建前工作
 
     // 检测是否需要修改游戏中平台配置文件
-    let { path, isTest } = platform.platformFiles;
+    let { path, isTest } = platform.platformFile;
     if (path && existsSync(path)) {
         let baseUrl = isTest ? 'https://quchuangtest.yundps.com' : 'https://quchuang.yundps.com';
         let domain = isTest ? 'https://mobiletest.yundps.com' : 'https://mobile.yundps.com';
