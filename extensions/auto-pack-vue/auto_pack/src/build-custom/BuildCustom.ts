@@ -1,10 +1,8 @@
-
 import { execSync } from 'child_process';
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import path from 'path';
 import { BasePlatform } from '../platforms/BasePlatform';
 import { AutoUploadPlatform, ChannelInfo, channelToName, EPlatform, GAMEPF } from '../platforms/PlatformConfig';
-import { DingdingBot } from '../utils/DingdingBot';
 import { FeiShuBot } from '../utils/FeiShuBot';
 import { LogReport } from '../utils/LogReport';
 import PackUtil from '../utils/PackUtil';
