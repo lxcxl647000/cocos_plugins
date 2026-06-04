@@ -21,6 +21,7 @@ export function beforeStartBuild(options: {
     //构建前工作
 
     // 检测是否需要修改游戏中平台配置文件
+    platform.modifyServer = false;
     let platformFile = platform.platformFile;
     if (platformFile.path && existsSync(platformFile.path)) {
         let baseUrl = platformFile.isTest ? 'https://quchuangtest.yundps.com' : 'https://quchuang.yundps.com';
@@ -42,6 +43,7 @@ export function beforeStartBuild(options: {
                 });
                 if (newBaseUrl && newDomain) {
                     writeFileSync(platformFile.path, fileContent, 'utf-8');
+                    platform.modifyServer = true;
                     platform.logHelper.log(`修改${platformFile.path}成功, ${newBaseUrl} , ${newDomain}`);
                 }
                 else {

@@ -35,6 +35,7 @@ export class BasePlatform {
     public gameConfigPath: string = "";
     public logHelper: LogHelper = null;
     public platformFile: { path: string, isTest: boolean } = { path: '', isTest: false };
+    public modifyServer: boolean = false;
 
     public constructor() {
     }
@@ -246,6 +247,7 @@ export class BasePlatform {
             let oprateStr = '';
             let channelName = channelToName[this.curPackChannel] || this.channelInfo.platform;
             let outputPath = '';
+            let serverName = '';
             if (isUpload) {
                 oprateStr = this.configData.dingTalkCustomContent_upload;
                 oprateType = '上传';
@@ -256,9 +258,12 @@ export class BasePlatform {
                 oprateStr = this.configData.dingTalkCustomContent_pack;
                 oprateType = '打包';
                 outputPath = path.join(this.outputPath, this.curPackChannel);
+                if (this.modifyServer && this.platformFile.path) {
+                    serverName = ` ##### 服务器：**${this.platformFile.isTest ? '测试服' : '正式服'}** \n`;
+                }
             }
             let bot = new DingdingBot(this.configData.dingTalkWebHook);
-            let msg = `#### **<font color='#e61a1a'>${oprateStr}</font>** \n #### 游戏名字：**<font color='#1E90FF'>${this.configData.gameName}</font>** \n ##### 游戏渠道：**${channelName}**\n ${versionStr} ##### 状态：**<font color='#00dd00'>${oprateType + result}</font>** \n ##### 资源包路径：${outputPath} \n ##### ${oprateType}时间：**${new Date().toLocaleString()}** \n`;
+            let msg = `#### **<font color='#e61a1a'>${oprateStr}</font>** \n #### 游戏名字：**<font color='#1E90FF'>${this.configData.gameName}</font>** \n ##### 游戏渠道：**${channelName}**\n ${versionStr} ##### 状态：**<font color='#00dd00'>${oprateType + result}</font>** \n ##### 资源包路径：${outputPath} \n ##### ${oprateType}时间：**${new Date().toLocaleString()}** \n${serverName}`;
             let title = `${this.configData.gameName}`;
             bot.pushMsgMarkdown(msg, title);
         }

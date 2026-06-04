@@ -6,12 +6,12 @@
 			"channel": "taobao-mini-game",
 			"upload": false,
 			"skip": false,
-			"needAutoPack": true,
+			"needAutoPack": false,
 			"appId": "3000000136119813",
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\HappyPullCat\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": true
+					"isTest": false
 				}
 			}
 		},
@@ -56,7 +56,7 @@
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\Cat_Eliminate\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": true
+					"isTest": false
 				}
 			}
 		},
@@ -101,7 +101,7 @@
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\BuddyGo\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": true
+					"isTest": false
 				}
 			}
 		},
