@@ -80,8 +80,8 @@ platforms:
         version: "1.0.0"
         remoteDir: "/Users/ywkj/Documents/cdnres/prodragon/tt"
         # 字节跳动上传后台登录需要的账号密码
-        account: "wujianfen@126.com"
-        password: "8288988fen"
+        account: ""
+        password: ""
 
     # oppo小游戏
     oppo: &oppo

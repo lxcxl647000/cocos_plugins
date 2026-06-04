@@ -22,7 +22,7 @@
     "*.yml",
     "*.sh"
   ],
-  "author": "wujianfen",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^18.11.18",

@@ -20,6 +20,7 @@ export class BasePlatform {
     public upload: boolean = false;
     public skipBuild: boolean = false;
     public logHelper: LogHelper = null;
+    public platformFiles: { path: string, isTest: boolean } = { path: '', isTest: false };
 
     public constructor() {
     }
@@ -38,6 +39,10 @@ export class BasePlatform {
         this.isDebug = options.project.debug || false;
         this.outputPath = path.join(outputpath, this.channelInfo.buildPath);
         this.logHelper = new LogHelper(path.join(this.outputPath, 'log'), options.configData.gameName);
+        if (options.project.platformFiles && options.project.platformFiles[this.curPackChannel]) {
+            this.platformFiles.path = options.project.platformFiles[this.curPackChannel].path || '';
+            this.platformFiles.isTest = options.project.platformFiles[this.curPackChannel].isTest || false;
+        }
         if (PackUtil.compareVersion(this.configData.engineVer, "3.0.0") >= 0) {
             this.isEngine3 = true;
         }

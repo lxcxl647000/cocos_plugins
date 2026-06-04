@@ -7,7 +7,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000136119813"
+			"appId": "3000000136119813",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\HappyPullCat\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "养个招财猫",
@@ -16,7 +22,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000132351722"
+			"appId": "3000000132351722",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Cat\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "萌宠连连看",
@@ -25,16 +37,28 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000141704164"
+			"appId": "3000000141704164",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Pet_Line\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "猫咪萌宠消除",
-			"path": "D:\\cocos_project\\Cat_Eliminate",
+			"path": "D:/cocos_project/Cat_Eliminate",
 			"channel": "taobao-mini-game",
-			"upload": true,
+			"upload": false,
 			"skip": false,
-			"needAutoPack": true,
-			"appId": "3000000136636894"
+			"needAutoPack": false,
+			"appId": "3000000136636894",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Cat_Eliminate\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			}
 		},
 		{
 			"name": "挪车大师",
@@ -43,7 +67,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000141704974"
+			"appId": "3000000141704974",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Parking_Master\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "合数专家",
@@ -52,7 +82,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000143834422"
+			"appId": "3000000143834422",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\SuperRelieveStressPipe\\assets\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "兄弟来闯关",
@@ -61,7 +97,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000143834423"
+			"appId": "3000000143834423",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\BuddyGo\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			}
 		},
 		{
 			"name": "箭头转转消",
@@ -70,7 +112,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000143834483"
+			"appId": "3000000143834483",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\ArrowEliminate\\assets\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "倒水大师",
@@ -79,7 +127,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000143833683"
+			"appId": "3000000143833683",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\PourTheWater\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "糖豆消消乐",
@@ -88,7 +142,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000137357221"
+			"appId": "3000000137357221",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\HappyEliminate\\Eliminate\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "小鱼碰碰消",
@@ -97,7 +157,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000141703714"
+			"appId": "3000000141703714",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Ocean_Eliminate\\assets\\script\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		},
 		{
 			"name": "全员打螺丝",
@@ -106,7 +172,13 @@
 			"upload": false,
 			"skip": false,
 			"needAutoPack": false,
-			"appId": "3000000143834991"
+			"appId": "3000000143834991",
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\ScrewInScrews\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			}
 		}
 	]
 }

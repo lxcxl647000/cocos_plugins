@@ -2,7 +2,7 @@
 
 import { ChildProcessWithoutNullStreams, spawn, exec } from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
-import { join } from 'path';
+import path, { join } from 'path';
 import { createApp, App, defineComponent } from 'vue';
 import os from 'os';
 import { checkTaobaoLogin, loginForTaobao } from '../../main';
@@ -19,8 +19,9 @@ interface PackProject {
     path: string,// Cocos项目根目录
     channel: string,// 指定打包对应渠道名称
     skip?: boolean,// 是否跳过cocos构建工程，直接使用导出工程
-    upload?: boolean// 是否需要上传
-    needAutoPack?: boolean// 是否需要进行自动构建上传
+    upload?: boolean,// 是否需要上传
+    needAutoPack?: boolean,// 是否需要进行自动构建上传
+    platformFiles: { [key: string]: { path: string, isTest: boolean } }// key平台名称与channel对应，value游戏工程中平台的配置文件
 }
 
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
@@ -94,8 +95,13 @@ module.exports = Editor.Panel.define({
                             openDilog('warn', 'warn', '请先添加自动化项目配置！', btnMap);
                             return;
                         }
+                        if (this.getAutoCount() === 0) {
+                            openDilog('warn', 'warn', '无自动化项目!');
+                            return;
+                        }
                         for (let task of this.taskList) {
-                            if (!task.path || !task.channel) {
+                            if (task.needAutoPack === false) continue;
+                            if (!task.appId || !task.path || !task.channel) {
                                 let str = '';
                                 if (!task.appId) {
                                     str += '未配置appId ';
@@ -109,10 +115,19 @@ module.exports = Editor.Panel.define({
                                 openDilog('warn', 'warn', `appId:${task.appId}${task.name}${str}请检查配置！`);
                                 return;
                             }
-                        }
-                        if (this.getAutoCount() === 0) {
-                            openDilog('warn', 'warn', '无自动化项目!');
-                            return;
+                            let platformFilepath = this.getPlatformFile(task);
+                            if (platformFilepath) {
+                                const normalizedPath = path.normalize(task.path);
+                                if (platformFilepath.indexOf(normalizedPath) < 0) {
+                                    openDilog('warn', 'warn', `appId:${task.appId}${task.name},${task.channel}配置不在项目路径中,请检查配置！`);
+                                    return;
+                                }
+                                let isTest = this.getPlatformFileServer(task);
+                                if (isTest && task.isUpload && !task.skip) {
+                                    openDilog('warn', 'warn', `appId:${task.appId}${task.name},项目构建为测试服不支持上传，请检查配置！`);
+                                    return;
+                                }
+                            }
                         }
                         if (this.isAutoPack) {
                             openDilog('warn', 'warn', '正在自动化，请稍后再试!');
@@ -209,6 +224,12 @@ module.exports = Editor.Panel.define({
                             upload: false,
                             skip: false,
                             needAutoPack: false,
+                            platformFiles: {
+                                'taobao-mini-game': {
+                                    path: '',
+                                    isTest: false
+                                }
+                            }
                         });
                         openDilog('info', 'add', '添加成功');
                     },
@@ -393,6 +414,40 @@ module.exports = Editor.Panel.define({
                         if (!flag) {
                             item.upload = false;
                             item.skip = false;
+                        }
+                    },
+                    setPlatformFile(item: PackProject, path: string) {
+                        if (!item.platformFiles) {
+                            item.platformFiles = {};
+                        }
+                        if (!item.platformFiles[item.channel]) {
+                            item.platformFiles[item.channel] = { path: '', isTest: false };
+                        }
+                        item.platformFiles[item.channel].path = path;
+                    },
+                    setPlatformFileServer(item: PackProject, isTest: boolean) {
+                        if (!item.platformFiles) {
+                            item.platformFiles = {};
+                        }
+                        if (!item.platformFiles[item.channel]) {
+                            item.platformFiles[item.channel] = { path: '', isTest: false };
+                        }
+                        item.platformFiles[item.channel].isTest = isTest;
+                    },
+                    getPlatformFile(item: PackProject) {
+                        if (item.platformFiles && item.platformFiles[item.channel]) {
+                            return item.platformFiles[item.channel].path || '';
+                        }
+                        else {
+                            return '';
+                        }
+                    },
+                    getPlatformFileServer(item: PackProject) {
+                        if (item.platformFiles && item.platformFiles[item.channel]) {
+                            return item.platformFiles[item.channel].isTest || false;
+                        }
+                        else {
+                            return false;
                         }
                     }
                 },

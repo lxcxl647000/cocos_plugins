@@ -13,8 +13,9 @@ export interface PackProject {
     version?: string,// 设置打包的版本号
     debug?: boolean,// 是否为测试包true:不是测试包,false:测试包
     skip?: boolean,// 是否跳过cocos构建工程，直接使用导出工程
-    upload?: boolean// 是否需要上传
-    needAutoPack?: boolean// 是否需要进行自动构建上传
+    upload?: boolean,// 是否需要上传
+    needAutoPack?: boolean,// 是否需要进行自动构建上传
+    platformFiles: { [key: string]: { path: string, isTest: boolean } },// 游戏项目中多平台配置文件，在构建前有可能会修改里面内容
 }
 
 class _Pack {
