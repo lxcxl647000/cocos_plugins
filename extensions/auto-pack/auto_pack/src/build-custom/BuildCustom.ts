@@ -1,7 +1,5 @@
-
 import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import { BasePlatform } from '../platforms/BasePlatform';
-import PackManager from '../pack/PackManager';
 export function beforeStartBuild(options: {
     platform: BasePlatform,//平台对象
 }, callback: Function) {
