@@ -33,8 +33,8 @@ export class BasePlatform {
     public isHotUpdate: boolean = false;
     public isHotUpLoad: boolean = false;
     public gameConfigPath: string = "";
-
     public logHelper: LogHelper = null;
+    public platformFile: { path: string, isTest: boolean } = { path: '', isTest: false };
 
     public constructor() {
     }
@@ -64,6 +64,10 @@ export class BasePlatform {
         this.isDebug = options.project.debug || false;
         this.outputPath = path.join(outputpath, this.channelInfo.buildPath);
         this.logHelper = new LogHelper(path.join(this.outputPath, 'log'), options.configData.gameName);
+        if (options.project.platformFiles && options.project.platformFiles[this.curPackChannel]) {
+            this.platformFile.path = options.project.platformFiles[this.curPackChannel].path || '';
+            this.platformFile.isTest = options.project.platformFiles[this.curPackChannel].isTest || false;
+        }
         if (PackUtil.compareVersion(this.configData.engineVer, "3.0.0") >= 0) {
             this.isEngine3 = true;
         }

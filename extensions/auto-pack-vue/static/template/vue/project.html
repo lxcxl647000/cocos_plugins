@@ -65,7 +65,6 @@
                 <ui-label slot="label">是否自动化</ui-label>
                 <ui-checkbox slot="content" :checked="item.needAutoPack"
                     @confirm="clickAutoPackToggle(item, $event.target.value)"></ui-checkbox>
-                <!-- @confirm="item.needAutoPack = $event.target.value"></ui-checkbox> -->
             </ui-prop>
 
             <ui-prop>
@@ -75,6 +74,18 @@
                     <option value="taobao-mini-game">taobao-mini-game</option>
                 </ui-select>
             </ui-prop>
+
+            <div style=" display: flex; align-items: center; margin-top: 10px;">
+                <ui-label slot="label" :value="`${item.channel}配置`"></ui-label>
+                <ui-file style="width: 50%; margin-left: 10px;" type="file" :value="getPlatformFile(item)"
+                    @confirm="setPlatformFile(item, $event.target.value)"></ui-file>
+                <ui-pro v-if="getPlatformFile(item)" style="margin-left: 10px;">
+                    <ui-checkbox :checked="!getPlatformFileServer(item)"
+                        @confirm="setPlatformFileServer(item, !$event.target.value)">正式服</ui-checkbox>
+                    <ui-checkbox :checked="getPlatformFileServer(item)"
+                        @confirm="setPlatformFileServer(item, $event.target.value)">测试服</ui-checkbox>
+                </ui-pro>
+            </div>
         </div>
     </div>
     <div style="margin-top: 20px;">

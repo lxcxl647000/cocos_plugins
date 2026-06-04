@@ -28,6 +28,7 @@ export interface PackProject {
     hotUpLoad?: boolean// 是否需要上传热更包配置
     upload?: boolean// 是否需要上传
     needAutoPack?: boolean// 是否需要进行自动构建上传
+    platformFiles: { [key: string]: { path: string, isTest: boolean } },// 游戏项目中多平台配置文件，在构建前有可能会修改里面内容
 }
 
 class _Pack {

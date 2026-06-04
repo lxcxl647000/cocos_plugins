@@ -19,7 +19,45 @@ export function beforeStartBuild(options: {
     bmsName?: string,//强制bmsname
     platform: BasePlatform,//平台对象
 }, callback: Function) {
+    let { platform } = options;
     //构建前工作
+
+    // 检测是否需要修改游戏中平台配置文件
+    let platformFile = platform.platformFile;
+    if (platformFile.path && existsSync(platformFile.path)) {
+        let baseUrl = platformFile.isTest ? 'https://quchuangtest.yundps.com' : 'https://quchuang.yundps.com';
+        let domain = platformFile.isTest ? 'https://mobiletest.yundps.com' : 'https://mobile.yundps.com';
+        try {
+            let fileContent = readFileSync(platformFile.path, 'utf-8');
+            if (fileContent) {
+                let newBaseUrl = '';
+                let newDomain = '';
+                fileContent = fileContent.replace(/(baseUrl|domain)\s*:\s*["'][^"']*["']/g, (match, p1) => {
+                    const newValue = p1 === 'baseUrl' ? baseUrl : domain;
+                    if (p1 === 'baseUrl') {
+                        newBaseUrl = newValue;
+                    }
+                    if (p1 === 'domain') {
+                        newDomain = newValue;
+                    }
+                    return `${p1}: "${newValue}"`;
+                });
+                if (newBaseUrl && newDomain) {
+                    writeFileSync(platformFile.path, fileContent, 'utf-8');
+                    platform.logHelper.log(`修改${platformFile.path}成功, ${newBaseUrl} , ${newDomain}`);
+                }
+                else {
+                    platform.logHelper.log(`修改${platformFile.path}失败,未匹配到baseUrl或domain`);
+                }
+            }
+            else {
+                platform.logHelper.log(`修改${platformFile.path}失败,文件不存在`);
+            }
+        } catch (error) {
+            platform.logHelper.log(`修改${platformFile.path}失败,${error}`);
+        }
+    }
+
     let launcherscene = path.join(options.projectDir, "assets/scene/Launcher.fire");
     if (existsSync(launcherscene)) {
         let launcher: any[] = JSON.parse(readFileSync(launcherscene, { encoding: 'utf-8' }));
@@ -36,10 +74,10 @@ export function beforeStartBuild(options: {
                 }
 
                 if (obj.hasOwnProperty("remoteConfig")) {
-                    obj['remoteConfig'] = options.platform.remoteConfig;
+                    obj['remoteConfig'] = platform.remoteConfig;
                 }
                 if (obj.hasOwnProperty("bmsVersion")) {
-                    obj['bmsVersion'] = options.platform.bmsVersion;
+                    obj['bmsVersion'] = platform.bmsVersion;
                     console.log('options.platform.bmsVersion', obj['bmsVersion'])
                 }
                 writeFileSync(launcherscene, JSON.stringify(launcher, null, "\t\t"), { encoding: 'utf8' });
@@ -65,26 +103,26 @@ export function beforeStartBuild(options: {
     let compressFire = path.join(options.projectDir, "settings", "ccc-png-auto-compress.json");
     if (existsSync(compressFire)) {
         let compressfile: any = JSON.parse(readFileSync(compressFire, { encoding: 'utf-8' }));
-        compressfile["enabled"] = !!options.platform.isCompress;
+        compressfile["enabled"] = !!platform.isCompress;
         writeFileSync(compressFire, JSON.stringify(compressfile, null, "\t\t"), { encoding: 'utf8' });
     }
     let ocFire = path.join(options.projectDir, "settings", "ccc-obfuscated-code.json");
     if (existsSync(ocFire)) {
         let ocssfile: any = JSON.parse(readFileSync(ocFire, { encoding: 'utf-8' }));
-        ocssfile["auto"] = !!options.platform.isOc;
+        ocssfile["auto"] = !!platform.isOc;
         writeFileSync(ocFire, JSON.stringify(ocssfile, null, "\t\t"), { encoding: 'utf8' });
     }
     if (options.platformsInfo.isNative) {
         let hotSettingFire = path.join(options.projectDir, "settings", "ccc-zz-hot-update.json");
         if (existsSync(hotSettingFire)) {
             let hotSettingFile: any = JSON.parse(readFileSync(hotSettingFire, { encoding: 'utf-8' }));
-            hotSettingFile["enabled"] = !!options.platform.isHotUpdate;
+            hotSettingFile["enabled"] = !!platform.isHotUpdate;
             if (options.platformsInfo.hotUpdateGenerateDir) {
                 hotSettingFile["outputPath"] = options.platformsInfo.hotUpdateGenerateDir;
             }
-            let jsbdefaultpath = path.join(options.platform.outputPath, `jsb-${options.platformsInfo.template}`);
+            let jsbdefaultpath = path.join(platform.outputPath, `jsb-${options.platformsInfo.template}`);
             hotSettingFile["jsbdefaultPath"] = jsbdefaultpath;
-            hotSettingFile["version"] = options.platform.version;
+            hotSettingFile["version"] = platform.version;
             writeFileSync(hotSettingFire, JSON.stringify(hotSettingFile, null, "\t\t"), { encoding: 'utf8' });
         }
 
@@ -108,7 +146,7 @@ export function beforeStartBuild(options: {
     }
 
 
-    if (options.platform.gameConfigPath && options.platform.gameConfigPath.startsWith("svn")) {
+    if (platform.gameConfigPath && platform.gameConfigPath.startsWith("svn")) {
         processSVNAndXLSX(options, () => {
             compressConfig(options);
             callback();
@@ -117,8 +155,8 @@ export function beforeStartBuild(options: {
         compressConfig(options);
         callback();
     }
-    if (options.platform.configData.hookPath) {
-        const hook = require(options.platform.configData.hookPath);
+    if (platform.configData.hookPath) {
+        const hook = require(platform.configData.hookPath);
         if (hook.beforeStartBuild) {
             hook.beforeStartBuild(options);
         }
