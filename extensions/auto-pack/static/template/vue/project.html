@@ -32,6 +32,8 @@
                 <ui-button style=" margin-left: 10px;" @confirm=" openLogDir(`${item.path}/build/log`)">
                     <ui-icon value="log"></ui-icon>
                 </ui-button>
+                <ui-button v-if="item.channel === 'taobao-mini-game'" style=" margin-left: 10px;"
+                    @confirm=" getTaoBaoDebugUrl(item.appId)">复制淘宝线上Debug版本链接</ui-button>
             </div>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
@@ -88,6 +90,7 @@
             </div>
         </div>
     </div>
+
     <div style="margin-top: 20px;">
         <ui-button @confirm="startAutoPack">开始</ui-button>
         <ui-label style="margin-left: 10px;">{{`总共 : ${taskList.length}`}}</ui-label>
@@ -95,6 +98,18 @@
         <ui-label style="margin-left: 10px;">{{`构建 : ${getPackCount()}`}}</ui-label>
         <ui-label style="margin-left: 10px;">{{`上传 : ${getUploadCount()}`}}</ui-label>
     </div>
+
+    <div v-if="qrCodeUrl!==''" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+        <div
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);display: flex; flex-direction: column; align-items: center;">
+            <ui-qrcode :value="qrCodeUrl"></ui-qrcode>
+            <div style="margin-top: 30px;">
+                <ui-button @confirm=" closeQrCode()" style="width: 32px; height: 32px;">X</ui-button>
+            </div>
+        </div>
+    </div>
+
     <div v-if="isAutoPack || isCheckLogin" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
                 background-color: rgba(0, 0, 0, 0.3); z-index: 9999;">
         <ui-loading v-if="isAutoPack"

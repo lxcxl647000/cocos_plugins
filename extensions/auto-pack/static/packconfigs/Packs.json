@@ -34,14 +34,14 @@
 			"name": "萌宠连连看",
 			"path": "D:/cocos_project/Pet_Line",
 			"channel": "taobao-mini-game",
-			"upload": false,
-			"skip": false,
-			"needAutoPack": false,
+			"upload": true,
+			"skip": true,
+			"needAutoPack": true,
 			"appId": "3000000141704164",
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\Pet_Line\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": false
+					"isTest": true
 				}
 			}
 		},
@@ -49,14 +49,14 @@
 			"name": "猫咪萌宠消除",
 			"path": "D:/cocos_project/Cat_Eliminate",
 			"channel": "taobao-mini-game",
-			"upload": false,
-			"skip": false,
-			"needAutoPack": false,
+			"upload": true,
+			"skip": true,
+			"needAutoPack": true,
 			"appId": "3000000136636894",
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\Cat_Eliminate\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": false
+					"isTest": true
 				}
 			}
 		},
@@ -176,7 +176,7 @@
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\ScrewInScrews\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": false
+					"isTest": true
 				}
 			}
 		}

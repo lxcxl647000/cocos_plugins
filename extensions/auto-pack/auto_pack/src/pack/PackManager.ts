@@ -185,11 +185,11 @@ export default class PackManager {
         this._failPackProjects.push(name);
     }
 
-    private _successUploads: string[] = [];
+    private _successUploads: BasePlatform[] = [];
     private _failUploads: string[] = [];
     private _totalUploads = 0;
-    public addSuccessUpload(name: string) {
-        this._successUploads.push(name);
+    public addSuccessUpload(platform: BasePlatform) {
+        this._successUploads.push(platform);
         this._checkFinishUpload();
     }
     public addFailUpload(name: string) {
@@ -202,7 +202,7 @@ export default class PackManager {
             let successStr = 'success upload:' + '\n';
             let failStr = 'fail upload:' + '\n';
             for (let i = 0; i < this._successUploads.length; i++) {
-                successStr += this._successUploads[i] + '\n';
+                successStr += `${this._successUploads[i].configData.gameName}, DebugUrl: ${this._successUploads[i].getDebugUrl()}\n`;
             }
             PackManager.ins.logHelper.log(successStr);
 
