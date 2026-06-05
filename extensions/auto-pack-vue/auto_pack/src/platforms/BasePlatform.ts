@@ -7,6 +7,7 @@ import { ChannelInfo, channelToName, IPackConfig } from './PlatformConfig';
 import PackManager, { PackProject } from '../pack/PackManager';
 import LogHelper from '../pack/LogHelper';
 import { DingdingBot } from '../utils/DingdingBot';
+import * as QRCode from 'qrcode';
 export class BasePlatform {
     public configData: IPackConfig = null!;
     public channelInfo: ChannelInfo = null!;
@@ -36,6 +37,7 @@ export class BasePlatform {
     public logHelper: LogHelper = null;
     public platformFile: { path: string, isTest: boolean } = { path: '', isTest: false };
     public modifyServer: boolean = false;
+    public isPostToDingTalk: boolean = false;
 
     public constructor() {
     }
@@ -43,6 +45,7 @@ export class BasePlatform {
         configData: IPackConfig,
         project: PackProject,
     }) {
+        this.isPostToDingTalk = options.project.postToDingTalk || false;
         this.gameConfigPath = options.project.svnConfigPath || "";
         this.isHotUpdate = options.project.hotUpdate || false;
         this.isHotUpLoad = options.project.hotUpLoad || false;
@@ -240,19 +243,25 @@ export class BasePlatform {
         fs.writeFileSync(backPath, JSON.stringify(backData, null, "\t"), { encoding: 'utf8' });
     }
 
-    public postToDingTalk(result: string, isUpload: boolean, version?: string) {
-        if (this.configData.notifyDingTalk && this.configData.dingTalkWebHook && !this.isSkipNotify) {
+    public getDebugUrl(): string {
+        return '';
+    }
+
+    public async postToDingTalk(result: string, isUpload: boolean, version?: string) {
+        if (this.isPostToDingTalk && this.configData.notifyDingTalk && this.configData.dingTalkWebHook && !this.isSkipNotify) {
             let oprateType = '';
             let versionStr = '';
             let oprateStr = '';
             let channelName = channelToName[this.curPackChannel] || this.channelInfo.platform;
             let outputPath = '';
             let serverName = '';
+            let debugUrl = '';
             if (isUpload) {
                 oprateStr = this.configData.dingTalkCustomContent_upload;
                 oprateType = '上传';
                 versionStr = `##### ${oprateType}版本：**${version}** \n`;
                 outputPath = channelName + "后台";
+                debugUrl = this.getDebugUrl();
             }
             else {
                 oprateStr = this.configData.dingTalkCustomContent_pack;
@@ -263,7 +272,30 @@ export class BasePlatform {
                 }
             }
             let bot = new DingdingBot(this.configData.dingTalkWebHook);
-            let msg = `#### **<font color='#e61a1a'>${oprateStr}</font>** \n #### 游戏名字：**<font color='#1E90FF'>${this.configData.gameName}</font>** \n ##### 游戏渠道：**${channelName}**\n ${versionStr} ##### 状态：**<font color='#00dd00'>${oprateType + result}</font>** \n ##### 资源包路径：${outputPath} \n ##### ${oprateType}时间：**${new Date().toLocaleString()}** \n${serverName}`;
+            let msg = `#### **<font color='#e61a1a'>${oprateStr}</font>** \n` +
+                ` #### 游戏名字：**<font color='#1E90FF'>${this.configData.gameName}</font>** \n` +
+                ` ##### 游戏渠道：**${channelName}**\n` +
+                ` ${versionStr}` +
+                ` ##### 状态：**<font color='#00dd00'>${oprateType + result}</font>** \n` +
+                ` ##### 资源包路径：${outputPath} \n` +
+                ` ##### ${oprateType}时间：**${new Date().toLocaleString()}** \n` +
+                `${serverName}`;
+
+            if (debugUrl) {
+                msg += `${debugUrl}\n`;
+                try {
+                    let base64Image = await QRCode.toDataURL(debugUrl, {
+                        width: 300,       // 二维码宽度
+                        margin: 2,        // 边距
+                        color: { dark: '#000000', light: '#ffffff' }
+                    });
+                    msg += `##### 请使用手机淘宝扫描下方二维码: \n` +
+                        `![预览二维码](${base64Image})\n`;
+                } catch (err) {
+                    this.logHelper.error(`生成或推送二维码时发生错误: ${err}`);
+                }
+            }
+
             let title = `${this.configData.gameName}`;
             bot.pushMsgMarkdown(msg, title);
         }

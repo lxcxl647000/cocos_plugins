@@ -19,9 +19,10 @@ interface PackProject {
     path: string,// Cocos项目根目录
     channel: string,// 指定打包对应渠道名称
     skip?: boolean,// 是否跳过cocos构建工程，直接使用导出工程
-    upload?: boolean// 是否需要上传
-    needAutoPack?: boolean// 是否需要进行自动构建上传
-    platformFiles: { [key: string]: { path: string, isTest: boolean } }// key平台名称与channel对应，value游戏工程中平台的配置文件
+    upload?: boolean,// 是否需要上传
+    needAutoPack?: boolean,// 是否需要进行自动构建上传
+    platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
+    postToDingTalk: boolean,// 是否推送钉钉
 }
 
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
@@ -81,11 +82,13 @@ module.exports = Editor.Panel.define({
                     return {
                         taskList: taskList,
                         isAutoPack: false,
-                        isCheckLogin: false
+                        isCheckLogin: false,
+                        qrCodeUrl: '',
                     };
                 },
                 methods: {
                     startAutoPack() {
+                        let testServerWarns: string = '';
                         if (!this.taskList || this.taskList.length === 0) {
                             let btnMap = new Map<string, Function>();
                             btnMap.set('add', () => {
@@ -123,9 +126,8 @@ module.exports = Editor.Panel.define({
                                     return;
                                 }
                                 let isTest = this.getPlatformFileServer(task);
-                                if (isTest && task.isUpload && !task.skip) {
-                                    openDilog('warn', 'warn', `appId:${task.appId}${task.name},项目构建为测试服不支持上传，请检查配置！`);
-                                    return;
+                                if (isTest && task.upload && !task.skip) {
+                                    testServerWarns += `注意！！${task.appId}：${task.name}，使用的测试服！！\n`
                                 }
                             }
                         }
@@ -209,6 +211,9 @@ module.exports = Editor.Panel.define({
                             }
                         }
                         msg += `自动化：${autoCount}个，构建：${packCount}个，上传：${uploadCount}个\n`;
+                        if (testServerWarns) {
+                            msg += testServerWarns;
+                        }
                         let btnMap = new Map<string, Function>();
                         btnMap.set('ok', () => {
                             checkTaobao(() => { autoPack(); });
@@ -229,7 +234,8 @@ module.exports = Editor.Panel.define({
                                     path: '',
                                     isTest: false
                                 }
-                            }
+                            },
+                            postToDingTalk: true
                         });
                         openDilog('info', 'add', '添加成功');
                     },
@@ -448,6 +454,46 @@ module.exports = Editor.Panel.define({
                         }
                         else {
                             return false;
+                        }
+                    },
+                    getTaoBaoDebugUrl(appId: string) {
+                        this.isCheckLogin = true;
+                        let version = '';
+                        let sp: ChildProcessWithoutNullStreams = spawn("tbopen", ['app', '-a', appId], { shell: true });
+                        sp.stdout.setEncoding('utf8');
+                        sp.stdout.on('data', (data) => {
+                            console.log(`getTaoBaoDebugUrl stdout ${data.toString()}`);
+                            let str: string = data.trim();
+                            let arr = str.split('最新线上版本:');
+                            version = arr[1].trim();
+                        });
+                        sp.stderr.on('data', (data) => {
+                            console.log(`getTaoBaoDebugUrl stderr ${data.toString()}`);
+                        })
+                        sp.on('exit', async (code, data) => {
+                            this.isCheckLogin = false;
+                            if (version) {
+                                console.log(`getTaoBaoDebugUrl suscess ${data}`);
+                                let url = `https://m.duanqu.com?_ariver_appid=${appId}&nbsv=${version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
+                                this.qrCodeUrl = url;
+                            }
+                            else {
+                                openDilog('error', '失败', '复制链接失败!');
+                            }
+                        });
+                    },
+                    closeQrCode() {
+                        this.qrCodeUrl = '';
+                    },
+                    async copyLink() {
+                        if (this.qrCodeUrl !== '') {
+                            try {
+                                await navigator.clipboard.writeText(this.qrCodeUrl);
+                                openDilog('info', '完成', `复制链接成功，可粘贴使用！`);
+
+                            } catch (error) {
+                                openDilog('error', '失败', `复制链接失败! ${error}`);
+                            }
                         }
                     }
                 },

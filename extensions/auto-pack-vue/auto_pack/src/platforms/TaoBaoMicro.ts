@@ -4,21 +4,22 @@ import path from "path";
 import PackManager from "../pack/PackManager";
 import fs from 'fs';
 export class TaoBaoMicro extends BasePlatform {
-    public QRCodeURL: string = "";
+    private _version: string = '';
     public async afterBuildFinish() {
         if (this.upload) {
-            let version = '';
             let outPath = path.join(this.outputPath, this.curPackChannel);
             this.logHelper.log('start upload get version');
 
             let uploadSuccess = () => {
-                PackManager.ins.addSuccessUpload(this.configData.gameName);
-                this.postToDingTalk('成功', true, version);
+                PackManager.ins.addSuccessUpload(this);
+                this.postToDingTalk('成功', true, this._version);
+                let debugUrl = this.getDebugUrl();
+                this.logHelper.log(`Debug Url is :${debugUrl}`);
                 this.logHelper.saveLog();
             };
             let uploadFail = () => {
                 PackManager.ins.addFailUpload(this.configData.gameName);
-                this.postToDingTalk('失败，查看日志失败详情', true, version);
+                this.postToDingTalk('失败，查看日志失败详情', true, this._version);
                 this.logHelper.saveLog();
             };
 
@@ -28,19 +29,19 @@ export class TaoBaoMicro extends BasePlatform {
                     (data: string) => {
                         let str: string = data.trim();
                         let arr = str.split('最新线上版本:');
-                        version = arr[1].trim();
+                        this._version = arr[1].trim();
                     },
                     () => {
-                        if (version) {
-                            let versionArr = version.split('.');
-                            version = versionArr[0] + '.' + versionArr[1] + '.' + (+versionArr[2] + 1);
+                        if (this._version) {
+                            let versionArr = this._version.split('.');
+                            this._version = versionArr[0] + '.' + versionArr[1] + '.' + (+versionArr[2] + 1);
 
                             // 上传游戏之前设置game.json文件高新能模式
                             this._setHighPerformanceMode();
 
                             // 上传小游戏
-                            this.logHelper.log(`start upload version:${version}`);
-                            this._spawn(["upload", "--input", outPath, "--appId", this.channelInfo.appid, "--type", "minigame", "--version", version], null,
+                            this.logHelper.log(`start upload version:${this._version}`);
+                            this._spawn(["upload", "--input", outPath, "--appId", this.channelInfo.appid, "--type", "minigame", "--version", this._version], null,
                                 (data: any) => {
                                     uploadSuccess();
                                 },
@@ -138,5 +139,10 @@ export class TaoBaoMicro extends BasePlatform {
 
     public async beforeStartBuild() {
         await super.beforeStartBuild();
+    }
+
+    public getDebugUrl(): string {
+        // 因为淘宝官方还没有实现tbopen preview的cli功能，所以只能用tbopen upload的以后拼接链接加上vconsole=true在真机上看打印
+        return `https://m.duanqu.com?_ariver_appid=${this.channelInfo.appid}&nbsv=${this._version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`;
     }
 }

@@ -29,6 +29,7 @@ export interface PackProject {
     upload?: boolean// 是否需要上传
     needAutoPack?: boolean// 是否需要进行自动构建上传
     platformFiles: { [key: string]: { path: string, isTest: boolean } },// 游戏项目中多平台配置文件，在构建前有可能会修改里面内容
+    postToDingTalk: boolean, // 是否推送钉钉
 }
 
 class _Pack {
@@ -209,11 +210,11 @@ export default class PackManager {
         this._failPackProjects.push(name);
     }
 
-    private _successUploads: string[] = [];
+    private _successUploads: BasePlatform[] = [];
     private _failUploads: string[] = [];
     private _totalUploads = 0;
-    public addSuccessUpload(name: string) {
-        this._successUploads.push(name);
+    public addSuccessUpload(platform: BasePlatform) {
+        this._successUploads.push(platform);
         this._checkFinishUpload();
     }
     public addFailUpload(name: string) {
@@ -226,7 +227,7 @@ export default class PackManager {
             let successStr = 'success upload:' + '\n';
             let failStr = 'fail upload:' + '\n';
             for (let i = 0; i < this._successUploads.length; i++) {
-                successStr += this._successUploads[i] + '\n';
+                successStr += `${this._successUploads[i].configData.gameName}, DebugUrl: ${this._successUploads[i].getDebugUrl()}\n`;
             }
             PackManager.ins.logHelper.log(successStr);
 
