@@ -456,7 +456,7 @@ module.exports = Editor.Panel.define({
                             return false;
                         }
                     },
-                    async getTaoBaoDebugUrl(appId: string) {
+                    getTaoBaoDebugUrl(appId: string) {
                         this.isCheckLogin = true;
                         let version = '';
                         let sp: ChildProcessWithoutNullStreams = spawn("tbopen", ['app', '-a', appId], { shell: true });
@@ -476,13 +476,6 @@ module.exports = Editor.Panel.define({
                                 console.log(`getTaoBaoDebugUrl suscess ${data}`);
                                 let url = `https://m.duanqu.com?_ariver_appid=${appId}&nbsv=${version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
                                 this.qrCodeUrl = url;
-                                try {
-                                    await navigator.clipboard.writeText(url);
-                                    openDilog('info', '完成', `复制链接成功，可粘贴使用！`);
-
-                                } catch (error) {
-                                    openDilog('error', '失败', `复制链接失败! ${error}`);
-                                }
                             }
                             else {
                                 openDilog('error', '失败', '复制链接失败!');
@@ -491,6 +484,17 @@ module.exports = Editor.Panel.define({
                     },
                     closeQrCode() {
                         this.qrCodeUrl = '';
+                    },
+                    async copyLink() {
+                        if (this.qrCodeUrl !== '') {
+                            try {
+                                await navigator.clipboard.writeText(this.qrCodeUrl);
+                                openDilog('info', '完成', `复制链接成功，可粘贴使用！`);
+
+                            } catch (error) {
+                                openDilog('error', '失败', `复制链接失败! ${error}`);
+                            }
+                        }
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

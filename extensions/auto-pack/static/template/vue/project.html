@@ -33,7 +33,7 @@
                     <ui-icon value="log"></ui-icon>
                 </ui-button>
                 <ui-button v-if="item.channel === 'taobao-mini-game'" style=" margin-left: 10px;"
-                    @confirm=" getTaoBaoDebugUrl(item.appId)">复制淘宝线上Debug版本链接</ui-button>
+                    @confirm=" getTaoBaoDebugUrl(item.appId)">淘宝线上Debug版</ui-button>
             </div>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
@@ -107,9 +107,13 @@
         <div
             style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);display: flex; flex-direction: column; align-items: center;">
             <ui-qrcode :value="qrCodeUrl"></ui-qrcode>
-            <div style="margin-top: 30px;">
-                <ui-button @confirm=" closeQrCode()" style="width: 32px; height: 32px;">X</ui-button>
+            <div style="display: flex; align-items: center; margin-top: 10px; width: 100%;">
+                <ui-label :value="qrCodeUrl"
+                    style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                </ui-label>
+                <ui-button @confirm="copyLink()" style="margin-left: 8px;">复制</ui-button>
             </div>
+            <ui-button @confirm=" closeQrCode()" style="margin-top: 10px;">关闭</ui-button>
         </div>
     </div>
 
