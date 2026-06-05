@@ -16,6 +16,7 @@ export interface PackProject {
     upload?: boolean,// 是否需要上传
     needAutoPack?: boolean,// 是否需要进行自动构建上传
     platformFiles: { [key: string]: { path: string, isTest: boolean } },// 游戏项目中多平台配置文件，在构建前有可能会修改里面内容
+    postToDingTalk: boolean, // 是否推送钉钉
 }
 
 class _Pack {

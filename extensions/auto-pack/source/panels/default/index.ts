@@ -21,7 +21,8 @@ interface PackProject {
     skip?: boolean,// 是否跳过cocos构建工程，直接使用导出工程
     upload?: boolean,// 是否需要上传
     needAutoPack?: boolean,// 是否需要进行自动构建上传
-    platformFiles: { [key: string]: { path: string, isTest: boolean } }// key平台名称与channel对应，value游戏工程中平台的配置文件
+    platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
+    postToDingTalk: boolean,// 是否推送钉钉
 }
 
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
@@ -233,7 +234,8 @@ module.exports = Editor.Panel.define({
                                     path: '',
                                     isTest: false
                                 }
-                            }
+                            },
+                            postToDingTalk: true
                         });
                         openDilog('info', 'add', '添加成功');
                     },

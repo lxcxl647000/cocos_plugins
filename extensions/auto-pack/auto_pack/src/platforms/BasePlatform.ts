@@ -23,6 +23,7 @@ export class BasePlatform {
     public logHelper: LogHelper = null;
     public platformFile: { path: string, isTest: boolean } = { path: '', isTest: false };
     public modifyServer: boolean = false;
+    public isPostToDingTalk: boolean = false;
 
     public constructor() {
     }
@@ -30,6 +31,7 @@ export class BasePlatform {
         configData: IPackConfig,
         project: PackProject,
     }) {
+        this.isPostToDingTalk = options.project.postToDingTalk || false;
         this.skipBuild = options.project.skip || false;
         this.upload = options.project.upload || false;
         this.configData = options.configData;
@@ -217,7 +219,7 @@ export class BasePlatform {
     }
 
     public async postToDingTalk(result: string, isUpload: boolean, version?: string) {
-        if (this.configData.notifyDingTalk && this.configData.dingTalkWebHook) {
+        if (this.isPostToDingTalk && this.configData.notifyDingTalk && this.configData.dingTalkWebHook) {
             let oprateType = '';
             let versionStr = '';
             let oprateStr = '';

@@ -38,7 +38,6 @@
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
                 <ui-label slot="label">工程路径</ui-label>
-                <!-- 双向绑定到当前循环项的 path -->
                 <ui-file style="width: 70%; margin-left: 10px;" type="directory" :value="item.path"
                     @confirm="item.path = $event.target.value"></ui-file>
             </div>
@@ -51,8 +50,13 @@
             </div>
 
             <ui-prop>
+                <ui-label slot="label">是否推送钉钉</ui-label>
+                <ui-checkbox slot="content" :checked="item.postToDingTalk"
+                    @confirm="item.postToDingTalk = $event.target.value"></ui-checkbox>
+            </ui-prop>
+
+            <ui-prop>
                 <ui-label slot="label">是否上传</ui-label>
-                <!-- 双向绑定到当前循环项的 upload -->
                 <ui-checkbox slot="content" :checked="item.upload"
                     @confirm="item.upload = $event.target.value"></ui-checkbox>
             </ui-prop>
@@ -71,7 +75,6 @@
 
             <ui-prop>
                 <ui-label slot="label">构建平台</ui-label>
-                <!-- 双向绑定到当前循环项的 channel -->
                 <ui-select slot="content" :value="item.channel" @confirm="item.channel = $event.target.value">
                     <option value="taobao-mini-game">taobao-mini-game</option>
                 </ui-select>

@@ -13,7 +13,8 @@
 					"path": "D:\\cocos_project\\HappyPullCat\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "养个招财猫",
@@ -28,7 +29,8 @@
 					"path": "D:\\cocos_project\\Cat\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "萌宠连连看",
@@ -43,22 +45,24 @@
 					"path": "D:\\cocos_project\\Pet_Line\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": true
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "猫咪萌宠消除",
 			"path": "D:/cocos_project/Cat_Eliminate",
 			"channel": "taobao-mini-game",
-			"upload": true,
-			"skip": true,
-			"needAutoPack": true,
+			"upload": false,
+			"skip": false,
+			"needAutoPack": false,
 			"appId": "3000000136636894",
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\Cat_Eliminate\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": true
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "挪车大师",
@@ -73,7 +77,8 @@
 					"path": "D:\\cocos_project\\Parking_Master\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "合数专家",
@@ -88,7 +93,8 @@
 					"path": "D:\\cocos_project\\SuperRelieveStressPipe\\assets\\common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "兄弟来闯关",
@@ -103,7 +109,8 @@
 					"path": "D:\\cocos_project\\BuddyGo\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "箭头转转消",
@@ -118,7 +125,8 @@
 					"path": "D:\\cocos_project\\ArrowEliminate\\assets\\common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "倒水大师",
@@ -133,7 +141,8 @@
 					"path": "D:\\cocos_project\\PourTheWater\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "糖豆消消乐",
@@ -148,7 +157,8 @@
 					"path": "D:\\cocos_project\\HappyEliminate\\Eliminate\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "小鱼碰碰消",
@@ -163,7 +173,8 @@
 					"path": "D:\\cocos_project\\Ocean_Eliminate\\assets\\script\\common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": false
 				}
-			}
+			},
+			"postToDingTalk": true
 		},
 		{
 			"name": "全员打螺丝",
@@ -178,7 +189,8 @@
 					"path": "D:\\cocos_project\\ScrewInScrews\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": true
 				}
-			}
+			},
+			"postToDingTalk": true
 		}
 	]
 }
