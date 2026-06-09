@@ -1,16 +1,17 @@
 {
     "$schema": "./@types/schema/package/index.json",
     "package_version": 2,
-    "name": "auto-pack_update-tool_switch",
+    "name": "export-auto-pack",
     "version": "1.0.0",
     "author": "Cocos Creator",
     "editor": ">=3.8.6",
     "scripts": {
         "preinstall": "node ./scripts/preinstall.js",
         "build": "tsc",
-        "watch": "tsc -w"
+        "watch": "tsc -w",
+        "zip": "node ./scripts/compressToZip.js"
     },
-    "description": "i18n:auto-pack_update-tool_switch.description",
+    "description": "i18n:export-auto-pack.description",
     "main": "./dist/main.js",
     "devDependencies": {
         "@cocos/creator-types": "^3.8.6",
@@ -20,17 +21,21 @@
     "contributions": {
         "menu": [
             {
-                "path": "i18n:auto-pack_update-tool_switch",
-                "label": "auto-pack插件更新自动化工具按钮开关",
-                "message": "update-tool-tool_switch"
+                "path": "export-auto-pack",
+                "label": "导出auto-pack插件",
+                "message": "export-auto-pack"
             }
         ],
         "messages": {
-            "update-tool-tool_switch": {
+            "export-auto-pack": {
                 "methods": [
-                    "updateToolSwitch"
+                    "exportAutoPack"
                 ]
             }
         }
+    },
+    "dependencies": {
+        "@types/archiver": "^8.0.0",
+        "archiver": "^8.0.0"
     }
 }
