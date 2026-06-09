@@ -125,7 +125,7 @@
                     <div style="display: flex; align-items: center;">
                         <ui-label slot="label">主包压缩类型</ui-label>
                         <ui-select slot="content" :value="item.mainBundleCompressionType"
-                            @confirm="item.mainBundleCompressionType = $event.target.value">
+                            @confirm="item.mainBundleCompressionType = $event.target.value" style="margin-left: 10px;">
                             <option value="none">无压缩</option>
                             <option value="merge_dep">合并依赖</option>
                             <option value="merge_all_json">合并所有JSON</option>
