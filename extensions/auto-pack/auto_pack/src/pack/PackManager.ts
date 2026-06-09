@@ -1,105 +1,55 @@
-import fs, { existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import yaml from 'yamljs';
 import { BasePlatform } from '../platforms/BasePlatform';
-import { IPackConfig, supportPlatform } from '../platforms/PlatformConfig';
-import PackUtil from '../utils/PackUtil';
+import { supportPlatform } from '../platforms/PlatformConfig';
 import LogHelper from './LogHelper';
 
 export interface PackProject {
+    appId: string,
     name: string,
     path: string,// Cocos项目根目录
     channel: string,// 指定打包对应渠道名称
-    version?: string,// 设置打包的版本号
-    debug?: boolean,// 是否为测试包true:不是测试包,false:测试包
-    skip?: boolean,// 是否跳过cocos构建工程，直接使用导出工程
-    upload?: boolean,// 是否需要上传
-    needAutoPack?: boolean,// 是否需要进行自动构建上传
-    platformFiles: { [key: string]: { path: string, isTest: boolean } },// 游戏项目中多平台配置文件，在构建前有可能会修改里面内容
-    postToDingTalk: boolean, // 是否推送钉钉
+    skip: boolean,// 是否跳过cocos构建工程，直接使用导出工程
+    upload: boolean,// 是否需要上传
+    needAutoPack: boolean,// 是否需要进行自动构建上传
+    platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
+    postToDingTalk: boolean,// 是否推送钉钉
+    md5Cache: boolean,
+    sourceMaps: boolean,
+    enableHighPerformanceMode: boolean,//是否开启高性能模式
+    customConfigPath: string,//自定义构建模板json路径
+    mainBundleCompressionType: string,//主包压缩类型  无压缩： "none"  合并依赖： "merge_dep"  合并所有JSON： "merge_all_json"  ZIP： "zip"  小游戏分包： "subpackage"
+    dingTalkWebHook: string,// 钉钉机器人的webhook地址
+    dingTalkCustomContent_pack: string,// 钉钉机器人的自定义内容
+    dingTalkCustomContent_upload: string,// 钉钉机器人的自定义内容
+    enginePath: string,// cocos引擎路径
+    engineVer: string,// cocos引擎版本
 }
 
 class _Pack {
-    public configData: IPackConfig = null!;
-    public curPackChannel: string = "";
-    public projectDir: string = "";
-    public isDebug: boolean = false;
-
     public curPlatform: BasePlatform = null!;
     public constructor() {
 
     }
     /**
      * 初始化必要参数
-     * @param projectDir 项目目录
      * @param packChannel 打包渠道
      * @returns 
      */
     public init(project: PackProject) {
-        let projectDir = project.path;
         let packChannel = project.channel;
-        let isdebug = project.debug || false;
-
-        this.isDebug = isdebug;
-        let configyml = PackUtil.isIOS ? "pack.configios.yml" : "pack.config.yml";
-        let configPath = path.join(projectDir, "settings", configyml);
-        if (!fs.existsSync(configPath)) {
-            PackManager.ins.logHelper.error(`${project.name} config file does't exits：${configPath}`);
-            return;
-        }
-        this.projectDir = projectDir;
-        this.configData = yaml.parse(fs.readFileSync(configPath).toString());
-        const channelInfo = this.configData.platforms[packChannel];
-        if (!channelInfo) {
-            PackManager.ins.logHelper.error(`${this.configData.gameName} current channel ${packChannel} does't extis, please check ${configyml}`);
-            return;
-        }
-        const scripts = supportPlatform[packChannel] || (channelInfo.channel ? supportPlatform[channelInfo.channel] : null);
+        const scripts = supportPlatform[packChannel] || null;
         if (!scripts) {
-            PackManager.ins.logHelper.error(`${this.configData.gameName} current channel ${packChannel} pack script does't extis, please confirm`);
+            PackManager.ins.logHelper.error(`${project.name} current channel ${packChannel} pack script does't extis, please confirm`);
             return;
         }
-        this.checkCustomEngine();
         this.curPlatform = new scripts();
-        this.curPlatform.init({ configData: this.configData, project: project });
+        this.curPlatform.init(project);
 
         this.startBuild(packChannel);
     }
 
     public startBuild(packChannel: string) {
         this.curPlatform.startBuild();
-    }
-
-    /**
-     * 检测是否有自定义引擎路径，有则修改local/settings.json下的配置
-     */
-    public checkCustomEngine() {
-        if (this.configData.customJsEnginePath || this.configData.customCppEnginePath) {
-            let configPath = path.join(this.projectDir, "local");
-            let settingjsonpath = path.join(configPath, "settings.json");
-            if (!existsSync(settingjsonpath)) {
-                PackUtil.mkdirSync(configPath);//没有对应输出目录则创建目录
-                let obj = {
-                    "use-global-engine-setting": false,
-                    "use-default-js-engine": !this.configData.customJsEnginePath,
-                    "js-engine-path": this.configData.customJsEnginePath ? this.configData.customJsEnginePath : "",
-                    "use-default-cpp-engine": !this.configData.customCppEnginePath,
-                    "cpp-engine-path": this.configData.customCppEnginePath ? this.configData.customCppEnginePath : "",
-                }
-                writeFileSync(settingjsonpath, JSON.stringify(obj, null, "\t"), { encoding: 'utf-8' });
-            } else {
-                let configinfo = JSON.parse(readFileSync(settingjsonpath, { encoding: 'utf-8' }));
-                configinfo["use-global-engine-setting"] = false;
-                configinfo["use-default-js-engine"] = !this.configData.customJsEnginePath;
-                configinfo["use-default-cpp-engine"] = !this.configData.customCppEnginePath;
-                if (this.configData.customJsEnginePath)
-                    configinfo["js-engine-path"] = this.configData.customJsEnginePath;
-                if (this.configData.customCppEnginePath) {
-                    configinfo["cpp-engine-path"] = this.configData.customCppEnginePath;
-                }
-                writeFileSync(settingjsonpath, JSON.stringify(configinfo, null, "\t"), { encoding: 'utf-8' });
-            }
-        }
     }
 }
 
@@ -203,7 +153,7 @@ export default class PackManager {
             let successStr = 'success upload:' + '\n';
             let failStr = 'fail upload:' + '\n';
             for (let i = 0; i < this._successUploads.length; i++) {
-                successStr += `${this._successUploads[i].configData.gameName}, DebugUrl: ${this._successUploads[i].getDebugUrl()}\n`;
+                successStr += `${this._successUploads[i].project.name}, DebugUrl: ${this._successUploads[i].getDebugUrl()}\n`;
             }
             PackManager.ins.logHelper.log(successStr);
 

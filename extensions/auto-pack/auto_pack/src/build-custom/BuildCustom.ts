@@ -1,9 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import { BasePlatform } from '../platforms/BasePlatform';
-export function beforeStartBuild(options: {
-    platform: BasePlatform,//平台对象
-}, callback: Function) {
-    let { platform } = options;
+export function beforeStartBuild(platform: BasePlatform, callback: Function) {
     //构建前工作
 
     // 检测是否需要修改游戏中平台配置文件
@@ -43,31 +40,14 @@ export function beforeStartBuild(options: {
             platform.logHelper.log(`修改${path}失败,${error}`);
         }
     }
-
+    
     callback();
-    if (platform.configData.hookPath) {
-        const hook = require(options.platform.configData.hookPath);
-        if (hook.beforeStartBuild) {
-            hook.beforeStartBuild(options);
-        }
-    }
 }
 
-export function afterBuildFinish(options: {
-    platform: BasePlatform
-}, callback: Function) {
-    let { platform } = options;
-    if (platform.configData.hookPath) {
-        const hook = require(platform.configData.hookPath);
-        if (hook.afterBuildFinish) {
-            hook.afterBuildFinish(options);
-        }
-    }
-
-    if (!platform.skipBuild) {
+export function afterBuildFinish(platform: BasePlatform, callback: Function) {
+    if (!platform.project.skip) {
         platform.postToDingTalk("完成", false);
     }
-
     //构建完成后工作
     callback();
 }

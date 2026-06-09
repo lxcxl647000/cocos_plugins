@@ -18,17 +18,56 @@ interface PackProject {
     name: string,
     path: string,// Cocos项目根目录
     channel: string,// 指定打包对应渠道名称
-    skip?: boolean,// 是否跳过cocos构建工程，直接使用导出工程
-    upload?: boolean,// 是否需要上传
-    needAutoPack?: boolean,// 是否需要进行自动构建上传
+    skip: boolean,// 是否跳过cocos构建工程，直接使用导出工程
+    upload: boolean,// 是否需要上传
+    needAutoPack: boolean,// 是否需要进行自动构建上传
     platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
     postToDingTalk: boolean,// 是否推送钉钉
+    md5Cache: boolean,
+    sourceMaps: boolean,
+    enableHighPerformanceMode: boolean,//是否开启高性能模式
+    customConfigPath: string,//自定义构建模板json路径
+    mainBundleCompressionType: string,//主包压缩类型  无压缩： "none"  合并依赖： "merge_dep"  合并所有JSON： "merge_all_json"  ZIP： "zip"  小游戏分包： "subpackage"
+    dingTalkWebHook: string,// 钉钉机器人的webhook地址
+    dingTalkCustomContent_pack: string,// 钉钉机器人的自定义内容
+    dingTalkCustomContent_upload: string,// 钉钉机器人的自定义内容
+    enginePath: string,// cocos引擎路径
+    engineVer: string,// cocos引擎版本
 }
 
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
 let taskList: PackProject[] = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
+const TaskTemp: PackProject = {
+    appId: '',
+    name: '',
+    path: '',
+    channel: 'taobao-mini-game',
+    skip: false,
+    upload: false,
+    needAutoPack: false,
+    platformFiles: {
+        'taobao-mini-game': {
+            path: '',
+            isTest: false
+        }
+    },
+    postToDingTalk: true,
+    md5Cache: false,
+    sourceMaps: false,
+    enableHighPerformanceMode: true,
+    customConfigPath: '',
+    mainBundleCompressionType: 'none',
+    dingTalkWebHook: '',
+    dingTalkCustomContent_pack: '',
+    dingTalkCustomContent_upload: '',
+    enginePath: '',
+    engineVer: ''
+};
 
 const modifyPackageJson = () => {
+    for (let i = 0; i < taskList.length; i++) {
+        taskList[i] = { ...TaskTemp, ...taskList[i] };
+    }
     let data = { packs: taskList };
     let dataStr = JSON.stringify(data, null, "\t");
     writeFileSync(join(__dirname, '../../../static/packconfigs/Packs.json'), dataStr, 'utf-8');
@@ -102,22 +141,31 @@ module.exports = Editor.Panel.define({
                             openDilog('warn', 'warn', '无自动化项目!');
                             return;
                         }
-                        for (let task of this.taskList) {
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            this.taskList[i] = { ...TaskTemp, ...this.taskList[i] };
+                            let task: PackProject = this.taskList[i];
                             if (task.needAutoPack === false) continue;
-                            if (!task.appId || !task.path || !task.channel) {
-                                let str = '';
-                                if (!task.appId) {
-                                    str += '未配置appId ';
-                                }
-                                if (!task.path) {
-                                    str += '未配置项目路径 ';
-                                }
-                                if (!task.channel) {
-                                    str += '未配置渠道 ';
-                                }
-                                openDilog('warn', 'warn', `appId:${task.appId}${task.name}${str}请检查配置！`);
+                            if (!task.appId) {
+                                openDilog('warn', 'warn', '自动化项目中未配置appId，请检查配置！');
                                 return;
                             }
+                            if (!task.path) {
+                                openDilog('warn', 'warn', '自动化项目中未配置项目路径，请检查配置！');
+                                return;
+                            }
+                            if (!task.channel) {
+                                openDilog('warn', 'warn', '自动化项目中未配置渠道平台，请检查配置！');
+                                return;
+                            }
+                            if (!task.enginePath) {
+                                openDilog('warn', 'warn', '自动化项目中未配置引擎路径，请检查配置！');
+                                return;
+                            }
+                            if (!task.engineVer) {
+                                openDilog('warn', 'warn', '自动化项目中未配置引擎版本，请检查配置！');
+                                return;
+                            }
+
                             let platformFilepath = this.getPlatformFile(task);
                             if (platformFilepath) {
                                 const normalizedPath = path.normalize(task.path);
@@ -166,14 +214,9 @@ module.exports = Editor.Panel.define({
                             openDilog('info', 'start', '开始自动化');
                             this.isAutoPack = true;
                             modifyPackageJson();
-                            let data = { packs: this.taskList };
-                            let dataStr = JSON.stringify(data);
-                            // 将 JSON 字符串转为 Base64 编码 避免双引号在命令行中被吃掉
-                            let base64Str = Buffer.from(dataStr).toString('base64');
 
                             let path = join(__dirname, '../../../static/auto-pack/build/app.js');
-                            let args = [path, '--packs', base64Str];
-
+                            let args = [path];
                             let sp: ChildProcessWithoutNullStreams = spawn("node", args, { shell: true });
                             sp.stdout.setEncoding('utf8');
                             sp.stdout.on('data', (data) => {
@@ -221,22 +264,7 @@ module.exports = Editor.Panel.define({
                         openDilog('warn', 'warn', `${msg}开始自动化?`, btnMap, 1);
                     },
                     addProject() {
-                        this.taskList.push({
-                            appId: '',
-                            name: '',
-                            path: '',
-                            channel: 'taobao-mini-game',
-                            upload: false,
-                            skip: false,
-                            needAutoPack: false,
-                            platformFiles: {
-                                'taobao-mini-game': {
-                                    path: '',
-                                    isTest: false
-                                }
-                            },
-                            postToDingTalk: true
-                        });
+                        this.taskList.push({ ...TaskTemp });
                         openDilog('info', 'add', '添加成功');
                     },
                     delProject(item: PackProject) {
@@ -351,7 +379,7 @@ module.exports = Editor.Panel.define({
                             this.taskList[i].needAutoPack = flag;
                             if (!flag) {
                                 this.taskList[i].upload = false;
-                                this.taskList[i].skip = false;
+                                this.taskList[i].skip = true;
                             }
                         }
                     },
@@ -419,7 +447,7 @@ module.exports = Editor.Panel.define({
                         item.needAutoPack = flag;
                         if (!flag) {
                             item.upload = false;
-                            item.skip = false;
+                            item.skip = true;
                         }
                     },
                     setPlatformFile(item: PackProject, path: string) {
@@ -457,6 +485,10 @@ module.exports = Editor.Panel.define({
                         }
                     },
                     getTaoBaoDebugUrl(appId: string) {
+                        if (!appId) {
+                            openDilog('warn', 'warn', '请输入正确的appId');
+                            return;
+                        }
                         this.isCheckLogin = true;
                         let version = '';
                         let sp: ChildProcessWithoutNullStreams = spawn("tbopen", ['app', '-a', appId], { shell: true });

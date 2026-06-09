@@ -6,8 +6,8 @@ import fs from 'fs';
 export class TaoBaoMiniGame extends BasePlatform {
     private _version: string = '';
     public async afterBuildFinish() {
-        if (this.upload) {
-            let outPath = path.join(this.outputPath, this.curPackChannel);
+        if (this.project.upload) {
+            let outPath = path.join(this.outputPath, this.project.channel);
             this.logHelper.log('start upload get version');
 
             let uploadSuccess = () => {
@@ -18,14 +18,14 @@ export class TaoBaoMiniGame extends BasePlatform {
                 this.logHelper.saveLog();
             };
             let uploadFail = () => {
-                PackManager.ins.addFailUpload(this.configData.gameName);
+                PackManager.ins.addFailUpload(this.project.name);
                 this.postToDingTalk('失败，查看日志失败详情', true, this._version);
                 this.logHelper.saveLog();
             };
 
             try {
                 // 获取小游戏信息，拿到版本号
-                this._spawn(["app", "--appId", this.channelInfo.appid],
+                this._spawn(["app", "--appId", this.project.appId],
                     (data: string) => {
                         let str: string = data.trim();
                         let arr = str.split('最新线上版本:');
@@ -41,7 +41,7 @@ export class TaoBaoMiniGame extends BasePlatform {
 
                             // 上传小游戏
                             this.logHelper.log(`start upload version:${this._version}`);
-                            this._spawn(["upload", "--input", outPath, "--appId", this.channelInfo.appid, "--type", "minigame", "--version", this._version], null,
+                            this._spawn(["upload", "--input", outPath, "--appId", this.project.appId, "--type", "minigame", "--version", this._version], null,
                                 (data: any) => {
                                     uploadSuccess();
                                 },
@@ -69,7 +69,6 @@ export class TaoBaoMiniGame extends BasePlatform {
             this.logHelper.log(`not need to upload`);
             this.logHelper.saveLog();
         }
-        this.saveBackUpConfig();
         await super.afterBuildFinish();
     }
 
@@ -98,7 +97,7 @@ export class TaoBaoMiniGame extends BasePlatform {
         sp.on('exit', (code) => {
             if (code === 0) {
                 if (needLogin || uploadFailed) {
-                    this.logHelper.log(`${this.configData.gameName} ${commondStr} failed : ${needLogin ? '登录过期' : '上传失败'}`);
+                    this.logHelper.log(`${this.project.name} ${commondStr} failed : ${needLogin ? '登录过期' : '上传失败'}`);
                     fail && fail();
                 }
                 else {
@@ -107,7 +106,7 @@ export class TaoBaoMiniGame extends BasePlatform {
                 }
             }
             else {
-                this.logHelper.log(`${this.configData.gameName} ${commondStr} failed`);
+                this.logHelper.log(`${this.project.name} ${commondStr} failed`);
                 fail && fail();
             }
         });
@@ -115,7 +114,7 @@ export class TaoBaoMiniGame extends BasePlatform {
 
     private _setHighPerformanceMode() {
         this.logHelper.log('set game.json high performance mode');
-        let gameJsonPath = path.join(this.outputPath, `${this.curPackChannel}/game.json`);
+        let gameJsonPath = path.join(this.outputPath, `${this.project.channel}/game.json`);
         if (!fs.existsSync(gameJsonPath)) {
             this.logHelper.log('game.json is not exist', gameJsonPath);
         }
@@ -143,6 +142,6 @@ export class TaoBaoMiniGame extends BasePlatform {
 
     public getDebugUrl(): string {
         // 因为淘宝官方还没有实现tbopen preview的cli功能，所以只能用tbopen upload的以后拼接链接加上vconsole=true在真机上看打印
-        return `https://m.duanqu.com?_ariver_appid=${this.channelInfo.appid}&nbsv=${this._version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`;
+        return `https://m.duanqu.com?_ariver_appid=${this.project.appId}&nbsv=${this._version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`;
     }
 }
