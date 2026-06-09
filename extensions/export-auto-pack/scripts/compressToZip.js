@@ -8,29 +8,23 @@ const { join } = path;
  * @param {string[]} paths - 需要打包的文件或文件夹路径数组（绝对路径）
  * @param {string} outputFileName - 输出的 zip 文件路径（例如 './output.zip'）
  */
-async function compressToZip(paths, outputFileName) {
+async function compressToZip(paths, outputFileName, filter) {
     return new Promise((resolve, reject) => {
-        // 创建输出流
         const output = createWriteStream(outputFileName);
 
-        // 初始化 archiver，设置最高压缩级别 (9)
         const archive = new ZipArchive({ zlib: { level: 9 } });
 
-        // 监听完成事件
         output.on('close', () => {
             console.log(`✅ 压缩完成: ${outputFileName} (${archive.pointer()} bytes)`);
             resolve();
         });
 
-        // 错误处理
         archive.on('error', (err) => {
             reject(err);
         });
 
-        // 绑定输出流
         archive.pipe(output);
 
-        // 遍历传入的路径列表，添加到压缩包中
         for (const targetPath of paths) {
             if (!existsSync(targetPath)) {
                 console.warn(`⚠️ 警告: 路径不存在，已跳过 -> ${targetPath}`);
@@ -39,15 +33,19 @@ async function compressToZip(paths, outputFileName) {
 
             const stats = statSync(targetPath);
             if (stats.isDirectory()) {
-                // 如果是文件夹，将其作为根目录下的同名文件夹打包进去
-                archive.directory(targetPath, path.basename(targetPath));
+                archive.directory(targetPath, path.basename(targetPath), (entry) => {
+                    if (!filter || filter(entry.name)) {
+                        return entry;
+                    }
+                    else {
+                        return false;
+                    }
+                });
             } else {
-                // 如果是文件，直接添加
                 archive.file(targetPath, { name: path.basename(targetPath) });
             }
         }
 
-        // 结束压缩流
         archive.finalize();
     });
 }
@@ -67,7 +65,7 @@ try {
         mkdirSync(exportPath);
     }
     exportPath = join(exportPath, 'auto_pack.zip');
-    compressToZip(paths, exportPath);
+    compressToZip(paths, exportPath, (name) => !name.endsWith('Packs.json'));
 } catch (error) {
     console.log(`zip 失败`, error);
 }

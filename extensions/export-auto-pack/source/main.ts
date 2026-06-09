@@ -1,4 +1,4 @@
-import { ChildProcessWithoutNullStreams, spawn } from "child_process";
+import { ChildProcessWithoutNullStreams, exec, spawn } from "child_process";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
@@ -66,10 +66,14 @@ export const methods: { [key: string]: (...any: any) => any } = {
                                     console.log(`exit build suscess ${data}`);
                                     console.log('开始将自动化插件打包zip，并导出');
                                     // 压缩成zip包导出
+                                    let zipSuccess = false;
                                     let sp3: ChildProcessWithoutNullStreams = spawn("npm", ['run', 'zip'], { shell: true, cwd: join(__dirname, '../') });
                                     sp3.stdout.setEncoding('utf8');
                                     sp3.stdout.on('data', (data) => {
                                         console.log(`stdout build: ${data}`);
+                                        if (typeof data === 'string' && data.includes('压缩完成')) {
+                                            zipSuccess = true;
+                                        }
                                     });
                                     sp3.stderr.on('data', (data) => {
                                         console.log(`stderr build: ${data}`);
@@ -77,11 +81,33 @@ export const methods: { [key: string]: (...any: any) => any } = {
                                     sp3.on('exit', (code, data) => {
                                         fixPackageJson(autoPackPackageJson, false);
                                         if (code === 0) {
-                                            console.log(`exit zip suscess ${data}`);
-                                            Editor.Dialog.info('自动化插件导出成功!', { title: '提示' });
+                                            if (zipSuccess) {
+                                                console.log(`exit zip suscess ${data}`);
+                                                Editor.Dialog.info('自动化插件导出成功!', { title: '提示' });
+                                                let exportPath = join(__dirname, '../exportZip');
+                                                if (!existsSync(exportPath)) {
+                                                    Editor.Dialog.warn(`${exportPath}不存在`, { title: '提示' })
+                                                    return;
+                                                }
+                                                try {
+                                                    exec(`start "" "${exportPath}"`, (error) => {
+                                                        if (error) {
+                                                            console.error('执行命令出错:', error);
+                                                            Editor.Dialog.error('无法打开目录，请检查路径或权限！', { title: '错误' });
+                                                        }
+                                                    });
+                                                } catch (error) {
+                                                    console.error('打开目录异常:', error);
+                                                    Editor.Dialog.error('发生未知错误，无法打开目录！', { title: '错误' });
+                                                }
+                                            }
+                                            else {
+                                                console.log(`exit zip fail ${data}`);
+                                                Editor.Dialog.error('自动化插件导出失败!', { title: '错误' });
+                                            }
                                         }
                                         else {
-                                            console.log(`exit zip fail ${data}`);
+                                            console.log(`exit zip fail---- ${data}`);
                                             Editor.Dialog.error('自动化插件导出失败!', { title: '错误' });
                                         }
                                     });
