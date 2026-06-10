@@ -33,7 +33,8 @@ export class BasePlatform {
         dingTalkCustomContent_pack: '',
         dingTalkCustomContent_upload: '',
         enginePath: '',
-        engineVer: ''
+        engineVer: '',
+        navigationBarTextStyle: ''
     };
 
     public get project() {

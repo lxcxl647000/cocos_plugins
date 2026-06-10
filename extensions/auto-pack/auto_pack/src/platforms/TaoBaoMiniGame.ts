@@ -6,6 +6,9 @@ import fs from 'fs';
 export class TaoBaoMiniGame extends BasePlatform {
     private _version: string = '';
     public async afterBuildFinish() {
+        // 上传游戏之前设置game.json文件
+        this._setGameJson();
+
         if (this.project.upload) {
             let outPath = path.join(this.outputPath, this.project.channel);
             this.logHelper.log('start upload get version');
@@ -35,9 +38,6 @@ export class TaoBaoMiniGame extends BasePlatform {
                         if (this._version) {
                             let versionArr = this._version.split('.');
                             this._version = versionArr[0] + '.' + versionArr[1] + '.' + (+versionArr[2] + 1);
-
-                            // 上传游戏之前设置game.json文件高新能模式
-                            this._setHighPerformanceMode();
 
                             // 上传小游戏
                             this.logHelper.log(`start upload version:${this._version}`);
@@ -112,28 +112,50 @@ export class TaoBaoMiniGame extends BasePlatform {
         });
     }
 
-    private _setHighPerformanceMode() {
-        this.logHelper.log('set game.json high performance mode');
+    private _setGameJson() {
+        this.logHelper.log('set game.json');
+
         let gameJsonPath = path.join(this.outputPath, `${this.project.channel}/game.json`);
         if (!fs.existsSync(gameJsonPath)) {
             this.logHelper.log('game.json is not exist', gameJsonPath);
+            return;
+        }
+        this.logHelper.log('game.json  exist', gameJsonPath);
+        let content = fs.readFileSync(gameJsonPath, 'utf-8');
+        if (!content) {
+            this.logHelper.log('can not get game.json content ');
+            return;
+        }
+
+        this.logHelper.log(`get game.json content ${content}`);
+        let newContent = content;
+        let data = JSON.parse(content);
+
+        data = this._setNavigationBarTextStyle(data);
+
+        if (this.project.enableHighPerformanceMode) {
+            data = this._setHighPerformanceMode(data);
         }
         else {
-            this.logHelper.log('game.json  exist', gameJsonPath);
-            let content = fs.readFileSync(gameJsonPath, 'utf-8');
-            if (content) {
-                this.logHelper.log(`get game.json content ${content}`);
-                let newContent = content;
-                let data = JSON.parse(content);
-                let newData = { ...data, highPerformanceMode: true };
-                newContent = JSON.stringify(newData);
-                this.logHelper.log(`get game.json newContent ${newContent}`);
-                fs.writeFileSync(gameJsonPath, newContent, 'utf-8');
-            }
-            else {
-                this.logHelper.log('cant get game.json content ');
-            }
+            this.logHelper.log('set game.json default mode');
         }
+
+        newContent = JSON.stringify(data);
+        this.logHelper.log(`get game.json newContent ${newContent}`);
+        fs.writeFileSync(gameJsonPath, newContent, 'utf-8');
+    }
+
+    private _setNavigationBarTextStyle(data: any) {
+        this.logHelper.log(`set game.json navigationBarTextStyle ${this.project.navigationBarTextStyle}`);
+        if (data.window) {
+            data.window = { ...data.window, navigationBarTextStyle: this.project.navigationBarTextStyle };
+        }
+        return data;
+    }
+
+    private _setHighPerformanceMode(data: any) {
+        this.logHelper.log('set game.json high performance mode');
+        return { ...data, highPerformanceMode: true };
     }
 
     public async beforeStartBuild() {

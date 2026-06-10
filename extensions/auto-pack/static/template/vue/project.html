@@ -140,6 +140,15 @@
                     <ui-checkbox slot="content" :checked="item.enableHighPerformanceMode"
                         @confirm="item.enableHighPerformanceMode = $event.target.value"></ui-checkbox>
                 </div>
+
+                <div v-if="item.channel === 'taobao-mini-game'" style="display: flex; align-items: center;">
+                    <ui-label slot="label">导航栏标题颜色</ui-label>
+                    <ui-select slot="content" :value="item.navigationBarTextStyle || 'black'"
+                        @confirm="item.navigationBarTextStyle = $event.target.value" style="margin-left: 10px;">
+                        <option value="black">黑色</option>
+                        <option value="white">白色</option>
+                    </ui-select>
+                </div>
             </ui-prop>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">

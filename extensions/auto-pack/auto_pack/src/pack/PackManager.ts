@@ -23,6 +23,7 @@ export interface PackProject {
     dingTalkCustomContent_upload: string,// 钉钉机器人的自定义内容
     enginePath: string,// cocos引擎路径
     engineVer: string,// cocos引擎版本
+    navigationBarTextStyle: string,// 导航栏标题颜色
 }
 
 class _Pack {

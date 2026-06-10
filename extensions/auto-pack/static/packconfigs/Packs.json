@@ -5,13 +5,13 @@
 			"name": "开心抓猫猫",
 			"path": "D:\\cocos_project\\HappyPullCat",
 			"channel": "taobao-mini-game",
-			"skip": true,
-			"upload": false,
-			"needAutoPack": false,
+			"skip": false,
+			"upload": true,
+			"needAutoPack": true,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\HappyPullCat\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": true
+					"isTest": false
 				}
 			},
 			"postToDingTalk": true,
@@ -24,7 +24,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
-			"engineVer": "3.8.6"
+			"engineVer": "3.8.6",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000132351722",
@@ -50,7 +51,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
-			"engineVer": "3.8.6"
+			"engineVer": "3.8.6",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000141704164",
@@ -76,7 +78,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.5\\CocosCreator.exe",
-			"engineVer": "3.8.5"
+			"engineVer": "3.8.5",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000136636894",
@@ -102,16 +105,17 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
-			"engineVer": "3.8.2"
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000141704974",
 			"name": "挪车大师",
 			"path": "D:/cocos_project/Parking_Master",
 			"channel": "taobao-mini-game",
-			"skip": false,
-			"upload": true,
-			"needAutoPack": true,
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\Parking_Master\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
@@ -128,7 +132,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.3\\CocosCreator.exe",
-			"engineVer": "3.8.3"
+			"engineVer": "3.8.3",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000143834422",
@@ -154,7 +159,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
-			"engineVer": "3.8.2"
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000143834423",
@@ -180,7 +186,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
-			"engineVer": "3.8.2"
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000143834483",
@@ -206,7 +213,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
-			"engineVer": "3.8.2"
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000143833683",
@@ -232,7 +240,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.7\\CocosCreator.exe",
-			"engineVer": "3.8.7"
+			"engineVer": "3.8.7",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000137357221",
@@ -258,7 +267,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
-			"engineVer": "3.8.6"
+			"engineVer": "3.8.6",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000141703714",
@@ -284,7 +294,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.4\\CocosCreator.exe",
-			"engineVer": "3.8.4"
+			"engineVer": "3.8.4",
+			"navigationBarTextStyle": "black"
 		},
 		{
 			"appId": "3000000143834991",
@@ -310,7 +321,8 @@
 			"dingTalkCustomContent_pack": "打包通知",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.4\\CocosCreator.exe",
-			"engineVer": "3.8.4"
+			"engineVer": "3.8.4",
+			"navigationBarTextStyle": "black"
 		}
 	]
 }
