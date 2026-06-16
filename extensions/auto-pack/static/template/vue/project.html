@@ -76,14 +76,14 @@
                 </div>
 
                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <ui-label slot="label">钉钉自定义内容（打包）</ui-label>
+                    <ui-label slot="label">钉钉自定义内容（打包通知）</ui-label>
                     <ui-input style="font-size: 14px; max-width: 30%; margin-left: 10px;"
                         :value="item.dingTalkCustomContent_pack || ''"
                         @confirm="item.dingTalkCustomContent_pack = $event.target.value"></ui-input>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <ui-label slot="label">钉钉自定义内容（上传）</ui-label>
+                    <ui-label slot="label">钉钉自定义内容（上传通知）</ui-label>
                     <ui-input style="font-size: 14px; max-width: 30%; margin-left: 10px;"
                         :value="item.dingTalkCustomContent_upload || ''"
                         @confirm="item.dingTalkCustomContent_upload = $event.target.value"></ui-input>

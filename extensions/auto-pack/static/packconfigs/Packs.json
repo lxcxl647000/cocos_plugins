@@ -330,7 +330,7 @@
 			"path": "D:\\cocos_project\\cybersh-2.4.12",
 			"channel": "taobao-mini-game",
 			"skip": false,
-			"upload": false,
+			"upload": true,
 			"needAutoPack": true,
 			"platformFiles": {
 				"taobao-mini-game": {
@@ -345,7 +345,7 @@
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
-			"dingTalkCustomContent_pack": "打包通知",
+			"dingTalkCustomContent_pack": "",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\2.4.12\\CocosCreator.exe",
 			"engineVer": "2.4.12",

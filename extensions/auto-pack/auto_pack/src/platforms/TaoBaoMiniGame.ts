@@ -36,8 +36,13 @@ export class TaoBaoMiniGame extends BasePlatform {
                     },
                     () => {
                         if (this._version) {
-                            let versionArr = this._version.split('.');
-                            this._version = versionArr[0] + '.' + versionArr[1] + '.' + (+versionArr[2] + 1);
+                            if (this._version === 'null') {
+                                this._version = '0.0.1';
+                            }
+                            else {
+                                let versionArr = this._version.split('.');
+                                this._version = versionArr[0] + '.' + versionArr[1] + '.' + (+versionArr[2] + 1);
+                            }
 
                             // 上传小游戏
                             this.logHelper.log(`start upload version:${this._version}`);
