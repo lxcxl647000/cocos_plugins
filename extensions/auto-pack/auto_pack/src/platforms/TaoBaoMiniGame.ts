@@ -10,7 +10,7 @@ export class TaoBaoMiniGame extends BasePlatform {
         this._setGameJson();
 
         if (this.project.upload) {
-            let outPath = path.join(this.outputPath, this.project.channel);
+            let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
             this.logHelper.log('start upload get version');
 
             let uploadSuccess = () => {
@@ -113,9 +113,8 @@ export class TaoBaoMiniGame extends BasePlatform {
     }
 
     private _setGameJson() {
-        this.logHelper.log('set game.json');
-
-        let gameJsonPath = path.join(this.outputPath, `${this.project.channel}/game.json`);
+        let gameJsonPath = path.join(this.outputPath, `${this.isEngine3 ? this.project.channel : 'taobao-minigame'}/game.json`);
+        this.logHelper.log(`set game.json output  gameJsonPath ${gameJsonPath}`);
         if (!fs.existsSync(gameJsonPath)) {
             this.logHelper.log('game.json is not exist', gameJsonPath);
             return;

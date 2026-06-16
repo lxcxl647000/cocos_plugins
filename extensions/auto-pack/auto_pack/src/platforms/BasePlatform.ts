@@ -79,7 +79,13 @@ export class BasePlatform {
         return new Promise<boolean>((resolve, reject) => {
             let buildPath = this.outputPath;
             //构建信息
-            let buildInfo = `"title=${this._project.name};platform=${this._project.channel};buildPath=${buildPath};debug=false;md5Cache=${this._project.md5Cache};`;
+            let buildInfo = '';
+            if (this.isEngine3) {
+                buildInfo = `"title=${this._project.name};platform=${this._project.channel};buildPath=${buildPath};debug=false;md5Cache=${this._project.md5Cache};`;
+            }
+            else {
+                buildInfo = `"platform=${this._project.channel};debug=false;md5Cache=${this._project.md5Cache};`;
+            }
             if (this._project.sourceMaps) {
                 buildInfo = `${buildInfo}sourceMaps=true;debug=true`;
                 buildInfo = buildInfo.replace("debug=false;", "");
@@ -103,6 +109,8 @@ export class BasePlatform {
                     sp = spawn(`${this._project.enginePath}`, ["--project", `${this._project.path}`, "--build", `${buildInfo}`]);
                 } else {
                     buildInfo = `${buildInfo}"`;
+                    //CocosCreator/CocosCreator.exe --path projectPath --build "platform=android;debug=true"
+                    //D:\cocos_editor\Creator\2.4.15\CocosCreator.exe --path D:\cocos_project\copy\cybersh-2.4.15 --build "platform=taobao-minigame;debug=false;md5Cache=false;mainBundleCompressionType=subpackage"
                     sp = spawn(`${this._project.enginePath}`, ["--path", `${this._project.path}`, "--build", `${buildInfo}`]);
                 }
 
