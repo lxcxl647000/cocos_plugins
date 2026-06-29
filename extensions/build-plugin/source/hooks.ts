@@ -8,8 +8,51 @@ export const load: BuildHook.load = async function () {
 };
 
 export const onBeforeBuild: BuildHook.onBeforeBuild = async function (options: ITaskOptions, result: IBuildResult) {
-    // TODO some thing
-    // log(`${PACKAGE_NAME}.webTestOption`, 'onBeforeBuild');
+    console.log('onBeforeBuild options ', options);
+    if (options.platform === 'taobao-mini-game') {
+        console.log('before build options : == ', options.packages['build-plugin']);
+        let { server, serverFile } = options.packages['build-plugin'];
+        if (!serverFile) {
+            console.log('before build serverFile is empty');
+            return;
+        }
+        if (!fs.existsSync(serverFile)) {
+            console.log('before build serverFile is not exist');
+            return;
+        }
+        let isTest = server === 'test';
+        let baseUrl = isTest ? 'https://quchuangtest.yundps.com' : 'https://quchuang.yundps.com';
+        let domain = isTest ? 'https://mobiletest.yundps.com' : 'https://mobile.yundps.com';
+        try {
+            let fileContent = fs.readFileSync(serverFile, 'utf-8');
+            if (fileContent) {
+                let newBaseUrl = '';
+                let newDomain = '';
+                fileContent = fileContent.replace(/(baseUrl|domain)\s*:\s*["'][^"']*["']/g, (match, p1) => {
+                    const newValue = p1 === 'baseUrl' ? baseUrl : domain;
+                    if (p1 === 'baseUrl') {
+                        newBaseUrl = newValue;
+                    }
+                    if (p1 === 'domain') {
+                        newDomain = newValue;
+                    }
+                    return `${p1}: "${newValue}"`;
+                });
+                if (newBaseUrl && newDomain) {
+                    fs.writeFileSync(serverFile, fileContent, 'utf-8');
+                    console.log('before build serverFile edit success');
+                }
+                else {
+                    console.log('before build serverFile edit fail not match baseUrl or domain');
+                }
+            }
+            else {
+                console.log('before build serverFile edit fail file is not exist');
+            }
+        } catch (error) {
+            console.log('before build serverFile edit fail', error);
+        }
+    }
 };
 
 export const onBeforeCompressSettings: BuildHook.onBeforeCompressSettings = async function (options: ITaskOptions, result: IBuildResult) {

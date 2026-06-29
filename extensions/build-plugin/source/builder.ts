@@ -71,7 +71,34 @@ export const configs: BuildPlugin.Configs = {
                         }
                     ]
                 },
-            }
+            },
+            serverFile: {
+                label: `服务器文件`,
+                description: `服务器文件`,
+                default: '',
+                render: {
+                    ui: 'ui-file',
+                    attributes: { type: 'file' },
+                },
+            },
+            server: {
+                label: `服务器`,
+                description: `服务器`,
+                default: 'realese',
+                render: {
+                    ui: 'ui-select',
+                    "items": [
+                        {
+                            "value": 'realese',
+                            "label": "正式服"
+                        },
+                        {
+                            "value": 'test',
+                            "label": "测试服"
+                        }
+                    ]
+                },
+            },
         },
         verifyRuleMap: {
             ruleTest: {

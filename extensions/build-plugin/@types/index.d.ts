@@ -32,4 +32,6 @@ export interface IOptions {
     searchPattern: string;
     injectAtTop: boolean;
     navigationBarTextStyle: string;
+    serverFile: string;
+    server: string;
 }
