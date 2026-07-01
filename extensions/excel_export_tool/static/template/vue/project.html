@@ -1,0 +1,55 @@
+<div style="position: relative; height: 100%;">
+    <div style="display: flex; align-items: center; margin-top: 10px;">
+        <ui-label slot="label">导出路径</ui-label>
+        <ui-file style=" margin-left: 10px; width: 40%;" type="directory" :value="exportPath||''"
+            @confirm="exportPath = $event.target.value"></ui-file>
+        <div style="display: flex; align-items: center; margin-left: 10px;">
+            <ui-label slot="label">使用导出配置</ui-label>
+            <ui-checkbox slot="content" :checked="useExportPathConfig"
+                @confirm="changeExportPathConfig($event.target.value)"></ui-checkbox>
+        </div>
+    </div>
+
+    <div style="display: flex; align-items: center; margin-top: 10px;">
+        <ui-label slot="label">TypeScript导出路径</ui-label>
+        <ui-file style=" margin-left: 10px; width: 40%;" type="directory" :value="exportTSPath||''"
+            @confirm="exportTSPath = $event.target.value"></ui-file>
+    </div>
+
+    <div style="display: flex; align-items: center; margin-top: 10px;">
+        <ui-label slot="label">excel路径</ui-label>
+        <ui-file style=" margin-left: 10px; width: 40%;" type="directory" :value="excelPath||''"
+            @confirm="excelPath = $event.target.value"></ui-file>
+    </div>
+
+    <div v-if="excelPathComputed" style=" margin-top: 10px;">
+        <div style="display: flex; align-items: center;">
+            <ui-label slot="label">全选</ui-label>
+            <ui-checkbox slot="content" :checked="allSelected"
+                @confirm="setAllSelected($event.target.value)"></ui-checkbox>
+        </div>
+    </div>
+
+    <div v-if="excelPathComputed" style="max-height: 80vh;overflow-y: auto; margin-top: 10px;">
+        <div v-for="(item, index) in files" :key="item.id" style="padding-bottom: 10px;">
+            <div style="display: flex; align-items: center;">
+                <ui-label slot="label" :value="item.name"></ui-label>
+                <ui-checkbox slot="content" :checked="item.selected"
+                    @confirm="item.selected = $event.target.value"></ui-checkbox>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="selectedExcel" style="margin-top: 20px; display: flex; align-items: center;">
+        <ui-button @confirm="exportConfig">导出</ui-button>
+        <div style="display: flex; align-items: center; margin-left: 10px;">
+            <ui-label slot="label">格式化</ui-label>
+            <ui-checkbox slot="content" :checked="isFormat" @confirm="isFormat = $event.target.value"></ui-checkbox>
+        </div>
+        <div style="display: flex; align-items: center; margin-left: 10px;">
+            <ui-label slot="label">数组</ui-label>
+            <ui-checkbox slot="content" :checked="isArr"
+                @confirm="isArr = $event.target.value"></ui-checkbox>
+        </div>
+    </div>
+</div>
