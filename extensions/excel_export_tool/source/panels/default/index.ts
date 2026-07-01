@@ -90,7 +90,7 @@ module.exports = Editor.Panel.define({
                             let dir = readdirSync(this.excelPath);
                             let index = 0;
                             dir.forEach((item) => {
-                                if ((item.endsWith('.xlsx') || item.endsWith('.xlsm') && !item.startsWith('~$'))) {
+                                if ((item.endsWith('.xlsx') || item.endsWith('.xlsm')) && !item.startsWith('~$')) {
                                     files.push({
                                         id: index++,
                                         name: item,
