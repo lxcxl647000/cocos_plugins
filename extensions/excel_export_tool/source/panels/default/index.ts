@@ -90,7 +90,7 @@ module.exports = Editor.Panel.define({
                             let dir = readdirSync(this.excelPath);
                             let index = 0;
                             dir.forEach((item) => {
-                                if (item.endsWith('.xlsx') || item.endsWith('.xlsm')) {
+                                if ((item.endsWith('.xlsx') || item.endsWith('.xlsm') && !item.startsWith('~$'))) {
                                     files.push({
                                         id: index++,
                                         name: item,
@@ -137,6 +137,9 @@ module.exports = Editor.Panel.define({
                         this.exportPathConfig.excelPath = this.excelPath;
                         let configPath = join(__dirname, '../../../static/ExportPathConfig.json');
                         writeFileSync(configPath, JSON.stringify(this.exportPathConfig, null, '\t'));
+                    },
+                    refreshFiles() {
+                        this.files = this.filterExcel();
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

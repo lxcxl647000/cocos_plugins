@@ -27,6 +27,9 @@
             <ui-label slot="label">全选</ui-label>
             <ui-checkbox slot="content" :checked="allSelected"
                 @confirm="setAllSelected($event.target.value)"></ui-checkbox>
+            <ui-button style=" margin-left: 10px;" @confirm=" refreshFiles">
+                <ui-icon value="refresh"></ui-icon>
+            </ui-button>
         </div>
     </div>
 
@@ -48,8 +51,7 @@
         </div>
         <div style="display: flex; align-items: center; margin-left: 10px;">
             <ui-label slot="label">数组</ui-label>
-            <ui-checkbox slot="content" :checked="isArr"
-                @confirm="isArr = $event.target.value"></ui-checkbox>
+            <ui-checkbox slot="content" :checked="isArr" @confirm="isArr = $event.target.value"></ui-checkbox>
         </div>
     </div>
 </div>
