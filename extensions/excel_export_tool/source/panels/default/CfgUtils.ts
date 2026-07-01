@@ -34,9 +34,8 @@ export default class CfgUtils {
                 else {
                     console.log(`配置文件 ${excelPaths[i]} 解析失败`);
                 }
-
-                cb && cb();
             }
+            cb && cb();
         }
         else {
             console.log('配置路径为空----');
