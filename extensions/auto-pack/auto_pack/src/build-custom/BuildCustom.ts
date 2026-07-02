@@ -5,11 +5,7 @@ import { rmdirSync } from 'fs';
 export function beforeStartBuild(platform: BasePlatform, callback: Function) {
     // 构建前工作
     // 检测目标工程里是否使用了build-plugin打包插件，影响打包结果，打包结束后再还原回去
-    let buildPluginPath = join(platform.project.path, 'extensions/build-plugin');
-    if (existsSync(buildPluginPath)) {
-        mkdirSync(join(platform.project.path, 'extensions/tmp'));
-        moveSync(buildPluginPath, join(platform.project.path, 'extensions/tmp/build-plugin'));
-    }
+    checkBuildPluginMoveOrRecover(platform.project.path, true);
 
     // 检测是否需要修改游戏中平台配置文件
     platform.modifyServer = false;
@@ -59,9 +55,28 @@ export function afterBuildFinish(platform: BasePlatform, callback: Function) {
     //构建完成后工作
     callback();
     // 检测是否需要恢复build-plugin
-    let buildPluginPath = join(platform.project.path, 'extensions/tmp/build-plugin');
-    if (existsSync(buildPluginPath)) {
-        moveSync(buildPluginPath, join(platform.project.path, 'extensions/build-plugin'));
-        rmdirSync(join(platform.project.path, 'extensions/tmp'));
+    checkBuildPluginMoveOrRecover(platform.project.path, false);
+}
+
+function checkBuildPluginMoveOrRecover(path: string, isMove: boolean) {
+    let pluginRootDirName = ''
+    if (existsSync(join(path, 'extensions'))) {
+        pluginRootDirName = 'extensions';
+    }
+    else if (existsSync(join(path, 'packages'))) {
+        pluginRootDirName = 'packages';
+    }
+    if (pluginRootDirName) {
+        let buildPluginPath = isMove ? join(path, `${pluginRootDirName}/build-plugin`) : join(path, `${pluginRootDirName}/tmp/build-plugin`);
+        if (existsSync(buildPluginPath)) {
+            if (isMove) {
+                mkdirSync(join(path, `${pluginRootDirName}/tmp`));
+                moveSync(buildPluginPath, join(path, `${pluginRootDirName}/tmp/build-plugin`));
+            }
+            else {
+                moveSync(buildPluginPath, join(path, `${pluginRootDirName}/build-plugin`));
+                rmdirSync(join(path, `${pluginRootDirName}/tmp`));
+            }
+        }
     }
 }
