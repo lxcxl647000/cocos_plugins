@@ -1,7 +1,15 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
+import { existsSync, mkdirSync, moveSync, readFileSync, renameSync, writeFileSync } from 'fs-extra';
 import { BasePlatform } from '../platforms/BasePlatform';
+import { join } from 'path';
+import { rmdirSync } from 'fs';
 export function beforeStartBuild(platform: BasePlatform, callback: Function) {
-    //构建前工作
+    // 构建前工作
+    // 检测目标工程里是否使用了build-plugin打包插件，影响打包结果，打包结束后再还原回去
+    let buildPluginPath = join(platform.project.path, 'extensions/build-plugin');
+    if (existsSync(buildPluginPath)) {
+        mkdirSync(join(platform.project.path, 'extensions/tmp'));
+        moveSync(buildPluginPath, join(platform.project.path, 'extensions/tmp/build-plugin'));
+    }
 
     // 检测是否需要修改游戏中平台配置文件
     platform.modifyServer = false;
@@ -40,7 +48,7 @@ export function beforeStartBuild(platform: BasePlatform, callback: Function) {
             platform.logHelper.log(`修改${path}失败,${error}`);
         }
     }
-    
+
     callback();
 }
 
@@ -50,4 +58,10 @@ export function afterBuildFinish(platform: BasePlatform, callback: Function) {
     }
     //构建完成后工作
     callback();
+    // 检测是否需要恢复build-plugin
+    let buildPluginPath = join(platform.project.path, 'extensions/tmp/build-plugin');
+    if (existsSync(buildPluginPath)) {
+        moveSync(buildPluginPath, join(platform.project.path, 'extensions/build-plugin'));
+        rmdirSync(join(platform.project.path, 'extensions/tmp'));
+    }
 }
