@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, moveSync, readFileSync, renameSync, writeFileSync } from 'fs-extra';
+import { existsSync, mkdirSync, moveSync, readFileSync, writeFileSync } from 'fs-extra';
 import { BasePlatform } from '../platforms/BasePlatform';
 import { join } from 'path';
 import { rmdirSync } from 'fs';
