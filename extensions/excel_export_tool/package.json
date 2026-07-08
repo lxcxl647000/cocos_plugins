@@ -12,6 +12,7 @@
     "description": "i18n:excel_export_tool.description",
     "main": "./dist/main.js",
     "dependencies": {
+        "archiver": "^5.3.2",
         "fs-extra": "^10.0.0",
         "node-xlsx": "^0.24.0",
         "vue": "^3.1.4"
