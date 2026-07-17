@@ -1,65 +1,94 @@
 import { BasePlatform } from "./BasePlatform";
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
-import path from "path";
-import PackManager from "../pack/PackManager";
+import path, { join } from "path";
+import PackManager, { PackProject } from "../pack/PackManager";
 import fs from 'fs';
+import PackUtil from "../utils/PackUtil";
+import { existsSync, readFileSync, writeFileSync } from "fs-extra";
 export class TaoBaoMiniGame extends BasePlatform {
-    private _version: string = '';
+    static count = 0;
+    static gameArr: TaoBaoMiniGame[] = [];
     public async afterBuildFinish() {
-        // 上传游戏之前设置game.json文件
-        this._setGameJson();
+        if (this.project.upload || this.project.preview) {
+            TaoBaoMiniGame.gameArr.push(this);
+        }
+        if (TaoBaoMiniGame.gameArr.length === TaoBaoMiniGame.count) {
+            TaoBaoMiniGame.checkDoCli();
+        }
+        await super.afterBuildFinish();
+    }
 
-        if (this.project.upload) {
+    public static clearData() {
+        TaoBaoMiniGame.count = 0;
+    }
+
+    static checkDoCli() {
+        let game = TaoBaoMiniGame.gameArr.shift();
+        if (game) {
+            game.doTaobaoCli();
+        }
+    }
+
+    public init(project: PackProject): void {
+        super.init(project);
+        if (this.project.upload || this.project.preview) {
+            TaoBaoMiniGame.count++;
+        }
+    }
+
+    public doTaobaoCli() {
+        this.debugUrl = '';
+        if (this.project.tb_cli_token && (this.project.upload || this.project.preview)) {
+            // 上传游戏之前设置game.json文件
+            this._setGameJson();
+            this._spawn(['config', 'set', 'token', this.project.tb_cli_token],
+                () => {
+                    if (this.project.upload) {
+                        uploadFunc();
+                    }
+                    else if (this.project.preview) {
+                        previewFunc();
+                    }
+                    else {
+                        this.logHelper.log(`not need to upload or preview`);
+                        this.logHelper.saveLog();
+                    }
+                },
+                () => {
+                    this.logHelper.saveLog();
+                }
+            );
+        }
+
+        let uploadFunc = () => {
             let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
-            this.logHelper.log('start upload get version');
-
-            let uploadSuccess = () => {
-                PackManager.ins.addSuccessUpload(this);
-                this.postToDingTalk('成功', true, this._version);
-                let debugUrl = this.getDebugUrl();
-                this.logHelper.log(`Debug Url is :${debugUrl}`);
-                this.logHelper.saveLog();
+            let uploadSuccess = (version: string) => {
+                TaoBaoMiniGame.checkDoCli();
+                PackManager.ins.addSuccessed(this);
+                if (version) {
+                    this.debugUrl = `https://m.duanqu.com?_ariver_appid=${this.project.appId}&nbsv=${version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
+                    this.postToDingTalk('成功', true, version);
+                    this.logHelper.log(`upload Debug Url is :${this.debugUrl}`);
+                    this.logHelper.saveLog();
+                }
+                else {
+                    this.logHelper.log(`upload success :获取版本号失败`);
+                    this.logHelper.saveLog();
+                }
             };
             let uploadFail = () => {
-                PackManager.ins.addFailUpload(this.project.name);
-                this.postToDingTalk('失败，查看日志失败详情', true, this._version);
+                TaoBaoMiniGame.checkDoCli();
+                PackManager.ins.addFailed(this);
+                this.postToDingTalk('失败，查看日志失败详情', true);
                 this.logHelper.saveLog();
             };
 
             try {
-                // 获取小游戏信息，拿到版本号
-                this._spawn(["app", "--appId", this.project.appId],
-                    (data: string) => {
-                        let str: string = data.trim();
-                        let arr = str.split('最新线上版本:');
-                        this._version = arr[1].trim();
-                    },
-                    () => {
-                        if (this._version) {
-                            if (this._version === 'null') {
-                                this._version = '0.0.1';
-                            }
-                            else {
-                                let versionArr = this._version.split('.');
-                                this._version = versionArr[0] + '.' + versionArr[1] + '.' + (+versionArr[2] + 1);
-                            }
-
-                            // 上传小游戏
-                            this.logHelper.log(`start upload version:${this._version}`);
-                            this._spawn(["upload", "--input", outPath, "--appId", this.project.appId, "--type", "minigame", "--version", this._version], null,
-                                (data: any) => {
-                                    uploadSuccess();
-                                },
-                                () => {
-                                    uploadFail();
-                                }
-                            );
-                        }
-                        // 有可能登录态过期，获取版本号失败
-                        else {
-                            this.logHelper.log(`upload failed :获取版本号失败`);
-                            uploadFail();
-                        }
+                // 上传小游戏
+                this.logHelper.log(`start upload`);
+                this._spawn(["upload", "--input", outPath, "--appId", this.project.appId, "--type", "minigame", "--renderMode", "highPerformance"],
+                    (data: { version: string }) => {
+                        uploadSuccess(data.version);
                     },
                     () => {
                         uploadFail();
@@ -69,45 +98,109 @@ export class TaoBaoMiniGame extends BasePlatform {
                 this.logHelper.log(`upload failed :${error}`);
                 uploadFail();
             }
-        }
-        else {
-            this.logHelper.log(`not need to upload`);
-            this.logHelper.saveLog();
-        }
-        await super.afterBuildFinish();
+        };
+
+        let previewFunc = () => {
+            let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
+            this.logHelper.log('start preview');
+
+            let previewSuccess = (previewUrl: string) => {
+                const packsPath = join(__dirname, '../../../../static/packconfigs/Packs.json');
+                let taskList: PackProject[] = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
+                for (let i = 0; i < taskList.length; i++) {
+                    if (taskList[i].appId === this.project.appId) {
+                        taskList[i].qrCodeUrl = previewUrl;
+                        let data = { packs: taskList };
+                        let dataStr = JSON.stringify(data, null, "\t");
+                        writeFileSync(packsPath, dataStr, 'utf-8');
+                        break;
+                    }
+                }
+                TaoBaoMiniGame.checkDoCli();
+                PackManager.ins.addSuccessed(this);
+                this.debugUrl = previewUrl;
+                this.postToDingTalk('成功', true);
+                this.logHelper.log(`preview Debug Url is :${this.debugUrl}`);
+                this.logHelper.saveLog();
+            };
+            let previewFail = () => {
+                TaoBaoMiniGame.checkDoCli();
+                PackManager.ins.addFailed(this);
+                this.postToDingTalk('失败，查看日志失败详情', true);
+                this.logHelper.saveLog();
+            };
+
+            try {
+                // 预览小游戏
+                this._spawn(["preview", "-i", outPath, "-a", this.project.appId, "-t", "minigame", "--copy", "true", "--renderMode", "highPerformance"],
+                    (data: { previewUrl: string }) => {
+                        previewSuccess(data.previewUrl);
+                    },
+                    () => {
+                        previewFail();
+                    }
+                );
+            } catch (error) {
+                this.logHelper.log(`preview failed :${error}`);
+                previewFail();
+            }
+        };
     }
 
-    private _spawn(args: string[], outFunc: Function, success: Function, fail: Function) {
+    private _spawn(args: string[], success: Function, fail: Function) {
         if (!args || args.length === 0) {
             return;
         }
-        let needLogin = false;
+        let cliTokenFailed = false;
         let uploadFailed = false;
-        let sp: ChildProcessWithoutNullStreams = spawn("tbopen", args, { shell: true });
+        let version = '';
+        let previewUrl = '';
+        let sp: ChildProcessWithoutNullStreams = spawn("tbgame", args, { shell: true });
         sp.stdout.setEncoding('utf8');
         let commondStr = sp.spawnargs[4].replace(/"/g, '');
+        let nextDataIsQrCode = false;
         sp.stdout.on('data', (data) => {
-            this.logHelper.log(`${commondStr} stdout ${data.toString()}`);
-            outFunc && outFunc(data);
+            if (nextDataIsQrCode) {
+                nextDataIsQrCode = false;
+            }
+            else {
+                this.logHelper.log(`${commondStr} stdout ${data.toString()}`);
+            }
+            if (data.indexOf('预览二维码地址：') > -1) {
+                let str: string = data.trim();
+                let arr = str.split('预览二维码地址：');
+                previewUrl = arr[1].trim();
+            }
+            if (data.indexOf('已复制预览码到剪贴板') > -1) {
+                nextDataIsQrCode = true;
+            }
+            // 上传成功
+            if (data.indexOf('upload done') > -1) {
+                let str: string = PackUtil.stripAnsi(data).trim();
+                let jsonData = PackUtil.extractJsonObject(str);
+                if (jsonData && jsonData.version) {
+                    version = jsonData.version;
+                }
+            }
         });
         sp.stderr.on('data', (data) => {
             this.logHelper.log(`${commondStr} stderr ${data.toString()}`);
-            if (data.indexOf('登录态过期，可使用指令 tbopen login 刷新登录态') > -1 || data.indexOf('need login') > -1) {
-                needLogin = true;
+            if (data.indexOf('CLI auth failed') > -1) {
+                cliTokenFailed = true;
             }
-            if (data.indexOf('上传失败') > -1) {
+            if (data.indexOf('upload 命令执行失败') > -1) {
                 uploadFailed = true;
             }
         })
         sp.on('exit', (code) => {
             if (code === 0) {
-                if (needLogin || uploadFailed) {
-                    this.logHelper.log(`${this.project.name} ${commondStr} failed : ${needLogin ? '登录过期' : '上传失败'}`);
+                if (cliTokenFailed || uploadFailed) {
+                    this.logHelper.log(`${this.project.name} ${commondStr} failed : ${cliTokenFailed ? '设置调用凭证Token错误' : '上传失败'}`);
                     fail && fail();
                 }
                 else {
                     this.logHelper.log(`${commondStr} success`);
-                    success && success();
+                    success && success({ version, previewUrl });
                 }
             }
             else {
@@ -137,13 +230,6 @@ export class TaoBaoMiniGame extends BasePlatform {
 
         data = this._setNavigationBarTextStyle(data);
 
-        if (this.project.enableHighPerformanceMode) {
-            data = this._setHighPerformanceMode(data);
-        }
-        else {
-            this.logHelper.log('set game.json default mode');
-        }
-
         newContent = JSON.stringify(data);
         this.logHelper.log(`get game.json newContent ${newContent}`);
         fs.writeFileSync(gameJsonPath, newContent, 'utf-8');
@@ -164,10 +250,5 @@ export class TaoBaoMiniGame extends BasePlatform {
 
     public async beforeStartBuild() {
         await super.beforeStartBuild();
-    }
-
-    public getDebugUrl(): string {
-        // 因为淘宝官方还没有实现tbopen preview的cli功能，所以只能用tbopen upload的以后拼接链接加上vconsole=true在真机上看打印
-        return `https://m.duanqu.com?_ariver_appid=${this.project.appId}&nbsv=${this._version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`;
     }
 }

@@ -13,6 +13,7 @@ export class BasePlatform {
     public logHelper: LogHelper = null;
     public platformFile: { path: string, isTest: boolean } = { path: '', isTest: false };
     public modifyServer: boolean = false;
+    public debugUrl: string = '';
 
     private _project: PackProject = {
         appId: '',
@@ -26,7 +27,6 @@ export class BasePlatform {
         postToDingTalk: false,
         md5Cache: false,
         sourceMaps: false,
-        enableHighPerformanceMode: false,
         customConfigPath: '',
         mainBundleCompressionType: '',
         dingTalkWebHook: '',
@@ -34,7 +34,9 @@ export class BasePlatform {
         dingTalkCustomContent_upload: '',
         enginePath: '',
         engineVer: '',
-        navigationBarTextStyle: ''
+        navigationBarTextStyle: '',
+        preview: false,
+        tb_cli_token: ''
     };
 
     public get project() {
@@ -44,6 +46,7 @@ export class BasePlatform {
     public constructor() {
     }
     public init(project: PackProject) {
+        this.debugUrl = '';
         this._project = project;
         let channel = project.channel;
         let outputpath = project.path;
@@ -154,6 +157,9 @@ export class BasePlatform {
 
     public async beforeStartBuild() {
         return new Promise<void>((resolve, reject) => {
+            if (this.project.skip) {
+                return resolve();
+            }
             beforeStartBuild(this, () => {
                 resolve();
             })
@@ -166,12 +172,8 @@ export class BasePlatform {
                 resolve();
                 PackManager.ins.addSuccessProject(this._project.name);
                 PackManager.ins.packIndex++;
-            })
+            });
         });
-    }
-
-    public getDebugUrl(): string {
-        return '';
     }
 
     public async postToDingTalk(result: string, isUpload: boolean, version?: string) {
@@ -185,10 +187,10 @@ export class BasePlatform {
             let debugUrl = '';
             if (isUpload) {
                 oprateStr = this._project.dingTalkCustomContent_upload;
-                oprateType = '上传';
-                versionStr = `##### ${oprateType}版本：**${version}** \n`;
+                oprateType = this._project.upload ? '上传' : '预览';
+                versionStr = this._project.upload ? `##### ${oprateType}版本：**${version}** \n` : '';
                 outputPath = channelName + "后台";
-                debugUrl = this.getDebugUrl();
+                debugUrl = this.debugUrl;
             }
             else {
                 oprateStr = this._project.dingTalkCustomContent_pack;

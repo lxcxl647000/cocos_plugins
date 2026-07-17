@@ -16,7 +16,6 @@
         <ui-button style=" margin-left: 10px;" @confirm=" openToolLog">
             <ui-icon value="log"></ui-icon>
         </ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm=" taobaoLogin">登录淘宝</ui-button>
     </div>
     <div style="max-height: 80vh;overflow-y: auto;">
         <div v-for="(item, index) in taskList" :key="item.appId"
@@ -33,13 +32,22 @@
                     <ui-icon value="log"></ui-icon>
                 </ui-button>
                 <ui-button v-if="item.channel === 'taobao-mini-game'" style=" margin-left: 10px;"
-                    @confirm=" getTaoBaoDebugUrl(item.appId)">淘宝线上Debug版</ui-button>
+                    @confirm=" getTaoBaoDebugUrl(item,false)">淘宝线上Debug版</ui-button>
+                <ui-button v-if="item.channel === 'taobao-mini-game'" style=" margin-left: 10px;"
+                    @confirm=" getTaoBaoDebugUrl(item,true)">预览</ui-button>
             </div>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
                 <ui-label slot="label">appId</ui-label>
                 <ui-input style="font-size: 14px; max-width: 50%; margin-left: 10px;" :value="item.appId"
                     @confirm="item.appId = $event.target.value">
+                </ui-input>
+
+                <ui-label v-if="item.channel === 'taobao-mini-game'" slot="label"
+                    style="margin-left: 10px;">tb_cli_token</ui-label>
+                <ui-input v-if="item.channel === 'taobao-mini-game'"
+                    style="font-size: 14px; max-width: 50%; margin-left: 10px;" :value="item.tb_cli_token"
+                    @confirm="item.tb_cli_token = $event.target.value">
                 </ui-input>
             </div>
 
@@ -91,9 +99,12 @@
             </ui-prop>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
-                <ui-label slot="label">是否上传</ui-label>
+                <ui-label slot="label">预览</ui-label>
+                <ui-checkbox slot="content" :checked="item.preview"
+                    @confirm="checkPreview(item, $event.target.value)"></ui-checkbox>
+                <ui-label slot="label">上传</ui-label>
                 <ui-checkbox slot="content" :checked="item.upload"
-                    @confirm="item.upload = $event.target.value"></ui-checkbox>
+                    @confirm="checkUpload(item, $event.target.value)"></ui-checkbox>
             </div>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
@@ -135,12 +146,6 @@
                     </div>
                 </div>
 
-                <div style="display: flex; align-items: center;">
-                    <ui-label slot="label">高性能模式</ui-label>
-                    <ui-checkbox slot="content" :checked="item.enableHighPerformanceMode"
-                        @confirm="item.enableHighPerformanceMode = $event.target.value"></ui-checkbox>
-                </div>
-
                 <div v-if="item.channel === 'taobao-mini-game'" style="display: flex; align-items: center;">
                     <ui-label slot="label">导航栏标题颜色</ui-label>
                     <ui-select slot="content" :value="item.navigationBarTextStyle || 'black'"
@@ -176,6 +181,14 @@
                 <ui-checkbox slot="content" :checked="item.needAutoPack"
                     @confirm="clickAutoPackToggle(item, $event.target.value)"></ui-checkbox>
             </div>
+
+            <div v-if="item.qrCodeUrl" style="margin-top: 10px;">
+                <ui-qrcode :value="item.qrCodeUrl"></ui-qrcode>
+                <ui-label :value="item.qrCodeUrl"
+                    style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                </ui-label>
+                <ui-button @confirm="copyLink(item.qrCodeUrl)">复制</ui-button>
+            </div>
         </div>
     </div>
 
@@ -185,6 +198,7 @@
         <ui-label style="margin-left: 10px;">{{`自动化 : ${getAutoCount()}`}}</ui-label>
         <ui-label style="margin-left: 10px;">{{`构建 : ${getPackCount()}`}}</ui-label>
         <ui-label style="margin-left: 10px;">{{`上传 : ${getUploadCount()}`}}</ui-label>
+        <ui-label style="margin-left: 10px;">{{`预览 : ${getPreviewCount()}`}}</ui-label>
     </div>
 
     <div v-if="qrCodeUrl!==''" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
@@ -196,17 +210,17 @@
                 <ui-label :value="qrCodeUrl"
                     style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 </ui-label>
-                <ui-button @confirm="copyLink()" style="margin-left: 8px;">复制</ui-button>
+                <ui-button @confirm="copyLink(qrCodeUrl)" style="margin-left: 8px;">复制</ui-button>
             </div>
             <ui-button @confirm=" closeQrCode()" style="margin-top: 10px;">关闭</ui-button>
         </div>
     </div>
 
-    <div v-if="isAutoPack || isCheckLogin" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    <div v-if="isAutoPack || isSetTbCliToken" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
                 background-color: rgba(0, 0, 0, 0.3); z-index: 9999;">
         <ui-loading v-if="isAutoPack"
             style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></ui-loading>
-        <ui-label v-if="isCheckLogin"
-            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">检测淘宝登录态...</ui-label>
+        <ui-label v-if="isSetTbCliToken"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">设置淘宝CLI_Token...</ui-label>
     </div>
 </div>

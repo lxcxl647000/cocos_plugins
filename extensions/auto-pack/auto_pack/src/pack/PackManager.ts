@@ -2,6 +2,7 @@ import path from 'path';
 import { BasePlatform } from '../platforms/BasePlatform';
 import { supportPlatform } from '../platforms/PlatformConfig';
 import LogHelper from './LogHelper';
+import { TaoBaoMiniGame } from '../platforms/TaoBaoMiniGame';
 
 export interface PackProject {
     appId: string,
@@ -9,13 +10,12 @@ export interface PackProject {
     path: string,// Cocos项目根目录
     channel: string,// 指定打包对应渠道名称
     skip: boolean,// 是否跳过cocos构建工程，直接使用导出工程
-    upload: boolean,// 是否需要上传
+    upload: boolean,// 是否需要上传 与preview互斥
     needAutoPack: boolean,// 是否需要进行自动构建上传
     platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
     postToDingTalk: boolean,// 是否推送钉钉
     md5Cache: boolean,
     sourceMaps: boolean,
-    enableHighPerformanceMode: boolean,//是否开启高性能模式
     customConfigPath: string,//自定义构建模板json路径
     mainBundleCompressionType: string,//主包压缩类型  无压缩： "none"  合并依赖： "merge_dep"  合并所有JSON： "merge_all_json"  ZIP： "zip"  小游戏分包： "subpackage"
     dingTalkWebHook: string,// 钉钉机器人的webhook地址
@@ -24,6 +24,9 @@ export interface PackProject {
     enginePath: string,// cocos引擎路径
     engineVer: string,// cocos引擎版本
     navigationBarTextStyle: string,// 导航栏标题颜色
+    preview: boolean,// 预览 与upload互斥
+    tb_cli_token: string,// 淘宝cli token
+    qrCodeUrl?: string
 }
 
 class _Pack {
@@ -91,10 +94,14 @@ export default class PackManager {
             }
         }
         this._totalUploads = 0;
+        this._totalPreviews = 0;
         for (let i = 0; i < this._packs.length; i++) {
             let pack = this._packs[i];
             if (pack.upload) {
                 this._totalUploads++;
+            }
+            if (pack.preview) {
+                this._totalPreviews++;
             }
         }
     }
@@ -109,6 +116,8 @@ export default class PackManager {
             this._failPackProjects = [];
             this._successUploads = [];
             this._failUploads = [];
+
+            TaoBaoMiniGame.clearData();
         }
         this._packIndex = index;
 
@@ -139,27 +148,56 @@ export default class PackManager {
 
     private _successUploads: BasePlatform[] = [];
     private _failUploads: string[] = [];
+    private _successPreviews: BasePlatform[] = [];
+    private _failPreviews: string[] = [];
     private _totalUploads = 0;
-    public addSuccessUpload(platform: BasePlatform) {
-        this._successUploads.push(platform);
-        this._checkFinishUpload();
+    private _totalPreviews = 0;
+    public addSuccessed(platform: BasePlatform) {
+        if (platform.project.upload) {
+            this._successUploads.push(platform);
+        }
+        else if (platform.project.preview) {
+            this._successPreviews.push(platform);
+        }
+        this._checkFinished();
     }
-    public addFailUpload(name: string) {
-        this._failUploads.push(name);
-        this._checkFinishUpload();
+    public addFailed(platform: BasePlatform) {
+        let name = platform.project.name;
+        if (platform.project.upload) {
+            this._failUploads.push(name);
+        }
+        else if (platform.project.preview) {
+            this._failPreviews.push(name);
+        }
+        this._checkFinished();
     }
-    private _checkFinishUpload() {
-        if (this._successUploads.length + this._failUploads.length === this._totalUploads) {
-            PackManager.ins.logHelper.log(`total upload ${this._totalUploads}  success : ${this._successUploads.length}  fail : ${this._failUploads.length}`);
+    private _checkFinished() {
+        if ((this._successUploads.length + this._failUploads.length) + (this._successPreviews.length + this._failPreviews.length) === this._totalUploads + this._totalPreviews) {
+            let uploadLog = `total upload ${this._totalUploads}  success : ${this._successUploads.length}  fail : ${this._failUploads.length}`;
+            let previewLog = `total preview ${this._totalPreviews}  success : ${this._successPreviews.length}  fail : ${this._failPreviews.length}`;
+            PackManager.ins.logHelper.log(`${uploadLog}\n${previewLog}`);
+
             let successStr = 'success upload:' + '\n';
             let failStr = 'fail upload:' + '\n';
             for (let i = 0; i < this._successUploads.length; i++) {
-                successStr += `${this._successUploads[i].project.name}, DebugUrl: ${this._successUploads[i].getDebugUrl()}\n`;
+                successStr += `${this._successUploads[i].project.name}, DebugUrl: ${this._successUploads[i].debugUrl}\n`;
             }
             PackManager.ins.logHelper.log(successStr);
 
             for (let i = 0; i < this._failUploads.length; i++) {
                 failStr += this._failUploads[i] + '\n';
+            }
+            PackManager.ins.logHelper.log(failStr);
+
+            successStr = 'success preview:' + '\n';
+            failStr = 'fail preview:' + '\n';
+            for (let i = 0; i < this._successPreviews.length; i++) {
+                successStr += `${this._successPreviews[i].project.name}, DebugUrl: ${this._successPreviews[i].debugUrl}\n`;
+            }
+            PackManager.ins.logHelper.log(successStr);
+
+            for (let i = 0; i < this._failPreviews.length; i++) {
+                failStr += this._failPreviews[i] + '\n';
             }
             PackManager.ins.logHelper.log(failStr);
 

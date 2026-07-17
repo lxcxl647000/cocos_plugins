@@ -5,54 +5,56 @@
 			"name": "开心抓猫猫",
 			"path": "D:\\cocos_project\\HappyPullCat",
 			"channel": "taobao-mini-game",
-			"skip": true,
+			"skip": false,
 			"upload": false,
-			"needAutoPack": false,
+			"needAutoPack": true,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\HappyPullCat\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": false
+					"isTest": true
 				}
 			},
-			"postToDingTalk": true,
+			"postToDingTalk": false,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
-			"dingTalkCustomContent_pack": "打包通知",
+			"dingTalkCustomContent_pack": "",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": true,
+			"tb_cli_token": "igo-cli-01eLrYn8iMYUN7j-pvDFbDc76KRCjsOAQ1MvLmPZ-LRjdqgDaxF-zTQuhnWUgZr78ZHL0DKfYp8SLoLrOtj3CkB45seutDKz4dns"
 		},
 		{
 			"appId": "3000000132351722",
 			"name": "养个招财猫",
 			"path": "D:/cocos_project/Cat",
 			"channel": "taobao-mini-game",
-			"skip": true,
+			"skip": false,
 			"upload": false,
-			"needAutoPack": false,
+			"needAutoPack": true,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\Cat\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": false
+					"isTest": true
 				}
 			},
-			"postToDingTalk": true,
+			"postToDingTalk": false,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
-			"dingTalkCustomContent_pack": "打包通知",
+			"dingTalkCustomContent_pack": "",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "white",
+			"preview": true,
+			"tb_cli_token": "igo-cli-015ZuP4sg-mKzWLn-tFUXEC9-OqG3RHuIWeRiT_tcsJHFh4cBqXsQjnz8VX201-NbaJv8NR0Cknqj5hjHuxRo4e9Tk475H9bgGIE"
 		},
 		{
 			"appId": "3000000141704164",
@@ -68,18 +70,19 @@
 					"isTest": false
 				}
 			},
-			"postToDingTalk": true,
+			"postToDingTalk": false,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
-			"dingTalkCustomContent_pack": "打包通知",
+			"dingTalkCustomContent_pack": "",
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.5\\CocosCreator.exe",
 			"engineVer": "3.8.5",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000136636894",
@@ -98,7 +101,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -106,7 +108,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
 			"engineVer": "3.8.2",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000141704974",
@@ -125,7 +129,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -133,7 +136,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.3\\CocosCreator.exe",
 			"engineVer": "3.8.3",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000143834422",
@@ -152,7 +157,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -160,7 +164,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
 			"engineVer": "3.8.2",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000143834423",
@@ -179,7 +185,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -187,7 +192,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
 			"engineVer": "3.8.2",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000143834483",
@@ -206,7 +213,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -214,7 +220,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
 			"engineVer": "3.8.2",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000143833683",
@@ -233,7 +241,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -241,7 +248,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.7\\CocosCreator.exe",
 			"engineVer": "3.8.7",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000137357221",
@@ -257,10 +266,9 @@
 					"isTest": false
 				}
 			},
-			"postToDingTalk": true,
+			"postToDingTalk": false,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -268,7 +276,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "white",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000141703714",
@@ -287,7 +297,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -295,7 +304,9 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.4\\CocosCreator.exe",
 			"engineVer": "3.8.4",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000143834991",
@@ -314,7 +325,6 @@
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
@@ -322,34 +332,37 @@
 			"dingTalkCustomContent_upload": "上传通知",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.4\\CocosCreator.exe",
 			"engineVer": "3.8.4",
-			"navigationBarTextStyle": "black"
+			"navigationBarTextStyle": "black",
+			"preview": false,
+			"tb_cli_token": ""
 		},
 		{
 			"appId": "3000000146360085",
 			"name": "星际守卫",
-			"path": "D:\\cocos_project\\cybersh-2.4.12",
+			"path": "D:\\cocos_project\\cybersh_v2-4-15",
 			"channel": "taobao-mini-game",
-			"skip": false,
-			"upload": true,
-			"needAutoPack": true,
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
-					"path": "D:\\cocos_project\\cybersh-2.4.12\\assets\\script\\core\\qc_common\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": true
+					"path": "D:\\cocos_project\\cybersh_v2-4-15\\assets\\script\\core\\qc_common\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
 				}
 			},
 			"postToDingTalk": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"enableHighPerformanceMode": true,
 			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"dingTalkWebHook": "https://oapi.dingtalk.com/robot/send?access_token=f984b908e8ecb48d4b4c22ca07c7e0b33500aba7654119213c32598f4782624d",
 			"dingTalkCustomContent_pack": "",
 			"dingTalkCustomContent_upload": "上传通知",
-			"enginePath": "D:\\cocos_editor\\Creator\\2.4.12\\CocosCreator.exe",
-			"engineVer": "2.4.12",
-			"navigationBarTextStyle": "white"
+			"enginePath": "D:\\cocos_editor\\Creator\\2.4.15\\CocosCreator.exe",
+			"engineVer": "2.4.15",
+			"navigationBarTextStyle": "white",
+			"preview": false,
+			"tb_cli_token": ""
 		}
 	]
 }

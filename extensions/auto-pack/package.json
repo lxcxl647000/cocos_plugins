@@ -51,11 +51,6 @@
                 "path": "auto-pack",
                 "label": "更新自动化工具",
                 "message": "update-tool"
-            },
-            {
-                "path": "auto-pack",
-                "label": "登录淘宝",
-                "message": "taobao-login"
             }
         ],
         "messages": {
@@ -67,11 +62,6 @@
             "update-tool": {
                 "methods": [
                     "updateTool"
-                ]
-            },
-            "taobao-login": {
-                "methods": [
-                    "taobaoLogin"
                 ]
             }
         }

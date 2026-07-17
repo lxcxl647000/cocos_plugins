@@ -5,7 +5,6 @@ import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import path, { join } from 'path';
 import { createApp, App, defineComponent } from 'vue';
 import os from 'os';
-import { checkTaobaoLogin, loginForTaobao } from '../../main';
 const panelDataMap = new WeakMap<any, App>();
 /**
  * @zh 如果希望兼容 3.3 之前的版本可以使用下方的代码
@@ -19,13 +18,12 @@ interface PackProject {
     path: string,// Cocos项目根目录
     channel: string,// 指定打包对应渠道名称
     skip: boolean,// 是否跳过cocos构建工程，直接使用导出工程
-    upload: boolean,// 是否需要上传
+    upload: boolean,// 是否需要上传 与preview互斥
     needAutoPack: boolean,// 是否需要进行自动构建上传
     platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
     postToDingTalk: boolean,// 是否推送钉钉
     md5Cache: boolean,
     sourceMaps: boolean,
-    enableHighPerformanceMode: boolean,//是否开启高性能模式
     customConfigPath: string,//自定义构建模板json路径
     mainBundleCompressionType: string,//主包压缩类型  无压缩： "none"  合并依赖： "merge_dep"  合并所有JSON： "merge_all_json"  ZIP： "zip"  小游戏分包： "subpackage"
     dingTalkWebHook: string,// 钉钉机器人的webhook地址
@@ -34,6 +32,9 @@ interface PackProject {
     enginePath: string,// cocos引擎路径
     engineVer: string,// cocos引擎版本
     navigationBarTextStyle: string,// 导航栏标题颜色
+    preview: boolean,// 是否预览 与upload互斥
+    tb_cli_token: string,// taobao cli token
+    qrCodeUrl?: string,// 二维码url
 }
 
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
@@ -55,7 +56,6 @@ const TaskTemp: PackProject = {
     postToDingTalk: true,
     md5Cache: false,
     sourceMaps: false,
-    enableHighPerformanceMode: true,
     customConfigPath: '',
     mainBundleCompressionType: 'none',
     dingTalkWebHook: '',
@@ -63,16 +63,76 @@ const TaskTemp: PackProject = {
     dingTalkCustomContent_upload: '',
     enginePath: '',
     engineVer: '',
-    navigationBarTextStyle: 'black'
+    navigationBarTextStyle: 'black',
+    preview: false,
+    tb_cli_token: ''
 };
 
 const modifyPackageJson = () => {
     for (let i = 0; i < taskList.length; i++) {
         taskList[i] = { ...TaskTemp, ...taskList[i] };
+        if (taskList[i].qrCodeUrl) {
+            delete taskList[i].qrCodeUrl;
+        }
     }
     let data = { packs: taskList };
     let dataStr = JSON.stringify(data, null, "\t");
     writeFileSync(join(__dirname, '../../../static/packconfigs/Packs.json'), dataStr, 'utf-8');
+};
+
+const spawn_tb = (args: string[], success: Function, fail: Function) => {
+    let sp: ChildProcessWithoutNullStreams = spawn("tbgame", args, { shell: true });
+    sp.stdout.setEncoding('utf8');
+    let commondStr = sp.spawnargs[4].replace(/"/g, '');
+    let cliTokenFailed = false;
+    let version = '';
+    let previewUrl = '';
+    let nextDataIsQrCode = false;
+
+    sp.stdout.on('data', (data) => {
+        if (nextDataIsQrCode) {
+            nextDataIsQrCode = false;
+        }
+        else {
+            console.log(`spawn_tb: ${commondStr} stdout ${data.toString()}`);
+        }
+        if (data.indexOf('最新线上版本:') > -1) {
+            let str: string = data.trim();
+            let arr = str.split('最新线上版本:');
+            version = arr[1].trim();
+        }
+        if (data.indexOf('预览二维码地址：') > -1) {
+            let str: string = data.trim();
+            let arr = str.split('预览二维码地址：');
+            previewUrl = arr[1].trim();
+        }
+        if (data.indexOf('已复制预览码到剪贴板') > -1) {
+            nextDataIsQrCode = true;
+        }
+    });
+    sp.stderr.on('data', (data) => {
+        console.log(`spawn_tb: ${commondStr} stderr ${data.toString()}`);
+        if (data.indexOf('CLI auth failed') > -1) {
+            cliTokenFailed = true;
+        }
+    });
+    sp.on('exit', async (code, data) => {
+        if (code === 0) {
+            if (cliTokenFailed) {
+                console.log(`spawn_tb: ${commondStr} failed 设置调用凭证Token错误`);
+                openDilog('warn', 'warn', '设置调用凭证Token错误!');
+                fail && fail();
+            }
+            else {
+                console.log(`spawn_tb: ${commondStr} success`);
+                success && success({ version, previewUrl });
+            }
+        }
+        else {
+            console.log(`spawn_tb: ${commondStr} failed`);
+            fail && fail();
+        }
+    });
 };
 
 export const openDilog = async (type: string, title: string, message: string, btnMap?: Map<string, Function>, cancel?: number) => {
@@ -123,8 +183,8 @@ module.exports = Editor.Panel.define({
                     return {
                         taskList: taskList,
                         isAutoPack: false,
-                        isCheckLogin: false,
                         qrCodeUrl: '',
+                        isSetTbCliToken: false
                     };
                 },
                 methods: {
@@ -167,6 +227,10 @@ module.exports = Editor.Panel.define({
                                 openDilog('warn', 'warn', '自动化项目中未配置引擎版本，请检查配置！');
                                 return;
                             }
+                            if (task.channel === 'taobao-mini-game' && (task.upload || task.preview) && !task.tb_cli_token) {
+                                openDilog('warn', 'warn', '请正确填写淘宝小游戏CLI Token！');
+                                return;
+                            }
 
                             let platformFilepath = this.getPlatformFile(task);
                             if (platformFilepath) {
@@ -184,32 +248,6 @@ module.exports = Editor.Panel.define({
                         if (this.isAutoPack) {
                             openDilog('warn', 'warn', '正在自动化，请稍后再试!');
                             return;
-                        }
-
-                        const checkTaobao = (func: Function) => {
-                            let check = false;
-                            for (let task of this.taskList) {
-                                if (task.channel === 'taobao-mini-game') {
-                                    check = true;
-                                    break;
-                                }
-                            }
-                            if (check) {
-                                this.isCheckLogin = true;
-                                checkTaobaoLogin(
-                                    () => {
-                                        this.isCheckLogin = false;
-                                        func && func();
-                                    },
-                                    () => {
-                                        this.isCheckLogin = false;
-                                        openDilog('warn', 'warn', '淘宝登录态过期，请重新登录!');
-                                    }
-                                );
-                            }
-                            else {
-                                func && func();
-                            }
                         }
 
                         const autoPack = () => {
@@ -231,6 +269,9 @@ module.exports = Editor.Panel.define({
                                 if (code === 0) {
                                     console.log(`autoPack exit suscess ${data}`);
                                     openDilog('info', '完成', '自动化完成!');
+
+                                    taskList = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
+                                    this.taskList = taskList;
                                 }
                                 else {
                                     console.log(`autoPack exit fail ${data}`);
@@ -243,6 +284,7 @@ module.exports = Editor.Panel.define({
                         let uploadCount = 0;
                         let packCount = 0;
                         let autoCount = 0;
+                        let previewCount = 0;
                         for (let task of this.taskList) {
                             if (task.needAutoPack) {
                                 autoCount++;
@@ -252,16 +294,19 @@ module.exports = Editor.Panel.define({
                                 if (!task.skip) {
                                     packCount++;
                                 }
-                                msg += `${task.appId}：${task.name}，构建：${(task.skip ? '✕' : '✓')}，上传：${(task.upload ? '✓' : '✕')}\n`;
+                                if (task.preview) {
+                                    previewCount++;
+                                }
+                                msg += `${task.appId}：${task.name}，构建：${(task.skip ? '✕' : '✓')}，上传：${(task.upload ? '✓' : '✕')}，预览：${(task.preview ? '✓' : '✕')}\n`;
                             }
                         }
-                        msg += `自动化：${autoCount}个，构建：${packCount}个，上传：${uploadCount}个\n`;
+                        msg += `自动化：${autoCount}个，构建：${packCount}个，上传：${uploadCount}个，预览：${previewCount}个\n`;
                         if (testServerWarns) {
                             msg += testServerWarns;
                         }
                         let btnMap = new Map<string, Function>();
                         btnMap.set('ok', () => {
-                            checkTaobao(() => { autoPack(); });
+                            autoPack();
                         });
                         openDilog('warn', 'warn', `${msg}开始自动化?`, btnMap, 1);
                     },
@@ -413,6 +458,15 @@ module.exports = Editor.Panel.define({
                         }
                         return count;
                     },
+                    getPreviewCount() {
+                        let count = 0;
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            if (this.taskList[i].preview && this.taskList[i].needAutoPack) {
+                                count++;
+                            }
+                        }
+                        return count;
+                    },
                     getPackCount() {
                         let count = 0;
                         for (let i = 0; i < this.taskList.length; i++) {
@@ -441,9 +495,6 @@ module.exports = Editor.Panel.define({
                     },
                     openToolLog() {
                         this.openLogDir(join(__dirname, '../../../toolLog'));
-                    },
-                    taobaoLogin() {
-                        loginForTaobao();
                     },
                     clickAutoPackToggle(item: PackProject, flag: boolean) {
                         item.needAutoPack = flag;
@@ -486,49 +537,104 @@ module.exports = Editor.Panel.define({
                             return false;
                         }
                     },
-                    getTaoBaoDebugUrl(appId: string) {
-                        if (!appId) {
+                    getTaoBaoDebugUrl(item: PackProject, isPreview: boolean) {
+                        if (!item) {
+                            openDilog('warn', 'warn', '项目配置为空，请检查配置');
+                            return;
+                        }
+                        if (!item.appId) {
                             openDilog('warn', 'warn', '请输入正确的appId');
                             return;
                         }
-                        this.isCheckLogin = true;
-                        let version = '';
-                        let sp: ChildProcessWithoutNullStreams = spawn("tbopen", ['app', '-a', appId], { shell: true });
-                        sp.stdout.setEncoding('utf8');
-                        sp.stdout.on('data', (data) => {
-                            console.log(`getTaoBaoDebugUrl stdout ${data.toString()}`);
-                            let str: string = data.trim();
-                            let arr = str.split('最新线上版本:');
-                            version = arr[1].trim();
-                        });
-                        sp.stderr.on('data', (data) => {
-                            console.log(`getTaoBaoDebugUrl stderr ${data.toString()}`);
-                        })
-                        sp.on('exit', async (code, data) => {
-                            this.isCheckLogin = false;
-                            if (version) {
-                                console.log(`getTaoBaoDebugUrl suscess ${data}`);
-                                let url = `https://m.duanqu.com?_ariver_appid=${appId}&nbsv=${version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
-                                this.qrCodeUrl = url;
+                        if (!item.tb_cli_token) {
+                            openDilog('warn', 'warn', '请输入正确的淘宝CLI Token');
+                            return;
+                        }
+
+                        this.isSetTbCliToken = true;
+                        spawn_tb(['config', 'set', 'token', item.tb_cli_token],
+                            () => {
+                                this.isSetTbCliToken = false;
+                                this.isAutoPack = true;
+                                if (isPreview) {
+                                    let compareVersion = (ver1: string, ver2: string) => {
+                                        let arr1 = ver1.split('.');
+                                        let arr2 = ver2.split('.');
+                                        let length = Math.min(arr1.length, arr2.length);
+                                        for (let i = 0; i < length; i++) {
+                                            if (arr1[i] == arr2[i]) {
+                                                continue;
+                                            }
+                                            return Number(arr1[i]) - Number(arr2[i]);
+                                        }
+                                        return arr1.length - arr2.length;
+                                    };
+                                    let outPath = path.join(item.path, `build/${compareVersion(item.engineVer, "3.0.0") ? item.channel : 'taobao-minigame'}`);
+                                    spawn_tb(["preview", "-i", outPath, "-a", item.appId, "-t", "minigame", "--copy", "true", "--renderMode", "highPerformance"],
+                                        (data: { previewUrl: string }) => {
+                                            this.isAutoPack = false;
+                                            for (let i = 0; i < this.taskList.length; i++) {
+                                                if (this.taskList[i].appId === item.appId) {
+                                                    this.taskList[i].qrCodeUrl = data.previewUrl;
+                                                    break;
+                                                }
+                                            }
+                                        },
+                                        () => {
+                                            this.isAutoPack = false;
+                                        }
+                                    );
+                                }
+                                else {
+                                    spawn_tb(['app', '-a', item.appId],
+                                        (data: { version: string }) => {
+                                            this.isAutoPack = false;
+                                            if (data.version) {
+                                                let url = `https://m.duanqu.com?_ariver_appid=${item.appId}&nbsv=${data.version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
+                                                this.qrCodeUrl = url;
+                                                console.log(`getTaoBaoDebugUrl suscess ${url}`);
+                                            }
+                                            else {
+                                                openDilog('error', '失败', '复制链接失败!');
+                                            }
+                                        },
+                                        () => {
+                                            this.isAutoPack = false;
+                                            openDilog('error', '失败', '复制链接失败!');
+                                        }
+                                    );
+                                }
+                            },
+                            () => {
+                                this.isSetTbCliToken = false;
                             }
-                            else {
-                                openDilog('error', '失败', '复制链接失败!');
-                            }
-                        });
+                        );
                     },
                     closeQrCode() {
                         this.qrCodeUrl = '';
                     },
-                    async copyLink() {
-                        if (this.qrCodeUrl !== '') {
+                    async copyLink(link: string) {
+                        if (link !== '') {
                             try {
-                                await navigator.clipboard.writeText(this.qrCodeUrl);
+                                await navigator.clipboard.writeText(link);
                                 openDilog('info', '完成', `复制链接成功，可粘贴使用！`);
 
                             } catch (error) {
                                 openDilog('error', '失败', `复制链接失败! ${error}`);
                             }
                         }
+                    },
+                    checkUpload(item: PackProject, isCheck: boolean) {
+                        if (item.preview) {
+                            item.preview = false;
+                        }
+                        item.upload = isCheck;
+                    },
+                    checkPreview(item: PackProject, isCheck: boolean) {
+                        if (item.upload) {
+                            item.upload = false;
+                        }
+                        item.preview = isCheck;
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

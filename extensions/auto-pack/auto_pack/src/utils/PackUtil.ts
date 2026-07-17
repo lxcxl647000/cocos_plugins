@@ -215,4 +215,46 @@ export default class PackUtil {
         // 先获取父目录，再获取父目录的basename
         return path.basename(filePath);
     }
+
+    /**
+     * 移除字符串中的 ANSI 转义序列
+     * @param str 带 ANSI 颜色码的字符串
+     * @returns 清洗后的纯文本
+     */
+    public static stripAnsi(str: string): string {
+        if (!str) return '';
+
+        // 匹配各种形式的 ANSI 转义序列
+        // \x1B[42m、\e[42m、\033[42m、\x9B[42m 等
+        return str.replace(/(\x1B|\x9B|\x1B\[|\e|\[)\d+(;\d+)*m/g, '');
+    }
+
+    /**
+     * 从字符串中提取 JSON 对象字面量
+     * @param str 包含对象字面量的字符串
+     * @returns 解析后的对象，失败返回 null
+     */
+    public static extractJsonObject(str: string): Record<string, any> | null {
+        console.log('extractJsonObject ', str);
+        if (!str) return null;
+
+        try {
+            // 提取最外层的 { ... }
+            const match = str.match(/{[\s\S]*}/);
+            if (!match) return null;
+
+            const objLiteral = match[0];
+
+            // 转换为标准 JSON
+            const jsonStr = objLiteral
+                .replace(/'/g, '"')
+                .replace(/(\w+)\s*:/g, '"$1":')
+                .replace(/,\s*}/g, '}');
+
+            return JSON.parse(jsonStr);
+        } catch (e) {
+            console.error('JSON 解析失败:', e);
+            return null;
+        }
+    }
 }
