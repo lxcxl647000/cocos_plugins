@@ -1,8 +1,9 @@
-import path from 'path';
+import path, { join } from 'path';
 import { BasePlatform } from '../platforms/BasePlatform';
 import { supportPlatform } from '../platforms/PlatformConfig';
 import LogHelper from './LogHelper';
 import { TaoBaoMiniGame } from '../platforms/TaoBaoMiniGame';
+import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 
 export interface PackProject {
     appId: string,
@@ -48,7 +49,22 @@ interface QRCode {
 export interface SaveData {
     ding_talk: DingTalk,
     taobao_cli_token: TaoBao_Cli_Token[],
-    qrCodeUrls: QRCode[]
+    qrCodeUrls: QRCode[],
+    successedPack?: string[],
+    failedPack?: string[],
+    successedUpload?: string[],
+    failedUpload?: string[],
+    successedPreview?: string[],
+    failedPreview?: string[]
+}
+
+enum ResultType {
+    successedPack = 0,
+    failedPack,
+    successedUpload,
+    failedUpload,
+    successedPreview,
+    failedPreview
 }
 
 class _Pack {
@@ -138,6 +154,8 @@ export default class PackManager {
             this._failPackProjects = [];
             this._successUploads = [];
             this._failUploads = [];
+            this._successPreviews = [];
+            this._failPreviews = [];
 
             TaoBaoMiniGame.clearData();
         }
@@ -226,6 +244,19 @@ export default class PackManager {
             if (this._packIndex >= PackManager.ins.packs.length) {
                 PackManager.ins.logHelper.saveLog();
             }
+
+            if (this._successUploads.length > 0) {
+                PackManager.ins.saveResult(ResultType.successedUpload, this._successUploads.map(item => item.project.name));
+            }
+            if (this._failUploads.length > 0) {
+                PackManager.ins.saveResult(ResultType.failedUpload, this._failUploads);
+            }
+            if (this._successPreviews.length > 0) {
+                PackManager.ins.saveResult(ResultType.successedPreview, this._successPreviews.map(item => item.project.name));
+            }
+            if (this._failPreviews.length > 0) {
+                PackManager.ins.saveResult(ResultType.failedPreview, this._failPreviews);
+            }
         }
     }
 
@@ -264,8 +295,15 @@ export default class PackManager {
         }
         PackManager.ins.logHelper.log(failStr);
 
-        if (this._successUploads.length + this._failUploads.length === this._totalUploads) {
+        if ((this._successUploads.length + this._failUploads.length === this._totalUploads) && (this._successPreviews.length + this._failPreviews.length === this._totalPreviews)) {
             PackManager.ins.logHelper.saveLog();
+        }
+
+        if (this._successPackProjects.length > 0) {
+            PackManager.ins.saveResult(ResultType.successedPack, this._successPackProjects);
+        }
+        if (this._failPackProjects.length > 0) {
+            PackManager.ins.saveResult(ResultType.failedPack, this._failPackProjects);
         }
     }
 
@@ -293,5 +331,34 @@ export default class PackManager {
         PackManager.ins.logHelper.log(`${project.name}打包失败，原因:${reason}${timeStr}`);
         this.addFailProject(project.name);
         this.packIndex++;
+    }
+
+    public saveResult(type: ResultType, result: string[]) {
+        const savePath = join(__dirname, '../../../../static/packconfigs/save.json');
+        let saveData: SaveData = existsSync(savePath) ? JSON.parse(readFileSync(savePath, 'utf-8')) : null;
+        if (saveData) {
+            switch (type) {
+                case ResultType.successedPack:
+                    saveData.successedPack = result;
+                    break;
+                case ResultType.failedPack:
+                    saveData.failedPack = result;
+                    break;
+                case ResultType.successedUpload:
+                    saveData.successedUpload = result;
+                    break;
+                case ResultType.failedUpload:
+                    saveData.failedUpload = result;
+                    break;
+                case ResultType.successedPreview:
+                    saveData.successedPreview = result;
+                    break;
+                case ResultType.failedPreview:
+                    saveData.failedPreview = result;
+                    break;
+            }
+            let saveDataStr = JSON.stringify(saveData, null, "\t");
+            writeFileSync(savePath, saveDataStr, 'utf-8');
+        }
     }
 }

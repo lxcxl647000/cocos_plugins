@@ -235,7 +235,6 @@ export default class PackUtil {
      * @returns 解析后的对象，失败返回 null
      */
     public static extractJsonObject(str: string): Record<string, any> | null {
-        console.log('extractJsonObject ', str);
         if (!str) return null;
 
         try {
@@ -253,7 +252,7 @@ export default class PackUtil {
 
             return JSON.parse(jsonStr);
         } catch (e) {
-            console.error('JSON 解析失败:', e);
+            console.error(`JSON 解析失败: ${e}`);
             return null;
         }
     }

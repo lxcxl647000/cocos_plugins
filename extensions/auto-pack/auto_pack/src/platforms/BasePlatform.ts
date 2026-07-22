@@ -168,7 +168,9 @@ export class BasePlatform {
         return new Promise<void>((resolve, reject) => {
             afterBuildFinish(this, () => {
                 resolve();
-                PackManager.ins.addSuccessProject(this._project.name);
+                if (!this._project.skip) {
+                    PackManager.ins.addSuccessProject(this._project.name);
+                }
                 PackManager.ins.packIndex++;
             });
         });

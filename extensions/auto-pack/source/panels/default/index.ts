@@ -57,7 +57,13 @@ interface QRCode {
 interface SaveData {
     ding_talk: DingTalk,
     taobao_cli_token: TaoBao_Cli_Token[],
-    qrCodeUrls: QRCode[]
+    qrCodeUrls: QRCode[],
+    successedPack?: string[],
+    failedPack?: string[],
+    successedUpload?: string[],
+    failedUpload?: string[],
+    successedPreview?: string[],
+    failedPreview?: string[]
 }
 
 const TaskTemp: PackProject = {
@@ -310,18 +316,55 @@ module.exports = Editor.Panel.define({
                             sp.on('exit', (code, data) => {
                                 if (code === 0) {
                                     console.log(`autoPack exit suscess ${data}`);
-                                    openDilog('info', '完成', '自动化完成!');
-
-                                    // 检测是否有预览码生成
+                                    let msg = '';
                                     if (existsSync(savePath)) {
-                                        this.qrCodeUrlMap.clear();
                                         let saveData: SaveData = JSON.parse(readFileSync(savePath, 'utf-8'));
+                                        // 检测是否有预览码生成
+                                        this.qrCodeUrlMap.clear();
                                         if (saveData.qrCodeUrls) {
                                             for (let i = 0; i < saveData.qrCodeUrls.length; i++) {
                                                 this.qrCodeUrlMap.set(saveData.qrCodeUrls[i].appid, saveData.qrCodeUrls[i]);
                                             }
                                         }
+                                        // 自动化结果
+                                        if (saveData.successedPack && saveData.successedPack.length > 0) {
+                                            msg += '构建成功：';
+                                            for (let i = 0; i < saveData.successedPack.length; i++) {
+                                                msg += `${saveData.successedPack[i]}${i === saveData.successedPack.length - 1 ? '\n' : ' '}`;
+                                            }
+                                        }
+                                        if (saveData.failedPack && saveData.failedPack.length > 0) {
+                                            msg += '构建失败：';
+                                            for (let i = 0; i < saveData.failedPack.length; i++) {
+                                                msg += `${saveData.failedPack[i]}${i === saveData.failedPack.length - 1 ? '\n' : ' '}`;
+                                            }
+                                        }
+                                        if (saveData.successedUpload && saveData.successedUpload.length > 0) {
+                                            msg += '上传成功：';
+                                            for (let i = 0; i < saveData.successedUpload.length; i++) {
+                                                msg += `${saveData.successedUpload[i]}${i === saveData.successedUpload.length - 1 ? '\n' : ' '}`;
+                                            }
+                                        }
+                                        if (saveData.failedUpload && saveData.failedUpload.length > 0) {
+                                            msg += '上传失败：';
+                                            for (let i = 0; i < saveData.failedUpload.length; i++) {
+                                                msg += `${saveData.failedUpload[i]}${i === saveData.failedUpload.length - 1 ? '\n' : ' '}`;
+                                            }
+                                        }
+                                        if (saveData.successedPreview && saveData.successedPreview.length > 0) {
+                                            msg += '预览成功：';
+                                            for (let i = 0; i < saveData.successedPreview.length; i++) {
+                                                msg += `${saveData.successedPreview[i]}${i === saveData.successedPreview.length - 1 ? '\n' : ' '}`;
+                                            }
+                                        }
+                                        if (saveData.failedPreview && saveData.failedPreview.length > 0) {
+                                            msg += '预览失败：';
+                                            for (let i = 0; i < saveData.failedPreview.length; i++) {
+                                                msg += `${saveData.failedPreview[i]}${i === saveData.failedPreview.length - 1 ? '\n' : ' '}`;
+                                            }
+                                        }
                                     }
+                                    openDilog('info', '完成', `自动化完成!\n${msg}`);
                                 }
                                 else {
                                     console.log(`autoPack exit fail ${data}`);
@@ -551,6 +594,7 @@ module.exports = Editor.Panel.define({
                         if (!flag) {
                             item.upload = false;
                             item.skip = true;
+                            item.preview = false;
                         }
                     },
                     setPlatformFile(item: PackProject, path: string) {
@@ -739,6 +783,24 @@ module.exports = Editor.Panel.define({
                 let saveData: SaveData = readJSONSync(savePath);
                 if (saveData) {
                     saveData.qrCodeUrls = [];
+                    if (saveData.successedPack) {
+                        delete saveData.successedPack;
+                    }
+                    if (saveData.failedPack) {
+                        delete saveData.failedPack;
+                    }
+                    if (saveData.successedUpload) {
+                        delete saveData.successedUpload;
+                    }
+                    if (saveData.failedUpload) {
+                        delete saveData.failedUpload;
+                    }
+                    if (saveData.successedPreview) {
+                        delete saveData.successedPreview;
+                    }
+                    if (saveData.failedPreview) {
+                        delete saveData.failedPreview;
+                    }
                     let saveDataStr = JSON.stringify(saveData, null, "\t");
                     writeFileSync(savePath, saveDataStr, 'utf-8');
                 }

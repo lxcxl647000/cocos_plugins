@@ -180,9 +180,18 @@ export class TaoBaoMiniGame extends BasePlatform {
             // 上传成功
             if (data.indexOf('upload done') > -1) {
                 let str: string = PackUtil.stripAnsi(data).trim();
+                let index = str.indexOf('upload done');
+                str = str.substring(index, str.length);
                 let jsonData = PackUtil.extractJsonObject(str);
-                if (jsonData && jsonData.version) {
-                    version = jsonData.version;
+                if (jsonData) {
+                    this.logHelper.log(`upload done str ${str}`);
+                    this.logHelper.log(`upload done jsonData ${JSON.stringify(jsonData)}`);
+                    if (jsonData.version) {
+                        version = jsonData.version;
+                    }
+                }
+                else {
+                    this.logHelper.log(`upload done str JSON 解析失败: ${str}`);
                 }
             }
         });
