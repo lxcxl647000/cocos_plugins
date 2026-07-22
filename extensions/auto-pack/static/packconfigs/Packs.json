@@ -57,7 +57,7 @@
 			"channel": "taobao-mini-game",
 			"skip": true,
 			"upload": false,
-			"needAutoPack": true,
+			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\Pet_Line\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
@@ -307,7 +307,7 @@
 			"channel": "taobao-mini-game",
 			"skip": true,
 			"upload": false,
-			"needAutoPack": true,
+			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\cocos_project\\cybersh_v2-4-15\\assets\\script\\core\\qc_common\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",

@@ -42,8 +42,6 @@ export class TaoBaoMiniGame extends BasePlatform {
             let uploadFunc = () => {
                 let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
                 let uploadSuccess = (version: string) => {
-                    TaoBaoMiniGame.checkDoCli();
-                    PackManager.ins.addSuccessed(this);
                     if (version) {
                         this.debugUrl = `https://m.duanqu.com?_ariver_appid=${this.project.appId}&nbsv=${version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
                         this.postToDingTalk('成功', true, version);
@@ -54,6 +52,8 @@ export class TaoBaoMiniGame extends BasePlatform {
                         this.logHelper.log(`upload success :获取版本号失败`);
                         this.logHelper.saveLog();
                     }
+                    TaoBaoMiniGame.checkDoCli();
+                    PackManager.ins.addSuccessed(this);
                 };
                 let uploadFail = () => {
                     TaoBaoMiniGame.checkDoCli();
@@ -99,9 +99,9 @@ export class TaoBaoMiniGame extends BasePlatform {
                     let saveDataStr = JSON.stringify(saveData, null, "\t");
                     writeFileSync(savePath, saveDataStr, 'utf-8');
 
+                    this.debugUrl = previewUrl;
                     TaoBaoMiniGame.checkDoCli();
                     PackManager.ins.addSuccessed(this);
-                    this.debugUrl = previewUrl;
                     this.postToDingTalk('成功', true);
                     this.logHelper.log(`preview Debug Url is :${this.debugUrl}`);
                     this.logHelper.saveLog();
