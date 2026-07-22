@@ -1,0 +1,329 @@
+{
+	"packs": [
+		{
+			"appId": "3000000136119813",
+			"name": "开心抓猫猫",
+			"path": "D:\\cocos_project\\HappyPullCat",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": true,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\HappyPullCat\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
+			"engineVer": "3.8.6",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000132351722",
+			"name": "养个招财猫",
+			"path": "D:/cocos_project/Cat",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": true,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Cat\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
+			"engineVer": "3.8.6",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000141704164",
+			"name": "萌宠连连看",
+			"path": "D:/cocos_project/Pet_Line",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Pet_Line\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.5\\CocosCreator.exe",
+			"engineVer": "3.8.5",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000136636894",
+			"name": "猫咪萌宠消除",
+			"path": "D:/cocos_project/Cat_Eliminate",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Cat_Eliminate\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000141704974",
+			"name": "挪车大师",
+			"path": "D:/cocos_project/Parking_Master",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Parking_Master\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.3\\CocosCreator.exe",
+			"engineVer": "3.8.3",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000143834422",
+			"name": "合数专家",
+			"path": "D:\\cocos_project\\SuperRelieveStressPipe",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\SuperRelieveStressPipe\\assets\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000143834423",
+			"name": "兄弟来闯关",
+			"path": "D:\\cocos_project\\BuddyGo",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\BuddyGo\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000143834483",
+			"name": "箭头转转消",
+			"path": "D:\\cocos_project\\ArrowEliminate",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\ArrowEliminate\\assets\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.2\\CocosCreator.exe",
+			"engineVer": "3.8.2",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000143833683",
+			"name": "倒水大师",
+			"path": "D:\\cocos_project\\PourTheWater",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\PourTheWater\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.7\\CocosCreator.exe",
+			"engineVer": "3.8.7",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000137357221",
+			"name": "糖豆消消乐",
+			"path": "D:\\cocos_project\\HappyEliminate\\Eliminate",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\HappyEliminate\\Eliminate\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
+			"engineVer": "3.8.6",
+			"navigationBarTextStyle": "black",
+			"preview": false
+		},
+		{
+			"appId": "3000000141703714",
+			"name": "小鱼碰碰消",
+			"path": "D:\\cocos_project\\Ocean_Eliminate",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\Ocean_Eliminate\\assets\\script\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.4\\CocosCreator.exe",
+			"engineVer": "3.8.4",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000143834991",
+			"name": "全员打螺丝",
+			"path": "D:\\cocos_project\\ScrewInScrews",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\ScrewInScrews\\assets\\scripts\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\3.8.4\\CocosCreator.exe",
+			"engineVer": "3.8.4",
+			"navigationBarTextStyle": "black",
+			"preview": true
+		},
+		{
+			"appId": "3000000146360085",
+			"name": "星际守卫",
+			"path": "D:\\cocos_project\\cybersh_v2-4-15",
+			"channel": "taobao-mini-game",
+			"skip": true,
+			"upload": false,
+			"needAutoPack": false,
+			"platformFiles": {
+				"taobao-mini-game": {
+					"path": "D:\\cocos_project\\cybersh_v2-4-15\\assets\\script\\core\\qc_common\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
+				}
+			},
+			"postToDingTalk": false,
+			"postToDingTalk2": false,
+			"md5Cache": false,
+			"sourceMaps": false,
+			"customConfigPath": "",
+			"mainBundleCompressionType": "subpackage",
+			"enginePath": "D:\\cocos_editor\\Creator\\2.4.15\\CocosCreator.exe",
+			"engineVer": "2.4.15",
+			"navigationBarTextStyle": "white",
+			"preview": true
+		}
+	]
+}

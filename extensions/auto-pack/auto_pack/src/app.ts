@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from "commander";
-import PackManager, { PackProject } from "./pack/PackManager";
+import PackManager, { PackProject, SaveData } from "./pack/PackManager";
 import { join } from "path";
 import { existsSync, readFileSync } from "fs-extra";
 
@@ -13,8 +13,25 @@ let options = program.opts();
 PackManager.ins.oneByOne = options.onebyone;
 
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
+const savePath = join(__dirname, '../../../static/packconfigs/save.json');
 let taskList: PackProject[] = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
+let saveData: SaveData = existsSync(savePath) ? JSON.parse(readFileSync(savePath, 'utf-8')) : null;
 PackManager.ins.packs = taskList;
+if (saveData) {
+    for (let i = 0; i < PackManager.ins.packs.length; i++) {
+        if (saveData.ding_talk) {
+            PackManager.ins.packs[i].dingTalk = saveData.ding_talk;
+        }
+        if (saveData.taobao_cli_token) {
+            for (let j = 0; j < saveData.taobao_cli_token.length; j++) {
+                if (PackManager.ins.packs[i].appId === saveData.taobao_cli_token[j].appid) {
+                    PackManager.ins.packs[i].tb_cli_token = saveData.taobao_cli_token[j].token;
+                    break;
+                }
+            }
+        }
+    }
+}
 
 PackManager.ins.logHelper.log(options);
 PackManager.ins.packIndex = 0;

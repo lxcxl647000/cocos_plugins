@@ -16,7 +16,27 @@
         <ui-button style=" margin-left: 10px;" @confirm=" openToolLog">
             <ui-icon value="log"></ui-icon>
         </ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm=" saveConfig">
+            <ui-icon value="save"></ui-icon>
+        </ui-button>
     </div>
+
+    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <ui-label slot="label">钉钉webhook</ui-label>
+        <ui-input style="font-size: 14px; margin: 0px 5px;" :value="dingTalk.dingTalkWebHook || ''"
+            @confirm="dingTalk.dingTalkWebHook = $event.target.value"></ui-input>
+
+        <ui-label slot="label">钉钉自定义内容(打包通知)</ui-label>
+        <ui-input style="font-size: 14px; max-width: 30%; margin: 0px 5px;"
+            :value="dingTalk.dingTalkCustomContent_pack || ''"
+            @confirm="dingTalk.dingTalkCustomContent_pack = $event.target.value"></ui-input>
+
+        <ui-label slot="label">钉钉自定义内容(上传通知)</ui-label>
+        <ui-input style="font-size: 14px; max-width: 30%; margin-left: 5px;"
+            :value="dingTalk.dingTalkCustomContent_upload || ''"
+            @confirm="dingTalk.dingTalkCustomContent_upload = $event.target.value"></ui-input>
+    </div>
+
     <div style="max-height: 80vh;overflow-y: auto;">
         <div v-for="(item, index) in taskList" :key="item.appId"
             style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
@@ -46,7 +66,7 @@
                 <ui-label v-if="item.channel === 'taobao-mini-game'" slot="label"
                     style="margin-left: 10px;">tb_cli_token</ui-label>
                 <ui-input v-if="item.channel === 'taobao-mini-game'"
-                    style="font-size: 14px; max-width: 50%; margin-left: 10px;" :value="item.tb_cli_token"
+                    style="font-size: 14px; max-width: 50%; margin-left: 10px;" :value="item.tb_cli_token || ''"
                     @confirm="item.tb_cli_token = $event.target.value">
                 </ui-input>
             </div>
@@ -71,32 +91,14 @@
             </div>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
-                <ui-label slot="label">是否推送钉钉</ui-label>
+                <ui-label slot="label">钉钉推送构建</ui-label>
                 <ui-checkbox slot="content" :checked="item.postToDingTalk"
-                    @confirm="item.postToDingTalk = $event.target.value"></ui-checkbox>
+                    @confirm="item.postToDingTalk = $event.target.value" style="margin-right: 10px;"></ui-checkbox>
+
+                <ui-label slot="label">钉钉推送预览或上传</ui-label>
+                <ui-checkbox slot="content" :checked="item.postToDingTalk2"
+                    @confirm="item.postToDingTalk2 = $event.target.value"></ui-checkbox>
             </div>
-
-            <ui-prop v-if="item.postToDingTalk">
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <ui-label slot="label">钉钉webhook</ui-label>
-                    <ui-input style="font-size: 14px; margin-left: 10px;" :value="item.dingTalkWebHook || ''"
-                        @confirm="item.dingTalkWebHook = $event.target.value"></ui-input>
-                </div>
-
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <ui-label slot="label">钉钉自定义内容（打包通知）</ui-label>
-                    <ui-input style="font-size: 14px; max-width: 30%; margin-left: 10px;"
-                        :value="item.dingTalkCustomContent_pack || ''"
-                        @confirm="item.dingTalkCustomContent_pack = $event.target.value"></ui-input>
-                </div>
-
-                <div style="display: flex; align-items: center;">
-                    <ui-label slot="label">钉钉自定义内容（上传通知）</ui-label>
-                    <ui-input style="font-size: 14px; max-width: 30%; margin-left: 10px;"
-                        :value="item.dingTalkCustomContent_upload || ''"
-                        @confirm="item.dingTalkCustomContent_upload = $event.target.value"></ui-input>
-                </div>
-            </ui-prop>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">
                 <ui-label slot="label">预览</ui-label>
@@ -182,17 +184,17 @@
                     @confirm="clickAutoPackToggle(item, $event.target.value)"></ui-checkbox>
             </div>
 
-            <div v-if="item.qrCodeUrl" style="margin-top: 10px;">
-                <ui-qrcode :value="item.qrCodeUrl"></ui-qrcode>
-                <ui-label :value="item.qrCodeUrl"
+            <div v-if="qrCodeUrlMap.has(item.appId)" style="margin-top: 10px;">
+                <ui-qrcode :value="qrCodeUrlMap.get(item.appId).url"></ui-qrcode>
+                <ui-label :value="qrCodeUrlMap.get(item.appId).url"
                     style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 </ui-label>
-                <ui-button @confirm="copyLink(item.qrCodeUrl)">复制</ui-button>
+                <ui-button @confirm="copyLink(qrCodeUrlMap.get(item.appId).url)">复制</ui-button>
             </div>
         </div>
     </div>
 
-    <div style="margin-top: 20px;">
+    <div style="margin-top: 5px;">
         <ui-button @confirm="startAutoPack">开始</ui-button>
         <ui-label style="margin-left: 10px;">{{`总共 : ${taskList.length}`}}</ui-label>
         <ui-label style="margin-left: 10px;">{{`自动化 : ${getAutoCount()}`}}</ui-label>

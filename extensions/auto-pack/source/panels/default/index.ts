@@ -1,7 +1,7 @@
 /* eslint-disable vue/one-component-per-file */
 
 import { ChildProcessWithoutNullStreams, spawn, exec } from 'child_process';
-import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
+import { existsSync, readFileSync, readJSONSync, writeFileSync } from 'fs-extra';
 import path, { join } from 'path';
 import { createApp, App, defineComponent } from 'vue';
 import os from 'os';
@@ -21,24 +21,45 @@ interface PackProject {
     upload: boolean,// 是否需要上传 与preview互斥
     needAutoPack: boolean,// 是否需要进行自动构建上传
     platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
-    postToDingTalk: boolean,// 是否推送钉钉
+    postToDingTalk: boolean,// 是否推送钉钉cocos构建结果
+    postToDingTalk2: boolean,// 是否推送钉钉cli上传或预览结果
     md5Cache: boolean,
     sourceMaps: boolean,
     customConfigPath: string,//自定义构建模板json路径
     mainBundleCompressionType: string,//主包压缩类型  无压缩： "none"  合并依赖： "merge_dep"  合并所有JSON： "merge_all_json"  ZIP： "zip"  小游戏分包： "subpackage"
-    dingTalkWebHook: string,// 钉钉机器人的webhook地址
-    dingTalkCustomContent_pack: string,// 钉钉机器人的自定义内容
-    dingTalkCustomContent_upload: string,// 钉钉机器人的自定义内容
     enginePath: string,// cocos引擎路径
     engineVer: string,// cocos引擎版本
     navigationBarTextStyle: string,// 导航栏标题颜色
     preview: boolean,// 是否预览 与upload互斥
-    tb_cli_token: string,// taobao cli token
-    qrCodeUrl?: string,// 二维码url
+    tb_cli_token?: string,// taobao cli token
+    dingTalk?: DingTalk,// 钉钉机器人配置
+}
+const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
+const savePath = join(__dirname, '../../../static/packconfigs/save.json');
+
+interface TaoBao_Cli_Token {
+    appid: string,
+    name: string,
+    token: string
 }
 
-const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
-let taskList: PackProject[] = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
+interface DingTalk {
+    dingTalkWebHook: string,
+    dingTalkCustomContent_pack: string,
+    dingTalkCustomContent_upload: string
+}
+
+interface QRCode {
+    appid: string,
+    url: string
+}
+
+interface SaveData {
+    ding_talk: DingTalk,
+    taobao_cli_token: TaoBao_Cli_Token[],
+    qrCodeUrls: QRCode[]
+}
+
 const TaskTemp: PackProject = {
     appId: '',
     name: '',
@@ -53,31 +74,16 @@ const TaskTemp: PackProject = {
             isTest: false
         }
     },
-    postToDingTalk: true,
+    postToDingTalk: false,
+    postToDingTalk2: false,
     md5Cache: false,
     sourceMaps: false,
     customConfigPath: '',
     mainBundleCompressionType: 'none',
-    dingTalkWebHook: '',
-    dingTalkCustomContent_pack: '',
-    dingTalkCustomContent_upload: '',
     enginePath: '',
     engineVer: '',
     navigationBarTextStyle: 'black',
     preview: false,
-    tb_cli_token: ''
-};
-
-const modifyPackageJson = () => {
-    for (let i = 0; i < taskList.length; i++) {
-        taskList[i] = { ...TaskTemp, ...taskList[i] };
-        if (taskList[i].qrCodeUrl) {
-            delete taskList[i].qrCodeUrl;
-        }
-    }
-    let data = { packs: taskList };
-    let dataStr = JSON.stringify(data, null, "\t");
-    writeFileSync(join(__dirname, '../../../static/packconfigs/Packs.json'), dataStr, 'utf-8');
 };
 
 const spawn_tb = (args: string[], success: Function, fail: Function) => {
@@ -181,13 +187,44 @@ module.exports = Editor.Panel.define({
             app.component('MyProject', defineComponent({
                 data() {
                     return {
-                        taskList: taskList,
+                        taskList: {} as PackProject[],
                         isAutoPack: false,
                         qrCodeUrl: '',
-                        isSetTbCliToken: false
+                        isSetTbCliToken: false,
+                        dingTalk: { dingTalkWebHook: '', dingTalkCustomContent_pack: '', dingTalkCustomContent_upload: '' } as DingTalk,
+                        qrCodeUrlMap: new Map<string, QRCode>()
                     };
                 },
+                mounted() {
+                    this.initSaveData();
+                },
                 methods: {
+                    initSaveData() {
+                        this.taskList = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
+                        let taobaoCliTokenMap: Map<string, TaoBao_Cli_Token> = new Map<string, TaoBao_Cli_Token>();
+                        if (existsSync(savePath)) {
+                            let data: SaveData = readJSONSync(savePath);
+                            if (data) {
+                                if (data.ding_talk) {
+                                    this.dingTalk = data.ding_talk;
+                                }
+                                if (data.taobao_cli_token) {
+                                    for (let i = 0; i < data.taobao_cli_token.length; i++) {
+                                        taobaoCliTokenMap.set(data.taobao_cli_token[i].appid, data.taobao_cli_token[i]);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (this.taskList) {
+                            for (let i = 0; i < this.taskList.length; i++) {
+                                if (taobaoCliTokenMap.has(this.taskList[i].appId)) {
+                                    this.taskList[i].tb_cli_token = taobaoCliTokenMap.get(this.taskList[i].appId).token;
+                                }
+                                this.taskList[i].dingTalk = this.dingTalk;
+                            }
+                        }
+                    },
                     startAutoPack() {
                         let testServerWarns: string = '';
                         if (!this.taskList || this.taskList.length === 0) {
@@ -232,6 +269,11 @@ module.exports = Editor.Panel.define({
                                 return;
                             }
 
+                            if ((task.postToDingTalk || task.postToDingTalk2) && (!task.dingTalk || !task.dingTalk.dingTalkWebHook)) {
+                                openDilog('warn', 'warn', '勾选了钉钉推送，请正确填写钉钉WebHook！');
+                                return;
+                            }
+
                             let platformFilepath = this.getPlatformFile(task);
                             if (platformFilepath) {
                                 const normalizedPath = path.normalize(task.path);
@@ -253,7 +295,7 @@ module.exports = Editor.Panel.define({
                         const autoPack = () => {
                             openDilog('info', 'start', '开始自动化');
                             this.isAutoPack = true;
-                            modifyPackageJson();
+                            this.saveConfig();
 
                             let path = join(__dirname, '../../../static/auto-pack/build/app.js');
                             let args = [path];
@@ -270,8 +312,16 @@ module.exports = Editor.Panel.define({
                                     console.log(`autoPack exit suscess ${data}`);
                                     openDilog('info', '完成', '自动化完成!');
 
-                                    taskList = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
-                                    this.taskList = taskList;
+                                    // 检测是否有预览码生成
+                                    if (existsSync(savePath)) {
+                                        this.qrCodeUrlMap.clear();
+                                        let saveData: SaveData = JSON.parse(readFileSync(savePath, 'utf-8'));
+                                        if (saveData.qrCodeUrls) {
+                                            for (let i = 0; i < saveData.qrCodeUrls.length; i++) {
+                                                this.qrCodeUrlMap.set(saveData.qrCodeUrls[i].appid, saveData.qrCodeUrls[i]);
+                                            }
+                                        }
+                                    }
                                 }
                                 else {
                                     console.log(`autoPack exit fail ${data}`);
@@ -354,10 +404,9 @@ module.exports = Editor.Panel.define({
                                         if (importedData.packs && Array.isArray(importedData.packs)) {
                                             // 将导入的数据替换到当前的 taskList 中
                                             this.taskList = importedData.packs;
-                                            taskList = this.taskList;
 
                                             // 4. 触发保存，将新数据写入本地 Packs.json
-                                            modifyPackageJson();
+                                            this.saveConfig();
 
                                             // 如果有 Editor.Dialog，可以弹个成功提示
                                             openDilog('info', '提示', '导入成功！');
@@ -576,7 +625,7 @@ module.exports = Editor.Panel.define({
                                             this.isAutoPack = false;
                                             for (let i = 0; i < this.taskList.length; i++) {
                                                 if (this.taskList[i].appId === item.appId) {
-                                                    this.taskList[i].qrCodeUrl = data.previewUrl;
+                                                    this.qrCodeUrlMap.set(item.appId, { appid: item.appId, url: data.previewUrl });
                                                     break;
                                                 }
                                             }
@@ -636,6 +685,43 @@ module.exports = Editor.Panel.define({
                             item.upload = false;
                         }
                         item.preview = isCheck;
+                    },
+                    saveConfig() {
+                        let saveData: SaveData = {
+                            ding_talk: {
+                                dingTalkWebHook: '',
+                                dingTalkCustomContent_pack: '',
+                                dingTalkCustomContent_upload: ''
+                            },
+                            taobao_cli_token: [],
+                            qrCodeUrls: []
+                        };
+                        let saveDingTalk = false;
+                        let packs: PackProject[] = [];
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            this.taskList[i] = { ...TaskTemp, ...this.taskList[i] };
+                            if (this.taskList[i].tb_cli_token) {
+                                saveData.taobao_cli_token.push({ appid: this.taskList[i].appId, name: this.taskList[i].name, token: this.taskList[i].tb_cli_token });
+                            }
+
+                            if (this.taskList[i].dingTalk) {
+                                if (!saveDingTalk) {
+                                    saveDingTalk = true;
+                                    saveData.ding_talk = { ...this.taskList[i].dingTalk };
+                                }
+                            }
+                            const { dingTalk, tb_cli_token, ...t } = this.taskList[i];
+                            packs.push(t);
+                        }
+
+                        this.qrCodeUrlMap.clear();
+
+                        let data = { packs };
+                        let dataStr = JSON.stringify(data, null, "\t");
+                        writeFileSync(packsPath, dataStr, 'utf-8');
+
+                        let saveDataStr = JSON.stringify(saveData, null, "\t");
+                        writeFileSync(savePath, saveDataStr, 'utf-8');
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),
@@ -649,7 +735,14 @@ module.exports = Editor.Panel.define({
     close() {
         const app = panelDataMap.get(this);
         if (app) {
-            modifyPackageJson();
+            if (existsSync(savePath)) {
+                let saveData: SaveData = readJSONSync(savePath);
+                if (saveData) {
+                    saveData.qrCodeUrls = [];
+                    let saveDataStr = JSON.stringify(saveData, null, "\t");
+                    writeFileSync(savePath, saveDataStr, 'utf-8');
+                }
+            }
 
             app.unmount();
         }

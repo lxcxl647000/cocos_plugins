@@ -13,20 +13,42 @@ export interface PackProject {
     upload: boolean,// 是否需要上传 与preview互斥
     needAutoPack: boolean,// 是否需要进行自动构建上传
     platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
-    postToDingTalk: boolean,// 是否推送钉钉
+    postToDingTalk: boolean,// 是否推送钉钉cocos构建结果
+    postToDingTalk2: boolean,// 是否推送钉钉cli上传或预览结果
     md5Cache: boolean,
     sourceMaps: boolean,
     customConfigPath: string,//自定义构建模板json路径
     mainBundleCompressionType: string,//主包压缩类型  无压缩： "none"  合并依赖： "merge_dep"  合并所有JSON： "merge_all_json"  ZIP： "zip"  小游戏分包： "subpackage"
-    dingTalkWebHook: string,// 钉钉机器人的webhook地址
-    dingTalkCustomContent_pack: string,// 钉钉机器人的自定义内容
-    dingTalkCustomContent_upload: string,// 钉钉机器人的自定义内容
     enginePath: string,// cocos引擎路径
     engineVer: string,// cocos引擎版本
     navigationBarTextStyle: string,// 导航栏标题颜色
     preview: boolean,// 预览 与upload互斥
-    tb_cli_token: string,// 淘宝cli token
-    qrCodeUrl?: string
+    tb_cli_token?: string,// 淘宝cli token
+    qrCodeUrl?: string,
+    dingTalk?: DingTalk,// 钉钉机器人配置
+}
+
+interface TaoBao_Cli_Token {
+    appid: string,
+    name: string,
+    token: string
+}
+
+interface DingTalk {
+    dingTalkWebHook: string,
+    dingTalkCustomContent_pack: string,
+    dingTalkCustomContent_upload: string
+}
+
+interface QRCode {
+    appid: string,
+    url: string
+}
+
+export interface SaveData {
+    ding_talk: DingTalk,
+    taobao_cli_token: TaoBao_Cli_Token[],
+    qrCodeUrls: QRCode[]
 }
 
 class _Pack {

@@ -29,4 +29,4 @@ toolLog/
 tsconfig.tsbuildinfo
 exportZip/
 ExportPathConfig.json
-Packs.json
+save.json

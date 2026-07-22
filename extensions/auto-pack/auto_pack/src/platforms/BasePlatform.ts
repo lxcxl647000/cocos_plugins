@@ -25,13 +25,11 @@ export class BasePlatform {
         needAutoPack: false,
         platformFiles: {},
         postToDingTalk: false,
+        postToDingTalk2: false,
         md5Cache: false,
         sourceMaps: false,
         customConfigPath: '',
         mainBundleCompressionType: '',
-        dingTalkWebHook: '',
-        dingTalkCustomContent_pack: '',
-        dingTalkCustomContent_upload: '',
         enginePath: '',
         engineVer: '',
         navigationBarTextStyle: '',
@@ -177,7 +175,7 @@ export class BasePlatform {
     }
 
     public async postToDingTalk(result: string, isUpload: boolean, version?: string) {
-        if (this._project.postToDingTalk && this._project.dingTalkWebHook) {
+        if ((this._project.postToDingTalk || this._project.postToDingTalk2) && this._project.dingTalk && this._project.dingTalk.dingTalkWebHook) {
             let oprateType = '';
             let versionStr = '';
             let oprateStr = '';
@@ -185,22 +183,26 @@ export class BasePlatform {
             let outputPath = '';
             let serverName = '';
             let debugUrl = '';
-            if (isUpload) {
-                oprateStr = this._project.dingTalkCustomContent_upload;
+            if (isUpload && this._project.postToDingTalk2) {
+                oprateStr = this._project.dingTalk.dingTalkCustomContent_upload;
                 oprateType = this._project.upload ? '上传' : '预览';
                 versionStr = this._project.upload ? `##### ${oprateType}版本：**${version}** \n` : '';
                 outputPath = channelName + "后台";
                 debugUrl = this.debugUrl;
             }
-            else {
-                oprateStr = this._project.dingTalkCustomContent_pack;
+            else if (this._project.postToDingTalk) {
+                oprateStr = this._project.dingTalk.dingTalkCustomContent_pack;
                 oprateType = '打包';
                 outputPath = path.join(this.outputPath, this._project.channel);
                 if (this.modifyServer && this.platformFile.path) {
                     serverName = ` ##### 服务器：**${this.platformFile.isTest ? '测试服' : '正式服'}** \n`;
                 }
             }
-            let bot = new DingdingBot(this._project.dingTalkWebHook);
+
+            if (!oprateStr) {
+                return;
+            }
+            let bot = new DingdingBot(this._project.dingTalk.dingTalkWebHook);
             let msg = `#### **<font color='#e61a1a'>${oprateStr}</font>** \n` +
                 ` #### 游戏名字：**<font color='#1E90FF'>${this._project.name}</font>** \n` +
                 ` ##### 游戏渠道：**${channelName}**\n` +

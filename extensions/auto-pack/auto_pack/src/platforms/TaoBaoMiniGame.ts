@@ -1,7 +1,7 @@
 import { BasePlatform } from "./BasePlatform";
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import path, { join } from "path";
-import PackManager, { PackProject } from "../pack/PackManager";
+import PackManager, { PackProject, SaveData } from "../pack/PackManager";
 import fs from 'fs';
 import PackUtil from "../utils/PackUtil";
 import { existsSync, readFileSync, writeFileSync } from "fs-extra";
@@ -39,6 +39,95 @@ export class TaoBaoMiniGame extends BasePlatform {
     public doTaobaoCli() {
         this.debugUrl = '';
         if (this.project.tb_cli_token && (this.project.upload || this.project.preview)) {
+            let uploadFunc = () => {
+                let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
+                let uploadSuccess = (version: string) => {
+                    TaoBaoMiniGame.checkDoCli();
+                    PackManager.ins.addSuccessed(this);
+                    if (version) {
+                        this.debugUrl = `https://m.duanqu.com?_ariver_appid=${this.project.appId}&nbsv=${version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
+                        this.postToDingTalk('成功', true, version);
+                        this.logHelper.log(`upload Debug Url is :${this.debugUrl}`);
+                        this.logHelper.saveLog();
+                    }
+                    else {
+                        this.logHelper.log(`upload success :获取版本号失败`);
+                        this.logHelper.saveLog();
+                    }
+                };
+                let uploadFail = () => {
+                    TaoBaoMiniGame.checkDoCli();
+                    PackManager.ins.addFailed(this);
+                    this.postToDingTalk('失败，查看日志失败详情', true);
+                    this.logHelper.saveLog();
+                };
+
+                try {
+                    // 上传小游戏
+                    this.logHelper.log(`start upload`);
+                    this._spawn(["upload", "--input", outPath, "--appId", this.project.appId, "--type", "minigame", "--renderMode", "highPerformance"],
+                        (data: { version: string }) => {
+                            uploadSuccess(data.version);
+                        },
+                        () => {
+                            uploadFail();
+                        }
+                    );
+                } catch (error) {
+                    this.logHelper.log(`upload failed :${error}`);
+                    uploadFail();
+                }
+            };
+
+            let previewFunc = () => {
+                let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
+                this.logHelper.log('start preview');
+
+                let previewSuccess = (previewUrl: string) => {
+                    const savePath = join(__dirname, '../../../../static/packconfigs/save.json');
+                    let saveData: SaveData = existsSync(savePath) ? JSON.parse(readFileSync(savePath, 'utf-8')) :
+                        {
+                            ding_talk: {
+                                dingTalkWebHook: '',
+                                dingTalkCustomContent_pack: '',
+                                dingTalkCustomContent_upload: ''
+                            },
+                            taobao_cli_token: [],
+                            qrCodeUrls: []
+                        };
+                    saveData.qrCodeUrls.push({ appid: this.project.appId, url: previewUrl });
+                    let saveDataStr = JSON.stringify(saveData, null, "\t");
+                    writeFileSync(savePath, saveDataStr, 'utf-8');
+
+                    TaoBaoMiniGame.checkDoCli();
+                    PackManager.ins.addSuccessed(this);
+                    this.debugUrl = previewUrl;
+                    this.postToDingTalk('成功', true);
+                    this.logHelper.log(`preview Debug Url is :${this.debugUrl}`);
+                    this.logHelper.saveLog();
+                };
+                let previewFail = () => {
+                    TaoBaoMiniGame.checkDoCli();
+                    PackManager.ins.addFailed(this);
+                    this.postToDingTalk('失败，查看日志失败详情', true);
+                    this.logHelper.saveLog();
+                };
+
+                try {
+                    // 预览小游戏
+                    this._spawn(["preview", "-i", outPath, "-a", this.project.appId, "-t", "minigame", "--copy", "true", "--renderMode", "highPerformance"],
+                        (data: { previewUrl: string }) => {
+                            previewSuccess(data.previewUrl);
+                        },
+                        () => {
+                            previewFail();
+                        }
+                    );
+                } catch (error) {
+                    this.logHelper.log(`preview failed :${error}`);
+                    previewFail();
+                }
+            };
             // 上传游戏之前设置game.json文件
             this._setGameJson();
             this._spawn(['config', 'set', 'token', this.project.tb_cli_token],
@@ -59,92 +148,6 @@ export class TaoBaoMiniGame extends BasePlatform {
                 }
             );
         }
-
-        let uploadFunc = () => {
-            let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
-            let uploadSuccess = (version: string) => {
-                TaoBaoMiniGame.checkDoCli();
-                PackManager.ins.addSuccessed(this);
-                if (version) {
-                    this.debugUrl = `https://m.duanqu.com?_ariver_appid=${this.project.appId}&nbsv=${version}&nbsource=debug&nbsn=TRIAL&_mp_code=tb&_container_type=gm&vconsole=true`
-                    this.postToDingTalk('成功', true, version);
-                    this.logHelper.log(`upload Debug Url is :${this.debugUrl}`);
-                    this.logHelper.saveLog();
-                }
-                else {
-                    this.logHelper.log(`upload success :获取版本号失败`);
-                    this.logHelper.saveLog();
-                }
-            };
-            let uploadFail = () => {
-                TaoBaoMiniGame.checkDoCli();
-                PackManager.ins.addFailed(this);
-                this.postToDingTalk('失败，查看日志失败详情', true);
-                this.logHelper.saveLog();
-            };
-
-            try {
-                // 上传小游戏
-                this.logHelper.log(`start upload`);
-                this._spawn(["upload", "--input", outPath, "--appId", this.project.appId, "--type", "minigame", "--renderMode", "highPerformance"],
-                    (data: { version: string }) => {
-                        uploadSuccess(data.version);
-                    },
-                    () => {
-                        uploadFail();
-                    }
-                );
-            } catch (error) {
-                this.logHelper.log(`upload failed :${error}`);
-                uploadFail();
-            }
-        };
-
-        let previewFunc = () => {
-            let outPath = path.join(this.outputPath, this.isEngine3 ? this.project.channel : 'taobao-minigame');
-            this.logHelper.log('start preview');
-
-            let previewSuccess = (previewUrl: string) => {
-                const packsPath = join(__dirname, '../../../../static/packconfigs/Packs.json');
-                let taskList: PackProject[] = existsSync(packsPath) ? JSON.parse(readFileSync(packsPath, 'utf-8')).packs : [];
-                for (let i = 0; i < taskList.length; i++) {
-                    if (taskList[i].appId === this.project.appId) {
-                        taskList[i].qrCodeUrl = previewUrl;
-                        let data = { packs: taskList };
-                        let dataStr = JSON.stringify(data, null, "\t");
-                        writeFileSync(packsPath, dataStr, 'utf-8');
-                        break;
-                    }
-                }
-                TaoBaoMiniGame.checkDoCli();
-                PackManager.ins.addSuccessed(this);
-                this.debugUrl = previewUrl;
-                this.postToDingTalk('成功', true);
-                this.logHelper.log(`preview Debug Url is :${this.debugUrl}`);
-                this.logHelper.saveLog();
-            };
-            let previewFail = () => {
-                TaoBaoMiniGame.checkDoCli();
-                PackManager.ins.addFailed(this);
-                this.postToDingTalk('失败，查看日志失败详情', true);
-                this.logHelper.saveLog();
-            };
-
-            try {
-                // 预览小游戏
-                this._spawn(["preview", "-i", outPath, "-a", this.project.appId, "-t", "minigame", "--copy", "true", "--renderMode", "highPerformance"],
-                    (data: { previewUrl: string }) => {
-                        previewSuccess(data.previewUrl);
-                    },
-                    () => {
-                        previewFail();
-                    }
-                );
-            } catch (error) {
-                this.logHelper.log(`preview failed :${error}`);
-                previewFail();
-            }
-        };
     }
 
     private _spawn(args: string[], success: Function, fail: Function) {
