@@ -7,18 +7,19 @@
         <ui-button style=" margin-left: 10px;" @confirm=" exportPacksConfig">
             <ui-icon value="export"></ui-icon>
         </ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(true)">一键勾选自动化</ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(false)">一键取消自动化</ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(true)">一键勾选上传</ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(false)">一键取消上传</ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(false)">一键勾选构建</ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(true)">一键取消构建</ui-button>
         <ui-button style=" margin-left: 10px;" @confirm=" openToolLog">
             <ui-icon value="log"></ui-icon>
         </ui-button>
         <ui-button style=" margin-left: 10px;" @confirm=" saveConfig">
             <ui-icon value="save"></ui-icon>
         </ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="importCliToken()">一键导入cli_token</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(true)">一键勾选自动化</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(false)">一键取消自动化</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(true)">一键勾选上传</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(false)">一键取消上传</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(false)">一键勾选构建</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(true)">一键取消构建</ui-button>
     </div>
 
     <div style="display: flex; align-items: center; margin-bottom: 5px;">

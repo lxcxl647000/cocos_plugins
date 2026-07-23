@@ -5,6 +5,8 @@ import { existsSync, readFileSync, readJSONSync, writeFileSync } from 'fs-extra'
 import path, { join } from 'path';
 import { createApp, App, defineComponent } from 'vue';
 import os from 'os';
+import CfgUtils from './CfgUtils';
+import * as XLSX from 'xlsx';
 const panelDataMap = new WeakMap<any, App>();
 /**
  * @zh 如果希望兼容 3.3 之前的版本可以使用下方的代码
@@ -171,6 +173,63 @@ export const openDilog = async (type: string, title: string, message: string, bt
         }
     }
 }
+
+const importFunc = (cb: Function) => {
+    // 1. 动态创建一个隐藏的 input 标签
+    const input = document.createElement('input');
+    input.type = 'file';
+    // 限制只能选择 json 文件，如果导入 Excel 可以改为 '.xlsx, .xls'
+    input.accept = '.json,.xlsx,.xls';
+    input.style.display = 'none';
+
+    // 2. 监听文件选择的变化
+    input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        // 获取文件后缀名，判断文件类型
+        const fileName = file.name;
+        const fileExt = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
+
+        // 3. 使用 FileReader 读取文件内容
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                let importedData = null;
+                if (fileExt === '.json') {
+                    // 获取文件里的文本内容并解析为 JSON
+                    const result = event.target?.result as string;
+                    importedData = JSON.parse(result);
+
+                } else if (fileExt === '.xlsx' || fileExt === '.xls') {
+                    // Excel 文件：以二进制形式读取并解析
+                    const data = new Uint8Array(event.target?.result as ArrayBuffer);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    importedData = CfgUtils.getJsonData(sheetData);
+                }
+                cb && cb(importedData);
+            } catch (error) {
+                console.error(error);
+                openDilog('error', '错误', '文件解析失败，请检查文件格式！');
+            }
+
+            // 5. 清理：将临时创建的 input 标签从页面中移除
+            document.body.removeChild(input);
+        };
+        if (fileExt === '.json') {
+            reader.readAsText(file); // JSON 以文本形式读取
+        } else if (fileExt === '.xlsx' || fileExt === '.xls') {
+            reader.readAsArrayBuffer(file); // Excel 以二进制形式读取
+        }
+    };
+
+    // 6. 将 input 挂载到页面并触发点击，弹出文件选择框
+    document.body.appendChild(input);
+    input.click();
+};
 
 module.exports = Editor.Panel.define({
     listeners: {
@@ -422,66 +481,45 @@ module.exports = Editor.Panel.define({
                         openDilog('warn', 'delete', '是否删除配置?', btnMap, 1);
                     },
                     importPacksConfig() {
-                        const importFunc = () => {
-                            // 1. 动态创建一个隐藏的 input 标签
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            // 限制只能选择 json 文件，如果导入 Excel 可以改为 '.xlsx, .xls'
-                            input.accept = '.json';
-                            input.style.display = 'none';
-
-                            // 2. 监听文件选择的变化
-                            input.onchange = (e) => {
-                                const file = (e.target as HTMLInputElement).files?.[0];
-                                if (!file) return;
-
-                                // 3. 使用 FileReader 读取文件内容
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                    try {
-                                        // 获取文件里的文本内容并解析为 JSON
-                                        const result = event.target?.result as string;
-                                        const importedData = JSON.parse(result);
-
-                                        // 假设导入的 JSON 格式也是 { packs: [...] }
-                                        if (importedData.packs && Array.isArray(importedData.packs)) {
-                                            // 将导入的数据替换到当前的 taskList 中
-                                            this.taskList = importedData.packs;
-
-                                            // 4. 触发保存，将新数据写入本地 Packs.json
-                                            this.saveConfig();
-
-                                            // 如果有 Editor.Dialog，可以弹个成功提示
-                                            openDilog('info', '提示', '导入成功！');
-                                        } else {
-                                            openDilog('warn', '警告', '导入的文件格式不正确！');
-                                        }
-                                    } catch (error) {
-                                        console.error(error);
-                                        openDilog('error', '错误', '文件解析失败，请检查文件格式！');
-                                    }
-
-                                    // 5. 清理：将临时创建的 input 标签从页面中移除
-                                    document.body.removeChild(input);
-                                };
-                                reader.readAsText(file); // 以文本形式读取文件
-                            };
-
-                            // 6. 将 input 挂载到页面并触发点击，弹出文件选择框
-                            document.body.appendChild(input);
-                            input.click();
-                        };
                         // 说明静态文件中有 Packs.json了，询问是否替换
+                        const cb = (importedData: any) => {
+                            // 假设导入的 JSON 格式也是 { packs: [...] }
+                            if (importedData && ((importedData.packs && Array.isArray(importedData.packs) || Array.isArray(importedData)))) {
+                                // 将导入的数据替换到当前的 taskList 中
+                                let data = importedData.packs ? importedData.packs : importedData;
+                                let tmps: PackProject[] = [...this.taskList];
+                                this.taskList = [];
+                                for (let i = 0; i < data.length; i++) {
+                                    this.taskList[i] = { ...TaskTemp, ...data[i] };
+                                    this.taskList[i].dingTalk = this.dingTalk;
+                                    for (let j = 0; j < tmps.length; j++) {
+                                        if (this.taskList[i].appId === tmps[j].appId && tmps[j].tb_cli_token) {
+                                            this.taskList[i].tb_cli_token = tmps[j].tb_cli_token;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // 4. 触发保存，将新数据写入本地 Packs.json
+                                this.saveConfig();
+
+                                // 如果有 Editor.Dialog，可以弹个成功提示
+                                openDilog('info', '提示', '导入成功！');
+                            }
+                            else {
+                                openDilog('warn', '警告', '导入的文件格式不正确！');
+                            }
+                        };
                         if (this.taskList && this.taskList.length > 0) {
                             let btnMap = new Map<string, Function>();
                             btnMap.set('replace', () => {
-                                importFunc();
+                                importFunc(cb);
                             });
                             btnMap.set('cancel', null);
                             openDilog('warn', 'replace', 'Packs.json 已存在，是否替换?', btnMap);
                         }
                         else {
-                            importFunc();
+                            importFunc(cb);
                         }
                     },
                     exportPacksConfig() {
@@ -492,19 +530,22 @@ module.exports = Editor.Panel.define({
                         }
                         try {
                             // 1. 组装需要导出的数据
-                            const exportData = {
-                                packs: this.taskList
-                            };
+                            let packs: PackProject[] = [];
+                            for (let i = 0; i < this.taskList.length; i++) {
+                                const { dingTalk, tb_cli_token, ...t } = this.taskList[i];
+                                packs.push(t);
+                            }
+                            const exportData = { packs };
                             const dataStr = JSON.stringify(exportData, null, "\t");
 
                             // 2. 获取当前系统的桌面路径
                             const desktopPath = os.homedir() + '/Desktop';
 
                             // 3. 拼接完整的保存路径
-                            const savePath = join(desktopPath, `Packs.json`);
+                            const exportPath = join(desktopPath, `Packs.json`);
 
                             // 4. 使用 Node.js 原生 fs 模块同步写入文件到桌面
-                            writeFileSync(savePath, dataStr, 'utf-8');
+                            writeFileSync(exportPath, dataStr, 'utf-8');
 
                             // 5. 弹出成功提示
                             openDilog('info', '提示', `配置已成功导出到桌面！\n文件名：${`Packs.json`}`);
@@ -766,6 +807,34 @@ module.exports = Editor.Panel.define({
 
                         let saveDataStr = JSON.stringify(saveData, null, "\t");
                         writeFileSync(savePath, saveDataStr, 'utf-8');
+                    },
+                    importCliToken() {
+                        const cb = (data: TaoBao_Cli_Token[]) => {
+                            if (data) {
+                                if (this.taskList && this.taskList.length > 0) {
+                                    for (let i = 0; i < this.taskList.length; i++) {
+                                        let task: PackProject = this.taskList[i];
+                                        if (task.channel === 'taobao-mini-game') {
+                                            for (let j = 0; j < data.length; j++) {
+                                                if (data[j].appid === task.appId) {
+                                                    task.tb_cli_token = data[j].token;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    openDilog('info', 'info', '导入成功！');
+                                    this.saveConfig();
+                                }
+                                else {
+                                    openDilog('warn', 'warn', '请先添加自动化项目配置！');
+                                }
+                            }
+                            else {
+                                openDilog('warn', 'warn', '导入cli token 数据失败！');
+                            }
+                        };
+                        importFunc(cb);
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),
