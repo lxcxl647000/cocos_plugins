@@ -24,7 +24,9 @@ export default class CfgUtils {
                         if (sheetData.length > 3) {
                             let sheet = { data: sheetData, name: excelData[0].name };
                             CfgUtils.writeFileJson(exportPath, sheet, isFormat, isArr);
-                            CfgUtils.writeFileTS(exportTSPath, sheet);
+                            if (exportTSPath) {
+                                CfgUtils.writeFileTS(exportTSPath, sheet);
+                            }
                         }
                         else {
                             console.log(`行数低于3行，无效配置 ${excelPaths[i]} ${excelData[0].name}`);

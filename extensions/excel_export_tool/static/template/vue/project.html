@@ -53,5 +53,9 @@
             <ui-label slot="label">数组</ui-label>
             <ui-checkbox slot="content" :checked="isArr" @confirm="isArr = $event.target.value"></ui-checkbox>
         </div>
+        <div style="display: flex; align-items: center; margin-left: 10px;">
+            <ui-label slot="label">zip</ui-label>
+            <ui-checkbox slot="content" :checked="isZip" @confirm="isZip = $event.target.value"></ui-checkbox>
+        </div>
     </div>
 </div>
