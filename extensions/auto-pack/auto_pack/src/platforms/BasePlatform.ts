@@ -11,7 +11,7 @@ export class BasePlatform {
     public outputPath: string = '';
     public isEngine3: boolean = false;
     public logHelper: LogHelper = null;
-    public platformFile: { path: string, isTest: boolean } = { path: '', isTest: false };
+    public platformFile: { path: string, isTest: boolean, apiVersion?: string } = { path: '', isTest: false };
     public modifyServer: boolean = false;
     public debugUrl: string = '';
 
@@ -53,6 +53,7 @@ export class BasePlatform {
         if (project.platformFiles && project.platformFiles[channel]) {
             this.platformFile.path = project.platformFiles[channel].path || '';
             this.platformFile.isTest = project.platformFiles[channel].isTest || false;
+            this.platformFile.apiVersion = project.platformFiles[channel].apiVersion || '';
         }
         if (PackUtil.compareVersion(project.engineVer, "3.0.0") >= 0) {
             this.isEngine3 = true;

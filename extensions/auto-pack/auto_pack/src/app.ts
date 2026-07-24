@@ -30,6 +30,16 @@ if (saveData) {
                 }
             }
         }
+        if (saveData.apiVersions) {
+            console.log(saveData.apiVersions);
+            for (let j = 0; j < saveData.apiVersions.length; j++) {
+                console.log(PackManager.ins.packs[i].appId, '  ', saveData.apiVersions[j].appid);
+                if (PackManager.ins.packs[i].appId === saveData.apiVersions[j].appid) {
+                    PackManager.ins.packs[i].platformFiles[PackManager.ins.packs[i].channel].apiVersion = saveData.apiVersions[j].apiVersion;
+                    break;
+                }
+            }
+        }
     }
 }
 

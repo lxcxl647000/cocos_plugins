@@ -5,7 +5,7 @@
 			"name": "开心抓猫猫",
 			"path": "D:\\cocos_project\\HappyPullCat",
 			"channel": "taobao-mini-game",
-			"skip": true,
+			"skip": false,
 			"upload": false,
 			"needAutoPack": true,
 			"platformFiles": {
@@ -23,14 +23,14 @@
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
 			"navigationBarTextStyle": "black",
-			"preview": true
+			"preview": false
 		},
 		{
 			"appId": "3000000132351722",
 			"name": "养个招财猫",
 			"path": "D:/cocos_project/Cat",
 			"channel": "taobao-mini-game",
-			"skip": true,
+			"skip": false,
 			"upload": false,
 			"needAutoPack": true,
 			"platformFiles": {
@@ -48,7 +48,7 @@
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
 			"navigationBarTextStyle": "black",
-			"preview": true
+			"preview": false
 		},
 		{
 			"appId": "3000000141704164",

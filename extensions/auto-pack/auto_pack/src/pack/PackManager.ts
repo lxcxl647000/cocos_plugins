@@ -13,7 +13,7 @@ export interface PackProject {
     skip: boolean,// 是否跳过cocos构建工程，直接使用导出工程
     upload: boolean,// 是否需要上传 与preview互斥
     needAutoPack: boolean,// 是否需要进行自动构建上传
-    platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
+    platformFiles: { [key: string]: { path: string, isTest: boolean, apiVersion?: string } },// key平台名称与channel对应，value游戏工程中平台的配置文件
     postToDingTalk: boolean,// 是否推送钉钉cocos构建结果
     postToDingTalk2: boolean,// 是否推送钉钉cli上传或预览结果
     md5Cache: boolean,
@@ -46,6 +46,11 @@ interface QRCode {
     url: string
 }
 
+interface ApiVersion {
+    appid: string,
+    apiVersion: string
+}
+
 export interface SaveData {
     ding_talk: DingTalk,
     taobao_cli_token: TaoBao_Cli_Token[],
@@ -55,7 +60,8 @@ export interface SaveData {
     successedUpload?: string[],
     failedUpload?: string[],
     successedPreview?: string[],
-    failedPreview?: string[]
+    failedPreview?: string[],
+    apiVersions?: ApiVersion[]
 }
 
 enum ResultType {

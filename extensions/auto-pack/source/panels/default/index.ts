@@ -22,7 +22,7 @@ interface PackProject {
     skip: boolean,// 是否跳过cocos构建工程，直接使用导出工程
     upload: boolean,// 是否需要上传 与preview互斥
     needAutoPack: boolean,// 是否需要进行自动构建上传
-    platformFiles: { [key: string]: { path: string, isTest: boolean } },// key平台名称与channel对应，value游戏工程中平台的配置文件
+    platformFiles: { [key: string]: { path: string, isTest: boolean, apiVersion?: string } },// key平台名称与channel对应，value游戏工程中平台的配置文件
     postToDingTalk: boolean,// 是否推送钉钉cocos构建结果
     postToDingTalk2: boolean,// 是否推送钉钉cli上传或预览结果
     md5Cache: boolean,
@@ -56,6 +56,11 @@ interface QRCode {
     url: string
 }
 
+interface ApiVersion {
+    appid: string,
+    apiVersion: string
+}
+
 interface SaveData {
     ding_talk: DingTalk,
     taobao_cli_token: TaoBao_Cli_Token[],
@@ -65,7 +70,8 @@ interface SaveData {
     successedUpload?: string[],
     failedUpload?: string[],
     successedPreview?: string[],
-    failedPreview?: string[]
+    failedPreview?: string[],
+    apiVersions?: ApiVersion[]
 }
 
 const TaskTemp: PackProject = {
@@ -672,6 +678,43 @@ module.exports = Editor.Panel.define({
                             return false;
                         }
                     },
+                    getApiVersion(item: PackProject) {
+                        let apiVersion: string = '';
+                        if (item.platformFiles && item.platformFiles[item.channel]) {
+                            let path = item.platformFiles[item.channel].path;
+                            if (existsSync(path)) {
+                                try {
+                                    let fileContent = readFileSync(path, 'utf-8');
+                                    if (fileContent) {
+                                        // 使用正则表达式匹配 apiVersion 的值
+                                        // 这个正则表达式的解释：
+                                        // apiVersion:        -> 匹配字面量 "apiVersion:"
+                                        // \s*                -> 匹配零个或多个空白字符（如空格、换行）
+                                        // "                  -> 匹配一个双引号
+                                        // ([^"]*)            -> 这是一个捕获组，匹配除了双引号以外的任意字符，直到遇到下一个双引号
+                                        // "                  -> 匹配结尾的双引号
+                                        const versionRegex = /apiVersion:\s*"([^"]*)"/;
+                                        const matchResult = fileContent.match(versionRegex);
+
+                                        // 检查是否匹配成功并提取值
+                                        if (matchResult && matchResult[1]) {
+                                            // matchResult[1] 就是第一个捕获组的内容，也就是我们想要的值
+                                            apiVersion = matchResult[1];
+                                        }
+                                        return apiVersion;
+                                    }
+                                } catch (error) {
+                                    return apiVersion;
+                                }
+                            }
+                            else {
+                                return apiVersion;
+                            }
+                        }
+                        else {
+                            return apiVersion;
+                        }
+                    },
                     getTaoBaoDebugUrl(item: PackProject, isPreview: boolean) {
                         if (!item) {
                             openDilog('warn', 'warn', '项目配置为空，请检查配置');
@@ -772,6 +815,14 @@ module.exports = Editor.Panel.define({
                         item.preview = isCheck;
                     },
                     saveConfig() {
+                        if (existsSync(savePath)) {
+                            let saveData: SaveData = readJSONSync(savePath);
+                            if (saveData && saveData.apiVersions) {
+                                saveData.apiVersions = [];
+                                let saveDataStr = JSON.stringify(saveData, null, "\t");
+                                writeFileSync(savePath, saveDataStr, 'utf-8');
+                            }
+                        }
                         let saveData: SaveData = {
                             ding_talk: {
                                 dingTalkWebHook: '',
@@ -779,7 +830,8 @@ module.exports = Editor.Panel.define({
                                 dingTalkCustomContent_upload: ''
                             },
                             taobao_cli_token: [],
-                            qrCodeUrls: []
+                            qrCodeUrls: [],
+                            apiVersions: []
                         };
                         let saveDingTalk = false;
                         let packs: PackProject[] = [];
@@ -795,6 +847,15 @@ module.exports = Editor.Panel.define({
                                     saveData.ding_talk = { ...this.taskList[i].dingTalk };
                                 }
                             }
+
+                            if (this.taskList[i].platformFiles && this.taskList[i].platformFiles[this.taskList[i].channel] && this.taskList[i].platformFiles[this.taskList[i].channel].apiVersion) {
+                                saveData.apiVersions.push({
+                                    appid: this.taskList[i].appId,
+                                    apiVersion: this.taskList[i].platformFiles[this.taskList[i].channel].apiVersion
+                                });
+                                delete this.taskList[i].platformFiles[this.taskList[i].channel].apiVersion;
+                            }
+
                             const { dingTalk, tb_cli_token, ...t } = this.taskList[i];
                             packs.push(t);
                         }
@@ -869,6 +930,9 @@ module.exports = Editor.Panel.define({
                     }
                     if (saveData.failedPreview) {
                         delete saveData.failedPreview;
+                    }
+                    if (saveData.apiVersions) {
+                        delete saveData.apiVersions;
                     }
                     let saveDataStr = JSON.stringify(saveData, null, "\t");
                     writeFileSync(savePath, saveDataStr, 'utf-8');
