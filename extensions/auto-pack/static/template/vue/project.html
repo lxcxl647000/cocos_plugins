@@ -149,13 +149,32 @@
                     </div>
                 </div>
 
-                <div v-if="item.channel === 'taobao-mini-game'" style="display: flex; align-items: center;">
+                <div v-if="item.channel === 'taobao-mini-game'"
+                    style="display: flex; align-items: center; margin-top: 10px;">
                     <ui-label slot="label">导航栏标题颜色</ui-label>
                     <ui-select slot="content" :value="item.navigationBarTextStyle || 'black'"
                         @confirm="item.navigationBarTextStyle = $event.target.value" style="margin-left: 10px;">
                         <option value="black">黑色</option>
                         <option value="white">白色</option>
                     </ui-select>
+                </div>
+
+                <div style=" display: flex; align-items: center; margin-top: 10px;">
+                    <ui-label slot="label" :value="`${item.channel}配置 ${getPlatformFile(item)}`"></ui-label>
+                    <ui-pro v-if="getPlatformFile(item)" style="margin-left: 10px;">
+                        <ui-checkbox :checked="!getPlatformFileServer(item)"
+                            @confirm="setPlatformFileServer(item, !$event.target.value)">正式服</ui-checkbox>
+                        <ui-checkbox :checked="getPlatformFileServer(item)"
+                            @confirm="setPlatformFileServer(item, $event.target.value)">测试服</ui-checkbox>
+                    </ui-pro>
+                </div>
+
+                <div v-if="getPlatformFile(item)" style="display: flex; align-items: center; margin-top: 10px;">
+                    <ui-label slot="label" :value="`API版本${getApiVersion(item)}`"></ui-label>
+                    <ui-input style="font-size: 14px; max-width: 50%; margin-left: 10px;"
+                        :value="item.platformFiles[item.channel].apiVersion || ''"
+                        @confirm="item.platformFiles[item.channel].apiVersion = $event.target.value">
+                    </ui-input>
                 </div>
             </ui-prop>
 
@@ -165,26 +184,6 @@
                     style="margin-left: 10px;">
                     <option value="taobao-mini-game">taobao-mini-game</option>
                 </ui-select>
-            </div>
-
-            <div style=" display: flex; align-items: center; margin-top: 10px;">
-                <ui-label slot="label" :value="`${item.channel}配置`"></ui-label>
-                <ui-file style="margin-left: 10px; width: 40%;" type="file" :value="getPlatformFile(item)"
-                    @confirm="setPlatformFile(item, $event.target.value)"></ui-file>
-                <ui-pro v-if="getPlatformFile(item)" style="margin-left: 10px;">
-                    <ui-checkbox :checked="!getPlatformFileServer(item)"
-                        @confirm="setPlatformFileServer(item, !$event.target.value)">正式服</ui-checkbox>
-                    <ui-checkbox :checked="getPlatformFileServer(item)"
-                        @confirm="setPlatformFileServer(item, $event.target.value)">测试服</ui-checkbox>
-                </ui-pro>
-            </div>
-
-            <div style="display: flex; align-items: center; margin-top: 10px;">
-                <ui-label slot="label" :value="`API版本${getApiVersion(item)}`"></ui-label>
-                <ui-input style="font-size: 14px; max-width: 50%; margin-left: 10px;"
-                    :value="item.platformFiles[item.channel].apiVersion || ''"
-                    @confirm="item.platformFiles[item.channel].apiVersion = $event.target.value">
-                </ui-input>
             </div>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">

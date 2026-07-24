@@ -7,6 +7,7 @@ import { createApp, App, defineComponent } from 'vue';
 import os from 'os';
 import CfgUtils from './CfgUtils';
 import * as XLSX from 'xlsx';
+import { FileUtils } from './FileUtils';
 const panelDataMap = new WeakMap<any, App>();
 /**
  * @zh 如果希望兼容 3.3 之前的版本可以使用下方的代码
@@ -38,6 +39,11 @@ interface PackProject {
 }
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
 const savePath = join(__dirname, '../../../static/packconfigs/save.json');
+
+// 对应工程中不同平台使用的配置
+const PlatformConfig = {
+    'taobao-mini-game': 'PlatformConfig_taobao.ts'
+}
 
 interface TaoBao_Cli_Token {
     appid: string,
@@ -258,7 +264,7 @@ module.exports = Editor.Panel.define({
             app.component('MyProject', defineComponent({
                 data() {
                     return {
-                        taskList: {} as PackProject[],
+                        taskList: [] as PackProject[],
                         isAutoPack: false,
                         qrCodeUrl: '',
                         isSetTbCliToken: false,
@@ -498,6 +504,7 @@ module.exports = Editor.Panel.define({
                                 for (let i = 0; i < data.length; i++) {
                                     this.taskList[i] = { ...TaskTemp, ...data[i] };
                                     this.taskList[i].dingTalk = this.dingTalk;
+                                    this.getPlatformFile(this.taskList[i]);
                                     for (let j = 0; j < tmps.length; j++) {
                                         if (this.taskList[i].appId === tmps[j].appId && tmps[j].tb_cli_token) {
                                             this.taskList[i].tb_cli_token = tmps[j].tb_cli_token;
@@ -644,15 +651,6 @@ module.exports = Editor.Panel.define({
                             item.preview = false;
                         }
                     },
-                    setPlatformFile(item: PackProject, path: string) {
-                        if (!item.platformFiles) {
-                            item.platformFiles = {};
-                        }
-                        if (!item.platformFiles[item.channel]) {
-                            item.platformFiles[item.channel] = { path: '', isTest: false };
-                        }
-                        item.platformFiles[item.channel].path = path;
-                    },
                     setPlatformFileServer(item: PackProject, isTest: boolean) {
                         if (!item.platformFiles) {
                             item.platformFiles = {};
@@ -663,7 +661,10 @@ module.exports = Editor.Panel.define({
                         item.platformFiles[item.channel].isTest = isTest;
                     },
                     getPlatformFile(item: PackProject) {
-                        if (item.platformFiles && item.platformFiles[item.channel]) {
+                        if (item.path && item.platformFiles && item.platformFiles[item.channel]) {
+                            if (!item.platformFiles[item.channel].path || !existsSync(item.platformFiles[item.channel].path)) {
+                                item.platformFiles[item.channel].path = FileUtils.findFile(item.path, PlatformConfig[item.channel]);
+                            }
                             return item.platformFiles[item.channel].path || '';
                         }
                         else {
