@@ -458,6 +458,7 @@ module.exports = Editor.Panel.define({
                         let packCount = 0;
                         let autoCount = 0;
                         let previewCount = 0;
+                        let needPackAndHasGitUrlArr: PackProject[] = [];
                         for (let task of this.taskList) {
                             if (task.needAutoPack) {
                                 autoCount++;
@@ -466,6 +467,9 @@ module.exports = Editor.Panel.define({
                                 }
                                 if (!task.skip) {
                                     packCount++;
+                                    if (task.gitConfig && task.gitConfig.gitUrl) {
+                                        needPackAndHasGitUrlArr.push(task);
+                                    }
                                 }
                                 if (task.preview) {
                                     previewCount++;
@@ -479,8 +483,51 @@ module.exports = Editor.Panel.define({
                             msg += testServerWarns;
                         }
                         let btnMap = new Map<string, Function>();
-                        btnMap.set('ok', () => {
-                            autoPack();
+                        btnMap.set('ok', async () => {
+                            // 如果有需要cocos构建的工程并且配置了git地址，检测一下和git远程版本是否是最新
+                            if (needPackAndHasGitUrlArr.length > 0) {
+                                this.isPullGit = true;
+                                let needPullGitArr: { projectPath: string, gitUrl: string, branch: string }[] = [];
+                                let pullGitNames: string[] = [];
+                                let index = 0;
+                                const tasks = needPackAndHasGitUrlArr.map((pack: PackProject) => {
+                                    let projectPath = pack.path;
+                                    let gitUrl = pack.gitConfig.gitUrl;
+                                    let gitHelper: GitHelper = this.getGitHelper(index, { projectPath, gitUrl });
+                                    index++;
+                                    return gitHelper.checkVersionSync().then((res) => {
+                                        if (!res.isSynced) {
+                                            needPullGitArr.push({ projectPath, gitUrl, branch: pack.gitConfig.gitBranch || '' });
+                                            pullGitNames.push(pack.name);
+                                        }
+                                    }).catch((error) => {
+
+                                    });
+                                });
+                                await Promise.all(tasks);
+                                this.isPullGit = false;
+                                if (needPullGitArr.length > 0) {
+                                    let btnMap2 = new Map<string, Function>();
+                                    btnMap2.set('ok', async () => {
+                                        await this.pullGitArr(needPullGitArr);
+                                        autoPack();
+                                    });
+                                    btnMap2.set('cancel', () => {
+                                        autoPack();
+                                    });
+                                    let names = '';
+                                    for (let i = 0; i < pullGitNames.length; i++) {
+                                        names += `${pullGitNames[i]} `;
+                                    }
+                                    openDilog('warn', 'warn', `${names}检测到需要更新的Git仓库，是否更新?`, btnMap2);
+                                }
+                                else {
+                                    autoPack();
+                                }
+                            }
+                            else {
+                                autoPack();
+                            }
                         });
                         openDilog('warn', 'warn', `${msg}开始自动化?`, btnMap, 1);
                     },
@@ -929,15 +976,7 @@ module.exports = Editor.Panel.define({
                         if (!branch) {
                             branch = 'master';
                         }
-                        let gitHelper: GitHelper = null;
-                        if (this.gitHelpers.length > 0) {
-                            gitHelper = this.gitHelpers[0];
-                            gitHelper.updateGit(projectPath);
-                        }
-                        else {
-                            gitHelper = new GitHelper({ projectPath, gitUrl, onLog: (msg: string) => { console.log(`GitHelper: ${projectPath}  ${msg}`); } });
-                            this.gitHelpers.push(gitHelper);
-                        }
+                        let gitHelper: GitHelper = this.getGitHelper(0, { projectPath, gitUrl });
                         this.isPullGit = true;
                         let result = await gitHelper.updateToLatest({ projectPath, gitUrl, branch, force: true });
                         this.isPullGit = false;
@@ -947,7 +986,7 @@ module.exports = Editor.Panel.define({
                         }
                         openDilog('info', 'info', '更新成功');
                     },
-                    async allPullGit() {
+                    allPullGit() {
                         let pullArr: { projectPath: string, gitUrl: string, branch: string }[] = [];
                         for (let i = 0; i < this.taskList.length; i++) {
                             const task: PackProject = this.taskList[i];
@@ -955,8 +994,12 @@ module.exports = Editor.Panel.define({
                                 pullArr.push({ projectPath: task.path, gitUrl: task.gitConfig.gitUrl, branch: task.gitConfig.gitBranch });
                             }
                         }
+                        this.pullGitArr(pullArr);
+                    },
+                    async pullGitArr(pullArr: { projectPath: string, gitUrl: string, branch: string }[]) {
                         let total = pullArr.length;
                         if (total > 0) {
+                            this.isPullGit = true;
                             let count = 0;
                             let failPullArr: string[] = [];
                             const checkOver = (error: string) => {
@@ -981,15 +1024,7 @@ module.exports = Editor.Panel.define({
                                 if (!branch) {
                                     branch = 'master';
                                 }
-                                let gitHelper: GitHelper = null;
-                                if (index <= this.gitHelpers.length - 1) {
-                                    gitHelper = this.gitHelpers[index];
-                                    gitHelper.updateGit(projectPath);
-                                }
-                                else {
-                                    gitHelper = new GitHelper({ projectPath, gitUrl, onLog: (msg: string) => { console.log(`GitHelper: ${projectPath}  ${msg}`); } });
-                                    this.gitHelpers.push(gitHelper);
-                                }
+                                let gitHelper: GitHelper = this.getGitHelper(index, { projectPath, gitUrl });
                                 index++;
                                 return gitHelper.updateToLatest({ projectPath, gitUrl, branch, force: true }).then((result) => {
                                     count++;
@@ -1006,6 +1041,7 @@ module.exports = Editor.Panel.define({
                             });
 
                             await Promise.all(tasks);
+                            return true;
                         }
                     },
                     setGitUrl(item: PackProject, gitUrl: string) {
@@ -1027,6 +1063,19 @@ module.exports = Editor.Panel.define({
                     onekeySaveConfig() {
                         this.saveConfig();
                         openDilog('info', 'info', '保存成功');
+                    },
+                    getGitHelper(index: number, data: { projectPath: string, gitUrl: string }) {
+                        let { projectPath, gitUrl } = data;
+                        let gitHelper: GitHelper = null;
+                        if (index <= this.gitHelpers.length - 1) {
+                            gitHelper = this.gitHelpers[index];
+                            gitHelper.updateGit(projectPath);
+                        }
+                        else {
+                            gitHelper = new GitHelper({ projectPath, gitUrl, onLog: (msg: string) => { console.log(`GitHelper: ${projectPath}  ${msg}`); } });
+                            this.gitHelpers.push(gitHelper);
+                        }
+                        return gitHelper;
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

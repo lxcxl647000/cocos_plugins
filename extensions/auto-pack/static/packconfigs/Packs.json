@@ -7,7 +7,7 @@
 			"channel": "taobao-mini-game",
 			"skip": true,
 			"upload": false,
-			"needAutoPack": false,
+			"needAutoPack": true,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\auto_pack\\HappyPullCat_Pack\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
@@ -23,7 +23,7 @@
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
 			"navigationBarTextStyle": "black",
-			"preview": false,
+			"preview": true,
 			"gitConfig": {
 				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/HappyPullCat.git",
 				"gitBranch": ""
@@ -36,7 +36,7 @@
 			"channel": "taobao-mini-game",
 			"skip": true,
 			"upload": false,
-			"needAutoPack": false,
+			"needAutoPack": true,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\auto_pack\\Cat_Pack\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
@@ -51,8 +51,8 @@
 			"mainBundleCompressionType": "subpackage",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
-			"navigationBarTextStyle": "black",
-			"preview": false,
+			"navigationBarTextStyle": "white",
+			"preview": true,
 			"gitConfig": {
 				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/Cat.git",
 				"gitBranch": ""
@@ -237,9 +237,9 @@
 			"name": "倒水大师",
 			"path": "D:\\auto_pack\\PourTheWater_Pack",
 			"channel": "taobao-mini-game",
-			"skip": false,
+			"skip": true,
 			"upload": false,
-			"needAutoPack": true,
+			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\auto_pack\\PourTheWater_Pack\\assets\\qc_common\\platform\\configs\\PlatformConfig_taobao.ts",
@@ -255,7 +255,7 @@
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.7\\CocosCreator.exe",
 			"engineVer": "3.8.7",
 			"navigationBarTextStyle": "black",
-			"preview": true,
+			"preview": false,
 			"gitConfig": {
 				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/PourTheWater.git",
 				"gitBranch": ""

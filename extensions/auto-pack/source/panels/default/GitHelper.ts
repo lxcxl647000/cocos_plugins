@@ -218,4 +218,46 @@ export class GitHelper {
             return null;
         }
     }
+
+    /**
+    * 【新增】检查本地代码是否与远程最新一致（不执行更新）
+    *  适用于构建前的版本校验
+    */
+    public async checkVersionSync(): Promise<{ isSynced: boolean; message: string }> {
+        try {
+            const status = await this._git.status();
+            const currentBranch = status.current || 'unknown';
+
+            this._log(`🔍 正在检查本地分支 [${currentBranch}] 与远程版本是否一致...`);
+
+            // 1. 先 fetch 一下，确保本地的 remote 跟踪分支是最新的
+            await this._git.fetch('origin', currentBranch);
+
+            // 2. 获取本地最新的 commit hash
+            const localHash = await this._git.revparse(['HEAD']);
+
+            // 3. 获取远程跟踪分支的最新 commit hash
+            const remoteHash = await this._git.revparse([`origin/${currentBranch}`]);
+
+            // 4. 对比 hash
+            if (localHash === remoteHash) {
+                const msg = `✅ 版本一致！本地已是最新 (Hash: ${localHash.substring(0, 7)})，允许构建。`;
+                this._log(msg);
+                return { isSynced: true, message: msg };
+            } else {
+                // 计算落后了多少个提交
+                const behindCount = await this.countCommitsBehind(this._git, currentBranch);
+                const msg = `⚠️ 版本不一致！本地落后远程 ${behindCount} 个提交。\n` +
+                    `本地: ${localHash.substring(0, 7)} | 远程: ${remoteHash.substring(0, 7)}\n` +
+                    `请先更新代码再进行构建！`;
+                this._log(msg);
+                return { isSynced: false, message: msg };
+            }
+        } catch (error: unknown) {
+            const errMsg = error instanceof Error ? error.message : String(error);
+            const msg = `❌ 版本检查失败: ${errMsg}`;
+            this._log(msg);
+            return { isSynced: false, message: msg };
+        }
+    }
 }
