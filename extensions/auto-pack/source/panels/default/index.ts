@@ -8,6 +8,7 @@ import os from 'os';
 import CfgUtils from './CfgUtils';
 import * as XLSX from 'xlsx';
 import { FileUtils } from './FileUtils';
+import { GitHelper } from './GitHelper';
 const panelDataMap = new WeakMap<any, App>();
 /**
  * @zh 如果希望兼容 3.3 之前的版本可以使用下方的代码
@@ -36,6 +37,7 @@ interface PackProject {
     preview: boolean,// 是否预览 与upload互斥
     tb_cli_token?: string,// taobao cli token
     dingTalk?: DingTalk,// 钉钉机器人配置
+    gitConfig?: GitConfig,// git配置
 }
 const packsPath = join(__dirname, '../../../static/packconfigs/Packs.json');
 const savePath = join(__dirname, '../../../static/packconfigs/save.json');
@@ -80,6 +82,11 @@ interface SaveData {
     apiVersions?: ApiVersion[]
 }
 
+interface GitConfig {
+    gitUrl: string,
+    gitBranch: string
+}
+
 const TaskTemp: PackProject = {
     appId: '',
     name: '',
@@ -103,7 +110,7 @@ const TaskTemp: PackProject = {
     enginePath: '',
     engineVer: '',
     navigationBarTextStyle: 'black',
-    preview: false,
+    preview: false
 };
 
 const spawn_tb = (args: string[], success: Function, fail: Function) => {
@@ -269,7 +276,9 @@ module.exports = Editor.Panel.define({
                         qrCodeUrl: '',
                         isSetTbCliToken: false,
                         dingTalk: { dingTalkWebHook: '', dingTalkCustomContent_pack: '', dingTalkCustomContent_upload: '' } as DingTalk,
-                        qrCodeUrlMap: new Map<string, QRCode>()
+                        qrCodeUrlMap: new Map<string, QRCode>(),
+                        gitHelpers: [] as GitHelper[],
+                        isPullGit: false,
                     };
                 },
                 mounted() {
@@ -573,6 +582,7 @@ module.exports = Editor.Panel.define({
                             this.taskList[i].needAutoPack = flag;
                             if (!flag) {
                                 this.taskList[i].upload = false;
+                                this.taskList[i].preview = false;
                                 this.taskList[i].skip = true;
                             }
                         }
@@ -580,6 +590,11 @@ module.exports = Editor.Panel.define({
                     onekeyOperateUpload(flag: boolean) {
                         for (let i = 0; i < this.taskList.length; i++) {
                             this.taskList[i].upload = flag;
+                        }
+                    },
+                    onekeyOperatePreview(flag: boolean) {
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            this.taskList[i].preview = flag;
                         }
                     },
                     onekeyOperateSkipPack(flag: boolean) {
@@ -661,11 +676,12 @@ module.exports = Editor.Panel.define({
                         item.platformFiles[item.channel].isTest = isTest;
                     },
                     getPlatformFile(item: PackProject) {
-                        if (item.path && item.platformFiles && item.platformFiles[item.channel]) {
-                            if (!item.platformFiles[item.channel].path || !existsSync(item.platformFiles[item.channel].path)) {
-                                item.platformFiles[item.channel].path = FileUtils.findFile(item.path, PlatformConfig[item.channel]);
+                        if (item.path) {
+                            let path = FileUtils.findFile(item.path, PlatformConfig[item.channel]);
+                            if (item.platformFiles && item.platformFiles[item.channel]) {
+                                item.platformFiles[item.channel].path = path;
                             }
-                            return item.platformFiles[item.channel].path || '';
+                            return path;
                         }
                         else {
                             return '';
@@ -682,7 +698,7 @@ module.exports = Editor.Panel.define({
                     getApiVersion(item: PackProject) {
                         let apiVersion: string = '';
                         if (item.platformFiles && item.platformFiles[item.channel]) {
-                            let path = item.platformFiles[item.channel].path;
+                            let path = this.getPlatformFile(item);
                             if (existsSync(path)) {
                                 try {
                                     let fileContent = readFileSync(path, 'utf-8');
@@ -897,6 +913,120 @@ module.exports = Editor.Panel.define({
                             }
                         };
                         importFunc(cb);
+                    },
+                    async pullGit(item: PackProject) {
+                        let projectPath = item.path;
+                        let gitUrl = (item.gitConfig && item.gitConfig.gitUrl) || '';
+                        let branch = (item.gitConfig && item.gitConfig.gitBranch) || '';
+                        if (!projectPath) {
+                            openDilog('warn', 'warn', '请输入项目路径');
+                            return;
+                        }
+                        if (!gitUrl) {
+                            openDilog('warn', 'warn', '请输入git地址');
+                            return;
+                        }
+                        if (!branch) {
+                            branch = 'master';
+                        }
+                        let gitHelper: GitHelper = null;
+                        if (this.gitHelpers.length > 0) {
+                            gitHelper = this.gitHelpers[0];
+                            gitHelper.updateGit(projectPath);
+                        }
+                        else {
+                            gitHelper = new GitHelper({ projectPath, gitUrl, onLog: (msg: string) => { console.log(`GitHelper: ${projectPath}  ${msg}`); } });
+                            this.gitHelpers.push(gitHelper);
+                        }
+                        this.isPullGit = true;
+                        let result = await gitHelper.updateToLatest({ projectPath, gitUrl, branch, force: true });
+                        this.isPullGit = false;
+                        if (!result.success) {
+                            openDilog('warn', 'warn', result.message);
+                            return;
+                        }
+                        openDilog('info', 'info', '更新成功');
+                    },
+                    async allPullGit() {
+                        let pullArr: { projectPath: string, gitUrl: string, branch: string }[] = [];
+                        for (let i = 0; i < this.taskList.length; i++) {
+                            const task: PackProject = this.taskList[i];
+                            if (task.path && task.gitConfig && task.gitConfig.gitUrl) {
+                                pullArr.push({ projectPath: task.path, gitUrl: task.gitConfig.gitUrl, branch: task.gitConfig.gitBranch });
+                            }
+                        }
+                        let total = pullArr.length;
+                        if (total > 0) {
+                            let count = 0;
+                            let failPullArr: string[] = [];
+                            const checkOver = (error: string) => {
+                                if (count === total) {
+                                    this.isPullGit = false;
+                                    let failStr = '';
+                                    if (failPullArr.length > 0) {
+                                        failStr = '\n' + '更新失败项目:' + '\n';
+                                        for (let i = 0; i < failPullArr.length; i++) {
+                                            failStr += `${failPullArr[i]}\n`;
+                                        }
+                                        failStr += `\n ${error}`;
+                                    }
+                                    openDilog('info', 'info', `更新完成${failStr}`);
+                                }
+                            }
+
+                            let index = 0;
+                            let errMsg: string = '';
+                            const tasks = pullArr.map((item) => {
+                                let { projectPath, gitUrl, branch } = item;
+                                if (!branch) {
+                                    branch = 'master';
+                                }
+                                let gitHelper: GitHelper = null;
+                                if (index <= this.gitHelpers.length - 1) {
+                                    gitHelper = this.gitHelpers[index];
+                                    gitHelper.updateGit(projectPath);
+                                }
+                                else {
+                                    gitHelper = new GitHelper({ projectPath, gitUrl, onLog: (msg: string) => { console.log(`GitHelper: ${projectPath}  ${msg}`); } });
+                                    this.gitHelpers.push(gitHelper);
+                                }
+                                index++;
+                                return gitHelper.updateToLatest({ projectPath, gitUrl, branch, force: true }).then((result) => {
+                                    count++;
+                                    if (!result.success) {
+                                        failPullArr.push(result.projectPath);
+                                    }
+                                    checkOver(errMsg);
+                                }).catch((error) => {
+                                    errMsg += error + '\n';
+                                    count++;
+                                    failPullArr.push(projectPath);
+                                    checkOver(errMsg);
+                                });
+                            });
+
+                            await Promise.all(tasks);
+                        }
+                    },
+                    setGitUrl(item: PackProject, gitUrl: string) {
+                        if (item) {
+                            if (!item.gitConfig) {
+                                item.gitConfig = { gitUrl: '', gitBranch: '' };
+                            }
+                            item.gitConfig.gitUrl = gitUrl;
+                        }
+                    },
+                    setGitBranch(item: PackProject, gitBranch: string) {
+                        if (item) {
+                            if (!item.gitConfig) {
+                                item.gitConfig = { gitUrl: '', gitBranch: '' };
+                            }
+                            item.gitConfig.gitBranch = gitBranch;
+                        }
+                    },
+                    onekeySaveConfig() {
+                        this.saveConfig();
+                        openDilog('info', 'info', '保存成功');
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

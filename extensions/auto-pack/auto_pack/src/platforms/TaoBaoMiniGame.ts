@@ -12,6 +12,9 @@ export class TaoBaoMiniGame extends BasePlatform {
         if (this.project.upload || this.project.preview) {
             TaoBaoMiniGame.gameArr.push(this);
         }
+        else {
+            this.logHelper.saveLog();
+        }
         if (TaoBaoMiniGame.gameArr.length === TaoBaoMiniGame.count) {
             TaoBaoMiniGame.checkDoCli();
         }

@@ -10,7 +10,7 @@
         <ui-button style=" margin-left: 10px;" @confirm=" openToolLog">
             <ui-icon value="log"></ui-icon>
         </ui-button>
-        <ui-button style=" margin-left: 10px;" @confirm=" saveConfig">
+        <ui-button style=" margin-left: 10px;" @confirm=" onekeySaveConfig">
             <ui-icon value="save"></ui-icon>
         </ui-button>
         <ui-button style=" margin-left: 10px;" @confirm="importCliToken()">一键导入cli_token</ui-button>
@@ -18,6 +18,8 @@
         <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateAutoPack(false)">一键取消自动化</ui-button>
         <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(true)">一键勾选上传</ui-button>
         <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateUpload(false)">一键取消上传</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperatePreview(true)">一键勾选预览</ui-button>
+        <ui-button style=" margin-left: 10px;" @confirm="onekeyOperatePreview(false)">一键取消预览</ui-button>
         <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(false)">一键勾选构建</ui-button>
         <ui-button style=" margin-left: 10px;" @confirm="onekeyOperateSkipPack(true)">一键取消构建</ui-button>
     </div>
@@ -149,16 +151,6 @@
                     </div>
                 </div>
 
-                <div v-if="item.channel === 'taobao-mini-game'"
-                    style="display: flex; align-items: center; margin-top: 10px;">
-                    <ui-label slot="label">导航栏标题颜色</ui-label>
-                    <ui-select slot="content" :value="item.navigationBarTextStyle || 'black'"
-                        @confirm="item.navigationBarTextStyle = $event.target.value" style="margin-left: 10px;">
-                        <option value="black">黑色</option>
-                        <option value="white">白色</option>
-                    </ui-select>
-                </div>
-
                 <div style=" display: flex; align-items: center; margin-top: 10px;">
                     <ui-label slot="label" :value="`${item.channel}配置 ${getPlatformFile(item)}`"></ui-label>
                     <ui-pro v-if="getPlatformFile(item)" style="margin-left: 10px;">
@@ -186,6 +178,29 @@
                 </ui-select>
             </div>
 
+            <div v-if="item.channel === 'taobao-mini-game'"
+                style="display: flex; align-items: center; margin-top: 10px;">
+                <ui-label slot="label">导航栏标题颜色</ui-label>
+                <ui-select slot="content" :value="item.navigationBarTextStyle || 'black'"
+                    @confirm="item.navigationBarTextStyle = $event.target.value" style="margin-left: 10px;">
+                    <option value="black">黑色</option>
+                    <option value="white">白色</option>
+                </ui-select>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-top: 10px;">
+                <ui-input placeholder="git 地址" style="font-size: 14px; max-width: 50%;"
+                    :value="(item.gitConfig && item.gitConfig.gitUrl)|| ''"
+                    @confirm="setGitUrl(item,$event.target.value)">
+                </ui-input>
+                <ui-label style=" margin-left: 10px;">branch</ui-label>
+                <ui-input placeholder="不填默认 master" style="font-size: 14px;"
+                    :value="(item.gitConfig && item.gitConfig.gitBranch)|| ''"
+                    @confirm="setGitBranch(item,$event.target.value)">
+                </ui-input>
+                <ui-button style=" margin-left: 10px;" @confirm=" pullGit(item)">git更新</ui-button>
+            </div>
+
             <div style="display: flex; align-items: center; margin-top: 10px;">
                 <ui-label slot="label">是否自动化</ui-label>
                 <ui-checkbox slot="content" :checked="item.needAutoPack"
@@ -204,6 +219,7 @@
 
     <div style="margin-top: 5px;">
         <ui-button @confirm="startAutoPack">开始</ui-button>
+        <ui-button style="margin-left: 10px;" @confirm="allPullGit">git更新</ui-button>
         <ui-label style="margin-left: 10px;">{{`总共 : ${taskList.length}`}}</ui-label>
         <ui-label style="margin-left: 10px;">{{`自动化 : ${getAutoCount()}`}}</ui-label>
         <ui-label style="margin-left: 10px;">{{`构建 : ${getPackCount()}`}}</ui-label>
@@ -226,9 +242,9 @@
         </div>
     </div>
 
-    <div v-if="isAutoPack || isSetTbCliToken" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    <div v-if="isAutoPack || isSetTbCliToken || isPullGit" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
                 background-color: rgba(0, 0, 0, 0.3); z-index: 9999;">
-        <ui-loading v-if="isAutoPack"
+        <ui-loading v-if="isAutoPack || isPullGit"
             style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></ui-loading>
         <ui-label v-if="isSetTbCliToken"
             style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">设置淘宝CLI_Token...</ui-label>

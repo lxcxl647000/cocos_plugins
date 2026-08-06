@@ -7,6 +7,7 @@ import PackManager, { PackProject } from '../pack/PackManager';
 import LogHelper from '../pack/LogHelper';
 import { DingdingBot } from '../utils/DingdingBot';
 import * as QRCode from 'qrcode';
+import { existsSync } from 'fs-extra';
 export class BasePlatform {
     public outputPath: string = '';
     public isEngine3: boolean = false;
@@ -72,6 +73,7 @@ export class BasePlatform {
             await this.afterBuildFinish();
         }
         else {
+            this.logHelper.saveLog();
             PackManager.ins.addFailProject(this._project.name);
             PackManager.ins.packIndex++;
         }
@@ -101,7 +103,12 @@ export class BasePlatform {
                 if (this.isEngine3) {
                     buildInfo += `name=${this._project.name};`;
                     if (this._project.customConfigPath) {
-                        buildInfo += `configPath=${this._project.customConfigPath}`;
+                        if (existsSync(this._project.customConfigPath)) {
+                            buildInfo += `configPath=${this._project.customConfigPath};`;
+                        }
+                        else {
+                            this.logHelper.warn("自定义构建配置不存在，将使用引擎默认构建配置");
+                        }
                     } else {
                         this.logHelper.warn("缺少configName字段，将使用引擎默认构建配置");
                     }
