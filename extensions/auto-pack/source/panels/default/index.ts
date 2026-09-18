@@ -1076,6 +1076,17 @@ module.exports = Editor.Panel.define({
                             this.gitHelpers.push(gitHelper);
                         }
                         return gitHelper;
+                    },
+                    configToTop(item: PackProject) {
+                        if (this.taskList && this.taskList.length > 0) {
+                            let index = this.taskList.indexOf(item);
+                            if (index > 0) {
+                                let top = this.taskList[0];
+                                this.taskList[0] = item;
+                                this.taskList[index] = top;
+                                this.saveConfig();
+                            }
+                        }
                     }
                 },
                 template: readFileSync(join(__dirname, '../../../static/template/vue/project.html'), 'utf-8'),

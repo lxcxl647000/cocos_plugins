@@ -58,6 +58,8 @@
                     @confirm=" getTaoBaoDebugUrl(item,false)">淘宝线上Debug版</ui-button>
                 <ui-button v-if="item.channel === 'taobao-mini-game'" style=" margin-left: 10px;"
                     @confirm=" getTaoBaoDebugUrl(item,true)">预览</ui-button>
+                <ui-button v-if="item.channel === 'taobao-mini-game'" style=" margin-left: 10px;"
+                    @confirm=" configToTop(item)">置顶</ui-button>
             </div>
 
             <div style="display: flex; align-items: center; margin-top: 10px;">

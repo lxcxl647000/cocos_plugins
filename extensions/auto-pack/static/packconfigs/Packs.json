@@ -1,31 +1,31 @@
 {
 	"packs": [
 		{
-			"appId": "3000000136119813",
-			"name": "开心抓猫猫",
-			"path": "D:\\auto_pack\\HappyPullCat_Pack",
+			"appId": "3000000137357221",
+			"name": "糖豆消消乐",
+			"path": "D:\\cocos_project\\HappyEliminate\\Eliminate",
 			"channel": "taobao-mini-game",
-			"skip": true,
+			"skip": false,
 			"upload": false,
 			"needAutoPack": true,
 			"platformFiles": {
 				"taobao-mini-game": {
-					"path": "D:\\auto_pack\\HappyPullCat_Pack\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"path": "D:\\cocos_project\\HappyEliminate\\Eliminate\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
 					"isTest": true
 				}
 			},
 			"postToDingTalk": false,
-			"postToDingTalk2": false,
+			"postToDingTalk2": true,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"customConfigPath": "D:\\auto_pack\\打包工程需要的文件\\开心抓猫猫打包工程需要的文件\\buildConfig_taobao-mini-game.json",
+			"customConfigPath": "",
 			"mainBundleCompressionType": "subpackage",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
-			"navigationBarTextStyle": "black",
+			"navigationBarTextStyle": "white",
 			"preview": true,
 			"gitConfig": {
-				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/HappyPullCat.git",
+				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/Eliminate.git",
 				"gitBranch": ""
 			}
 		},
@@ -36,7 +36,7 @@
 			"channel": "taobao-mini-game",
 			"skip": true,
 			"upload": false,
-			"needAutoPack": true,
+			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
 					"path": "D:\\auto_pack\\Cat_Pack\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
@@ -52,7 +52,7 @@
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
 			"navigationBarTextStyle": "white",
-			"preview": true,
+			"preview": false,
 			"gitConfig": {
 				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/Cat.git",
 				"gitBranch": ""
@@ -262,31 +262,31 @@
 			}
 		},
 		{
-			"appId": "3000000137357221",
-			"name": "糖豆消消乐",
-			"path": "D:\\auto_pack\\Eliminate_Pack",
+			"appId": "3000000136119813",
+			"name": "开心抓猫猫",
+			"path": "D:\\auto_pack\\HappyPullCat_Pack",
 			"channel": "taobao-mini-game",
 			"skip": true,
 			"upload": false,
 			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
-					"path": "D:\\auto_pack\\Eliminate_Pack\\assets\\scripts\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": false
+					"path": "D:\\auto_pack\\HappyPullCat_Pack\\assets\\scrpit\\common\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": true
 				}
 			},
 			"postToDingTalk": false,
 			"postToDingTalk2": false,
 			"md5Cache": false,
 			"sourceMaps": false,
-			"customConfigPath": "D:\\auto_pack\\打包工程需要的文件\\糖豆消消乐打包工程需要的文件\\buildConfig_taobao-mini-game.json",
+			"customConfigPath": "D:\\auto_pack\\打包工程需要的文件\\开心抓猫猫打包工程需要的文件\\buildConfig_taobao-mini-game.json",
 			"mainBundleCompressionType": "subpackage",
 			"enginePath": "D:\\cocos_editor\\Creator\\3.8.6\\CocosCreator.exe",
 			"engineVer": "3.8.6",
 			"navigationBarTextStyle": "black",
 			"preview": false,
 			"gitConfig": {
-				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/Eliminate.git",
+				"gitUrl": "git@codeup.aliyun.com:67c8fdd1484ca2f0a13ad1cb/HappyPullCat.git",
 				"gitBranch": ""
 			}
 		},
@@ -351,15 +351,15 @@
 		{
 			"appId": "3000000146360085",
 			"name": "星际守卫",
-			"path": "D:\\auto_pack\\cybersh_v2-4-15_Pack",
+			"path": "D:\\cocos_project\\cybersh_v2-4-15",
 			"channel": "taobao-mini-game",
 			"skip": true,
 			"upload": false,
 			"needAutoPack": false,
 			"platformFiles": {
 				"taobao-mini-game": {
-					"path": "D:\\auto_pack\\cybersh_v2-4-15_Pack\\assets\\script\\core\\qc_common\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
-					"isTest": true
+					"path": "D:\\cocos_project\\cybersh_v2-4-15\\assets\\script\\core\\qc_common\\framework\\lib\\platform\\configs\\PlatformConfig_taobao.ts",
+					"isTest": false
 				}
 			},
 			"postToDingTalk": false,
