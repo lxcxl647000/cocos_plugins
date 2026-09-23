@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Required by the Google Mobile Ads SDK for the Advertising ID (AAID). -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    <application>
+        <!-- ${admobAppId} is a Gradle manifest placeholder, written into
+             libadmob/build.gradle at build time by BuildTaskAndroid.ts
+             (the value comes from the build panel's "Android App ID"
+             option, or falls back to Google's public test App ID). -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
+
+        <!-- Read at runtime by AdMobServiceHub via PackageManager#getApplicationInfo(...).metaData.
+             Mirrors the "Use test ads" / "Test device IDs" build-panel options. -->
+        <meta-data
+            android:name="com.cocosext.admob.USE_TEST_ADS"
+            android:value="${admobUseTestAds}" />
+        <meta-data
+            android:name="com.cocosext.admob.TEST_DEVICE_IDS"
+            android:value="${admobTestDeviceIds}" />
+
+        <!-- Zero-content ContentProvider: registers the JsbBridgeWrapper
+             listener before Application.onCreate() runs, so the "admob"
+             channel is live the instant JS starts calling it. Standard
+             Cocos extension init pattern (see also ShareInitProvider in
+             cocos-share). -->
+        <provider
+            android:name="com.cocosext.admob.AdMobInitProvider"
+            android:authorities="${applicationId}.admobinit"
+            android:exported="false"
+            android:initOrder="100" />
+    </application>
+
+</manifest>

@@ -1,0 +1,55 @@
+// NOTE on package naming: every other extension in this "cocos-*" family uses
+// the `com.cocos.<ext>` namespace (e.g. `com.cocos.share`). This module
+// deliberately uses `com.cocosext.admob` INSTEAD of `com.cocos.admob`.
+// `com.cocos.admob` is the package used by Cocos's own official AdMob
+// extension; if a project ever had both installed side by side, identical
+// package + class names would collide at compile/merge time. Using a
+// distinct namespace here keeps this extension safely installable alongside
+// (or instead of) the official one.
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.cocosext.admob'
+    compileSdkVersion PROP_COMPILE_SDK_VERSION.toInteger()
+
+    defaultConfig {
+        minSdkVersion PROP_MIN_SDK_VERSION
+        targetSdkVersion PROP_TARGET_SDK_VERSION
+
+        manifestPlaceholders = [
+            admobAppId: "ca-app-pub-3940256099942544~3347511713",
+            admobUseTestAds: "true",
+            admobTestDeviceIds: "",
+        ]
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets.main {
+        java.srcDirs "src"
+        manifest.srcFile "AndroidManifest.xml"
+        res.srcDirs "res"
+    }
+
+    // ADMOB-BEGIN:manifestPlaceholders
+        // manifestPlaceholders = [
+        //     admobAppId: "ca-app-pub-3940256099942544~3347511713",
+        //     admobUseTestAds: "true",
+        //     admobTestDeviceIds: "",
+        // ]
+    // ADMOB-END:manifestPlaceholders
+}
+
+dependencies {
+    implementation project(':libcocos')
+    implementation 'androidx.core:core:1.13.1'
+
+    // Pinned versions — see THIRD_PARTY_NOTICES.md. Resolved from Google's
+    // Maven repository at build time; never vendored in this repository.
+    implementation 'com.google.android.gms:play-services-ads:25.4.0'
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+}
